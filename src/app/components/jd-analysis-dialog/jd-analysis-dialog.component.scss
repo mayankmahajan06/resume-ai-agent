@@ -1,0 +1,199 @@
+/* ========================================
+   JD ANALYSIS DIALOG
+======================================== */
+
+.jd-dialog {
+  position: relative;
+  padding: 32px;
+}
+
+/* ========================================
+   CLOSE BUTTON
+======================================== */
+
+.close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #eef2ff;
+}
+
+.dialog-header {
+  margin-bottom: 24px;
+}
+
+.dialog-header h2 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0f172a;
+}
+
+.dialog-header p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dialog-body label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dialog-body textarea {
+  width: 100%;
+  min-height: 130px;
+  padding: 18px;
+  border: 1px solid #dbe2ea;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: 0.2s ease;
+}
+
+.dialog-body textarea:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.06);
+}
+
+.analysis-result {
+  display: block;
+}
+
+.result-card {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.result-card span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.result-card strong {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.5;
+}
+
+/* ========================================
+   ANALYZE BUTTON
+======================================== */
+
+.analyze-btn {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 14px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.analyze-btn:hover {
+  transform: translateY(-1px);
+}
+
+.premium-cta {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+  padding: 28px;
+}
+
+.premium-cta h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.premium-cta p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.premium-points {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.premium-points span {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.premium-btn {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 14px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.premium-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .dialog-header h2 {
+    font-size: 22px;
+  }
+
+  .analysis-result {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-cta {
+    padding: 22px;
+  }
+
+  .dialog-body textarea {
+    min-height: 100px;
+  }
+  .jd-dialog {
+    padding: 20px;
+  }
+}

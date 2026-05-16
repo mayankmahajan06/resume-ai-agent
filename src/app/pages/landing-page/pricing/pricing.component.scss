@@ -1,0 +1,108 @@
+.pricing-section {
+  padding: 90px 20px;
+  background: #ffffff;
+  text-align: center;
+}
+
+h2 {
+  font-size: 42px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #64748b;
+  margin-bottom: 60px;
+}
+
+.pricing-grid {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.pricing-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: left;
+  position: relative;
+
+  h3 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #0f172a;
+  }
+
+  h4 {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: #0f172a;
+
+    span {
+      font-size: 16px;
+      color: #64748b;
+      font-weight: 400;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 36px;
+
+    li {
+      margin-bottom: 14px;
+      color: #475569;
+      font-size: 15px;
+    }
+  }
+
+  button {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 14px;
+    background: #f1f5f9;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 15px;
+  }
+}
+
+.active {
+  border: 2px solid #4f46e5;
+
+  button {
+    background: #4f46e5;
+    color: white;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h2 {
+    font-size: 32px;
+  }
+}

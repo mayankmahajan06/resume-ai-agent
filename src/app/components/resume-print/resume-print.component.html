@@ -1,0 +1,146 @@
+<!-- resume-print.component.html -->
+<!-- COMPLETE FILE -->
+
+<section class="print-resume" [ngClass]="'theme-' + selectedTheme">
+  <!-- HEADER -->
+  <header class="print-header">
+    <div class="left-header">
+      <h1>
+        {{ resumeData.fullName || "Your Name" }}
+      </h1>
+
+      <h2>
+        {{ resumeData.currentRole || "Your Current Role" }}
+      </h2>
+    </div>
+
+    <div class="right-header">
+      <p>{{ resumeData.location || "Location" }}</p>
+      <p>{{ resumeData.phone || "Phone Number" }}</p>
+      <p>{{ resumeData.email || "Email Address" }}</p>
+      <p>{{ resumeData.linkedIn || "LinkedIn Profile" }}</p>
+    </div>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- PROFESSIONAL SUMMARY -->
+  <section class="section-block">
+    <h3>Professional Summary</h3>
+
+    <p class="summary-text">
+      {{ resumeData.summary || "Your professional summary will appear here." }}
+    </p>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <section class="main-grid">
+    <!-- LEFT COLUMN -->
+    <aside class="left-column">
+      <!-- SKILLS -->
+      <div class="section-block page-safe">
+        <h3>Skills</h3>
+
+        <div class="skills-list">
+          <span *ngFor="let skill of skillsArray">
+            {{ skill }}
+          </span>
+        </div>
+      </div>
+
+      <!-- CERTIFICATIONS -->
+      <div class="section-block page-safe">
+        <h3>Certifications</h3>
+
+        <p *ngFor="let cert of resumeData.certifications">
+          {{ cert.certificationName || "Certification Name" }}
+        </p>
+      </div>
+
+      <!-- EDUCATION -->
+      <!-- EDUCATION -->
+      <div class="section-block page-safe">
+        <h3>Education</h3>
+
+        <div
+          class="education-block page-safe"
+          *ngFor="let edu of resumeData.education"
+        >
+          <p>
+            <strong>
+              {{ edu.degree || "Degree Name" }}
+            </strong>
+          </p>
+
+          <p>
+            {{ edu.college || "College / University" }}
+          </p>
+
+          <p>
+            {{ edu.graduationYear || "Graduation Year" }}
+
+            <span *ngIf="edu.cgpa"> | CGPA: {{ edu.cgpa }} </span>
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT COLUMN -->
+    <main class="right-column">
+      <!-- EXPERIENCE -->
+      <div class="section-block">
+        <h3>Experience</h3>
+
+        <div
+          class="job-block page-safe"
+          *ngFor="let exp of resumeData.experiences"
+        >
+          <div class="job-header">
+            <strong>
+              {{ exp.role || "Role Title" }}
+            </strong>
+
+            <span>
+              {{ exp.duration || "Duration" }}
+            </span>
+          </div>
+
+          <p class="company-name">
+            {{ exp.company || "Company Name" }}
+          </p>
+
+          <p class="content-text">
+            {{
+              exp.responsibilities ||
+                "Responsibilities and achievements will appear here."
+            }}
+          </p>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="section-block">
+        <h3>Projects</h3>
+
+        <div
+          class="project-block page-safe"
+          *ngFor="let project of resumeData.projects"
+        >
+          <p class="project-title">
+            <strong>
+              {{ project.projectName || "Project Name" }}
+            </strong>
+
+            —
+
+            {{ project.techStack || "Tech Stack" }}
+          </p>
+
+          <p class="content-text">
+            {{ project.description || "Project description will appear here." }}
+          </p>
+        </div>
+      </div>
+    </main>
+  </section>
+</section>

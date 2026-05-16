@@ -1,0 +1,69 @@
+<!-- header.component.html -->
+
+<mat-toolbar class="header-toolbar" [class.scrolled]="isScrolled">
+  <div class="container header-content">
+
+    <!-- Logo -->
+    <div class="logo-container" (click)="scrollTo('hero')">
+      <div class="logo-icon">
+        <mat-icon>auto_awesome</mat-icon>
+      </div>
+      <span class="logo-text">
+        ResumePilot <span class="highlight">AI</span>
+      </span>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="nav-links hide-mobile">
+      <a mat-button (click)="scrollTo('features')">Features</a>
+      <a mat-button (click)="scrollTo('how-it-works')">How It Works</a>
+      <a mat-button (click)="scrollTo('pricing')">Pricing</a>
+
+      <div class="nav-divider"></div>
+
+      <a mat-button class="login-btn">Login</a>
+
+      <button
+        mat-flat-button
+        color="primary"
+        class="cta-pulse"
+        (click)="navigateToBuilder()"
+      >
+        Start Free
+      </button>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button
+      mat-icon-button
+      class="hide-desktop"
+      (click)="toggleMenu()"
+    >
+      <mat-icon>
+        {{ isMenuOpen ? 'close' : 'menu' }}
+      </mat-icon>
+    </button>
+
+  </div>
+</mat-toolbar>
+
+<!-- Mobile Navigation -->
+<div class="mobile-nav" [class.active]="isMenuOpen">
+  <nav>
+    <a (click)="scrollTo('features'); toggleMenu()">Features</a>
+    <a (click)="scrollTo('how-it-works'); toggleMenu()">How It Works</a>
+    <a (click)="scrollTo('pricing'); toggleMenu()">Pricing</a>
+
+    <hr />
+
+    <a (click)="toggleMenu()" class="login-mobile">Login</a>
+
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="navigateToBuilder(); toggleMenu()"
+    >
+      Start Free
+    </button>
+  </nav>
+</div>

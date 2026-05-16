@@ -1,0 +1,208 @@
+@use '@angular/material' as mat;
+
+/* ========================================
+   HEADER TOOLBAR
+======================================== */
+
+.header-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  padding: 0;
+
+  &.scrolled {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* ========================================
+   CONTAINER + FLEX LAYOUT
+======================================== */
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header-content {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ========================================
+   LOGO
+======================================== */
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: #4f46e5;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .logo-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+
+    .highlight {
+      color: #4f46e5;
+    }
+  }
+}
+
+/* ========================================
+   DESKTOP NAVIGATION
+======================================== */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  a[mat-button] {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #475569;
+    transition: 0.2s ease;
+
+    &:hover {
+      color: #4f46e5;
+    }
+  }
+
+  .login-btn {
+    font-weight: 600;
+  }
+
+  .nav-divider {
+    width: 1px;
+    height: 24px;
+    background: #e2e8f0;
+    margin: 0 12px;
+  }
+}
+
+/* ========================================
+   CTA BUTTON
+======================================== */
+
+.cta-pulse {
+  border-radius: 999px;
+  padding: 0 24px;
+  height: 44px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: #4f46e5;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+}
+
+/* ========================================
+   MOBILE NAVIGATION
+======================================== */
+
+.mobile-nav {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  padding: 2rem;
+  z-index: 999;
+
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+
+  transition: all 0.35s ease;
+
+  &.active {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    a {
+      text-decoration: none;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 0.5rem 0;
+    }
+
+    button {
+      margin-top: 1rem;
+      border-radius: 999px;
+      height: 48px;
+      font-weight: 600;
+    }
+  }
+}
+
+/* ========================================
+   RESPONSIVE HELPERS
+======================================== */
+
+.hide-mobile {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.hide-desktop {
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+  }
+}

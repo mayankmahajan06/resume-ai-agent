@@ -1,0 +1,40 @@
+<div class="validation-dialog">
+
+  <button
+    type="button"
+    class="close-btn"
+    (click)="closeDialog()">
+    ✕
+  </button>
+
+  <div class="validation-header">
+    <h2>Complete Your Resume First</h2>
+
+    <p>
+      Please complete the following sections before
+      analyzing JD match and recruiter fit.
+    </p>
+  </div>
+
+  <div class="validation-list">
+
+    <div
+      class="validation-item"
+      *ngFor="let field of data.missingFields">
+
+      ○ {{ field }}
+
+    </div>
+
+  </div>
+
+  <button
+    type="button"
+    class="continue-btn"
+    (click)="closeDialog()">
+
+    Continue Editing
+
+  </button>
+
+</div>

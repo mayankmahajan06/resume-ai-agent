@@ -1,0 +1,72 @@
+<div class="jd-dialog">
+
+  <button
+    type="button"
+    class="close-btn"
+    (click)="closeDialog()">
+    ✕
+  </button>
+
+  <div class="dialog-header">
+    <h2>Optimize Resume for This Job</h2>
+
+    <p>
+      Paste the job description and get an estimated
+      recruiter match score for your resume.
+    </p>
+  </div>
+
+  <div class="dialog-body">
+
+    <label>Job Description</label>
+
+    <textarea
+      rows="10"
+      [(ngModel)]="jobDescription"
+      placeholder="Paste the full job description from LinkedIn, Naukri, or company portal here...">
+    </textarea>
+
+    <button
+      type="button"
+      class="analyze-btn"
+      (click)="analyzeJD()">
+      Analyze Resume Match
+    </button>
+
+    <div
+      class="analysis-result"
+      *ngIf="hasAnalyzed && jdMatch > 0">
+
+      <div class="result-card">
+        <span>Estimated Match Score</span>
+        <strong>{{ jdMatch }}%</strong>
+      </div>
+
+    </div>
+
+    <div class="premium-cta" *ngIf="hasAnalyzed">
+      <h3>Unlock Premium Optimization</h3>
+
+      <p>
+        Get recruiter-grade resume improvements and
+        increase your shortlist chances.
+      </p>
+
+      <div class="premium-points">
+        <span>✔ Missing Skills Breakdown</span>
+        <span>✔ Matching Skills Analysis</span>
+        <span>✔ Stronger ATS Optimization</span>
+        <span>✔ Resume Rewrite Suggestions</span>
+        <span>✔ Premium PDF Resume Template</span>
+      </div>
+
+      <button
+        type="button"
+        class="premium-btn">
+        Upgrade for ₹499
+      </button>
+    </div>
+
+  </div>
+
+</div>
