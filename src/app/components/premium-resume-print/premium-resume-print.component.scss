@@ -1,0 +1,350 @@
+:host {
+  display: block;
+  background: white;
+}
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: white;
+  font-family: 'Inter', sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.premium-resume {
+  color: #111827;
+  font-size: 13.5px;
+  line-height: 1.7;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
+.premium-header {
+  margin-bottom: 28px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 36px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  color: #0f172a;
+  letter-spacing: -1.5px;
+}
+
+.header-left h2 {
+  margin: 12px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 11px;
+  min-width: 230px;
+  padding-top: 6px;
+}
+
+.header-right span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.header-divider {
+  height: 1px;
+  background: #dbe4ee;
+  margin: 22px 0;
+}
+
+.summary-text {
+  margin: 0;
+  color: #334155;
+  line-height: 1.7;
+  white-space: pre-line;
+  max-width: 100%;
+  font-size: 13.5px;
+}
+
+/* ========================================
+   MAIN LAYOUT
+======================================== */
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 0.92fr 1.68fr;
+  gap: 34px;
+  align-items: start;
+}
+
+/* ========================================
+   LEFT COLUMN
+======================================== */
+
+.left-column {
+  background: #e8eef6;
+  border: 1px solid #d4deea;
+  border-radius: 10px;
+  padding: 22px 18px;
+  overflow: hidden;
+  box-sizing: border-box;
+  height: fit-content;
+}
+
+.left-section {
+  margin-bottom: 24px;
+  padding-bottom: 2px;
+}
+
+.left-section:last-child {
+  margin-bottom: 0;
+}
+
+.left-section h3 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ========================================
+   SKILLS
+======================================== */
+
+.skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.skills-container span {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d3dde8;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+}
+
+/* ========================================
+   LEFT ITEMS
+======================================== */
+
+.left-item {
+  margin-bottom: 10px;
+  color: #475569;
+  line-height: 1.7;
+  font-size: 13px;
+}
+
+/* ========================================
+   EDUCATION
+======================================== */
+
+.education-item {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d8e2ed;
+}
+
+.education-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.education-item strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.education-item p {
+  margin: 0 0 5px;
+  color: #475569;
+  line-height: 1.55;
+  font-size: 12px;
+}
+
+/* ========================================
+   RIGHT COLUMN
+======================================== */
+
+.content-section {
+  margin-bottom: 24px;
+}
+
+.content-section h3 {
+  margin: 0 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.experience-item,
+.project-item {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.experience-item:last-child,
+.project-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.experience-header,
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 10px;
+}
+
+.experience-header h4,
+.project-header h4,
+.project-title-block h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.company-name {
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.project-stack {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.duration {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-align: right;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.experience-text,
+.project-description {
+  margin: 0;
+  color: #334155;
+  line-height: 1.6;
+  white-space: pre-line;
+  font-size: 13px;
+}
+
+/* ========================================
+   THEMES
+======================================== */
+
+.theme-indigo {
+
+  .left-section h3,
+  .content-section h3 {
+    color: #4338ca;
+  }
+
+}
+
+.theme-emerald {
+
+  .left-section h3,
+  .content-section h3 {
+    color: #059669;
+  }
+
+}
+
+.theme-slate {
+
+  .left-section h3,
+  .content-section h3 {
+    color: #334155;
+  }
+
+}
+
+.theme-burgundy {
+
+  .left-section h3,
+  .content-section h3 {
+    color: #7f1d1d;
+  }
+
+}
+
+/* ========================================
+   PRINT SAFETY
+======================================== */
+
+.experience-item,
+.project-item,
+.left-section,
+.education-item {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* ========================================
+   PRINT FIXES
+======================================== */
+
+@media print {
+
+  .left-column {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .left-section {
+    background: #e8eef6;
+    border: 1px solid #d4deea;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+}

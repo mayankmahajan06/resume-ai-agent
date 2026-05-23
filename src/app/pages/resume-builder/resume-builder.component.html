@@ -1,40 +1,18 @@
 <!-- resume-builder.component.html -->
 
 <section class="resume-builder-page">
-
   <!-- Premium Workspace Header -->
-  <div class="builder-topbar">
-
-    <div class="brand-section">
-      <div class="brand-icon">
-        <mat-icon>auto_awesome</mat-icon>
-      </div>
-
-      <div class="brand-content">
-        <h2>ResumePilot AI</h2>
-        <p>AI Resume Optimizer Workspace</p>
-      </div>
-    </div>
-
-    <div class="topbar-actions">
-      <button class="ghost-btn">
-        My Resumes
-      </button>
-
-      <button class="ghost-btn">
-        Dashboard
-      </button>
-
-      <button class="primary-btn">
-        Save Draft
-      </button>
-    </div>
-
-  </div>
+  <app-workspace-header
+    subtitle="AI Resume Optimizer Workspace"
+    [showMyResumesButton]="true"
+    [showSaveButton]="true"
+    [isSaving]="isSaving"
+    (save)="saveResume()"
+  >
+  </app-workspace-header>
 
   <!-- Main Builder Layout -->
   <div class="builder-layout">
-
     <!-- Left Workspace -->
     <div class="builder-left">
       <app-resume-form></app-resume-form>
@@ -44,7 +22,23 @@
     <div class="builder-right">
       <app-resume-preview></app-resume-preview>
     </div>
-
   </div>
-
 </section>
+
+<!-- SAVE TOAST -->
+
+<div *ngIf="saveSuccessMessage" class="save-toast success">
+  <mat-icon>check_circle</mat-icon>
+
+  <span>
+    {{ saveSuccessMessage }}
+  </span>
+</div>
+
+<div *ngIf="saveErrorMessage" class="save-toast error">
+  <mat-icon>error</mat-icon>
+
+  <span>
+    {{ saveErrorMessage }}
+  </span>
+</div>

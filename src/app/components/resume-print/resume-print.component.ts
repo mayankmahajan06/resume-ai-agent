@@ -21,7 +21,7 @@ export class ResumePrintComponent implements OnInit {
 
   constructor(
     private pdfService: PdfService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.pdfService
@@ -52,4 +52,58 @@ export class ResumePrintComponent implements OnInit {
       .map(skill => skill.trim())
       .filter(skill => skill.length > 0);
   }
+
+  hasSkills(): boolean {
+
+    return this.skillsArray?.length > 0;
+
+  }
+
+  hasCertifications(): boolean {
+
+    return this.resumeData.certifications?.some(
+      (cert: any) =>
+        cert.certificationName?.trim()
+    );
+
+  }
+
+  hasEducation(): boolean {
+
+    return this.resumeData.education?.some(
+      (edu: any) =>
+
+        edu.degree?.trim() ||
+        edu.college?.trim() ||
+        edu.graduationYear?.trim()
+    );
+
+  }
+
+  hasExperience(): boolean {
+
+    return this.resumeData.experiences?.some(
+      (exp: any) =>
+
+        exp.role?.trim() ||
+        exp.company?.trim() ||
+        exp.duration?.trim() ||
+        exp.responsibilities?.trim()
+    );
+
+  }
+
+  hasProjects(): boolean {
+
+    return this.resumeData.projects?.some(
+      (project: any) =>
+
+        project.projectName?.trim() ||
+        project.techStack?.trim() ||
+        project.description?.trim()
+    );
+
+  }
+
+
 }

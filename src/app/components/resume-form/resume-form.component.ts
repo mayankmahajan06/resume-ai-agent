@@ -9,10 +9,20 @@ import {
   FormArray,
   ReactiveFormsModule
 } from '@angular/forms';
+import {
+  Firestore,
+  doc,
+  getDoc
+} from '@angular/fire/firestore';
+import {
+  Auth
+} from '@angular/fire/auth';
 
 import {
   ResumeService
 } from '../../services/resume.service';
+import { PdfService } from '../../services/pdf.service';
+import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-resume-form',
@@ -39,17 +49,39 @@ export class ResumeFormComponent implements OnInit {
   ];
 
   resumeForm!: FormGroup;
+  userPlan: 'free' | 'pro' | 'pro_plus' = 'free';
+  showUpgradeModal = false;
+  selectedTheme = '';
 
   constructor(
     private fb: FormBuilder,
-    private resumeService: ResumeService
+    private resumeService: ResumeService,
+    private paymentService: PaymentService,
+    private pdfService: PdfService,
+    private auth: Auth,
+    private firestore: Firestore
   ) { }
 
   ngOnInit(): void {
     const data = this.resumeService.getResumeData();
 
+    this.initializeForm(data);
+
+    /* Live Binding */
+    this.resumeForm.valueChanges.subscribe((value) => {
+      this.resumeService.updateResumeData(value);
+      this.calculateProfileCompletion(value);
+    });
+
+    /* Initial calculation */
+    this.calculateProfileCompletion(this.resumeForm.value);
+    this.loadUserPlanFromFirebase();
+  }
+
+  initializeForm(data: any): void {
+
     this.resumeForm = this.fb.group({
-      /* Personal Info */
+
       fullName: [data.fullName || ''],
       email: [data.email || ''],
       phone: [data.phone || ''],
@@ -59,13 +91,11 @@ export class ResumeFormComponent implements OnInit {
       targetRole: [data.targetRole || ''],
       summary: [data.summary || ''],
 
-      /* Skills */
       skills: [data.skills || ''],
 
-      /* Experience */
       experiences: this.fb.array(
         data.experiences?.length
-          ? data.experiences.map(exp =>
+          ? data.experiences.map((exp: any) =>
             this.fb.group({
               company: [exp.company || ''],
               role: [exp.role || ''],
@@ -76,10 +106,9 @@ export class ResumeFormComponent implements OnInit {
           : [this.createExperience()]
       ),
 
-      /* Projects */
       projects: this.fb.array(
         data.projects?.length
-          ? data.projects.map(project =>
+          ? data.projects.map((project: any) =>
             this.fb.group({
               projectName: [project.projectName || ''],
               techStack: [project.techStack || ''],
@@ -89,19 +118,19 @@ export class ResumeFormComponent implements OnInit {
           : [this.createProject()]
       ),
 
-      /* Certifications */
       certifications: this.fb.array(
         data.certifications?.length
-          ? data.certifications.map(cert =>
+          ? data.certifications.map((cert: any) =>
             this.fb.group({
               certificationName: [cert.certificationName || '']
             })
           )
           : [this.createCertification()]
       ),
+
       education: this.fb.array(
         data.education?.length
-          ? data.education.map(edu =>
+          ? data.education.map((edu: any) =>
             this.fb.group({
               degree: [edu.degree || ''],
               college: [edu.college || ''],
@@ -110,17 +139,10 @@ export class ResumeFormComponent implements OnInit {
             })
           )
           : [this.createEducation()]
-      ),
+      )
+
     });
 
-    /* Live Binding */
-    this.resumeForm.valueChanges.subscribe((value) => {
-      this.resumeService.updateResumeData(value);
-      this.calculateProfileCompletion(value);
-    });
-
-    /* Initial calculation */
-    this.calculateProfileCompletion(this.resumeForm.value);
   }
 
   /* ========================================
@@ -317,11 +339,116 @@ export class ResumeFormComponent implements OnInit {
 
   startFreshResume(): void {
     this.resumeService.resetResumeData();
-    this.resumeForm.reset();
+
+    const freshData =
+      this.resumeService.getResumeData();
+
+    this.initializeForm(freshData);
+
     this.currentStep = 1;
   }
 
   goToStep(step: number): void {
     this.currentStep = step;
+  }
+
+  downloadPremiumPDF(): void {
+    if (this.userPlan === 'free') {
+      this.showUpgradeModal = true;
+      return;
+    }
+    this.downloadPremium();
+
+    //alert('Premium PDF Download Started');
+  }
+
+  downloadPremium(): void {
+    const latestData =
+      this.resumeService.getResumeData();
+
+    this.pdfService
+      .saveResumeData(latestData)
+      .subscribe({
+        next: () => {
+          this.pdfService
+            .generatePremiumPdf()
+            .subscribe((response: Blob) => {
+              const blob = new Blob(
+                [response],
+                {
+                  type: 'application/pdf'
+                }
+              );
+
+              const url =
+                window.URL.createObjectURL(blob);
+
+              const link =
+                document.createElement('a');
+
+              link.href = url;
+              link.download = 'premium-resume.pdf';
+              link.click();
+
+              window.URL.revokeObjectURL(url);
+            });
+        },
+
+        error: (error) => {
+          console.error(
+            'Failed to save resume data',
+            error
+          );
+        }
+      });
+  }
+
+  closeUpgradeModal(): void {
+    this.showUpgradeModal = false;
+  }
+
+  startPremiumUpgrade(
+    planType: 'pro' | 'pro_plus'
+  ): void {
+
+    this.paymentService
+      .startPremiumUpgrade(
+        planType
+      );
+
+  }
+
+  async loadUserPlanFromFirebase(): Promise<void> {
+    const user = this.auth.currentUser;
+
+    if (!user) return;
+
+    const userRef = doc(
+      this.firestore,
+      `users/${user.uid}`
+    );
+
+    const snapshot = await getDoc(userRef);
+
+    if (snapshot.exists()) {
+      const data: any = snapshot.data();
+
+      if (
+        data.paymentStatus === 'active' &&
+        data.userPlan
+      ) {
+        const expiryDate = new Date(
+          data.planExpiryDate
+        );
+
+        const today = new Date();
+
+        if (expiryDate > today) {
+          this.userPlan = data.userPlan;
+        } else {
+          this.userPlan = 'free';
+        }
+      }
+    }
   }
 }

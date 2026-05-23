@@ -1,72 +1,111 @@
 <div class="jd-dialog">
-
-  <button
-    type="button"
-    class="close-btn"
-    (click)="closeDialog()">
-    ✕
-  </button>
+  <button type="button" class="close-btn" (click)="closeDialog()">✕</button>
 
   <div class="dialog-header">
-    <h2>Optimize Resume for This Job</h2>
+    <h2>Check Resume Match for This Job</h2>
 
     <p>
-      Paste the job description and get an estimated
-      recruiter match score for your resume.
+      Paste the job description and get an estimated recruiter match score for
+      your resume.
     </p>
   </div>
 
   <div class="dialog-body">
-
     <label>Job Description</label>
 
     <textarea
       rows="10"
       [(ngModel)]="jobDescription"
-      placeholder="Paste the full job description from LinkedIn, Naukri, or company portal here...">
+      placeholder="Paste the full job description from LinkedIn, Naukri, or company portal here..."
+    >
     </textarea>
 
-    <button
-      type="button"
-      class="analyze-btn"
-      (click)="analyzeJD()">
+    <button type="button" class="analyze-btn" (click)="analyzeJD()">
       Analyze Resume Match
     </button>
 
-    <div
-      class="analysis-result"
-      *ngIf="hasAnalyzed && jdMatch > 0">
+    <div class="loading-state" *ngIf="loading">Analyzing Resume Match...</div>
 
+    <div class="analysis-result" *ngIf="hasAnalyzed">
       <div class="result-card">
         <span>Estimated Match Score</span>
-        <strong>{{ jdMatch }}%</strong>
+        <strong [ngClass]="getScoreClass()">{{ jdMatch }}%</strong>
       </div>
 
+      <div class="skills-analysis" *ngIf="matchingSkills.length">
+        <h4>Matching Skills</h4>
+
+        <div class="skill-tags">
+          <span class="matched" *ngFor="let skill of matchingSkills">
+            {{ skill }}
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="skills-analysis missing"
+        *ngIf="isPremiumUser && missingSkills.length"
+      >
+        <h4>Missing Skills</h4>
+
+        <div class="skill-tags">
+          <span class="missing" *ngFor="let skill of missingSkills">
+            {{ skill }}
+          </span>
+        </div>
+      </div>
     </div>
 
-    <div class="premium-cta" *ngIf="hasAnalyzed">
-      <h3>Unlock Premium Optimization</h3>
+    <div class="empty-state" *ngIf="hasAnalyzed && !matchingSkills.length">
+      No matching skills found for this role.
+    </div>
+
+    <!-- FREE USER UPGRADE -->
+
+    <div class="upgrade-preview" *ngIf="!isPremiumUser && hasAnalyzed">
+      <div class="upgrade-header">Unlock More Resume Features</div>
 
       <p>
-        Get recruiter-grade resume improvements and
-        increase your shortlist chances.
+        Upgrade your account to unlock missing skills analysis and premium resume templates.
       </p>
 
-      <div class="premium-points">
-        <span>✔ Missing Skills Breakdown</span>
-        <span>✔ Matching Skills Analysis</span>
-        <span>✔ Stronger ATS Optimization</span>
-        <span>✔ Resume Rewrite Suggestions</span>
-        <span>✔ Premium PDF Resume Template</span>
+      <div class="upgrade-features">
+        <span>✔ Missing Skills Analysis</span>
+
+        <span>✔ Premium Resume Templates</span>
+
+        <span>✔ Premium PDF Export</span>
       </div>
 
-      <button
-        type="button"
-        class="premium-btn">
-        Upgrade for ₹499
-      </button>
+      <div class="pricing-cards">
+        <!-- PRO -->
+
+        <div class="pricing-card">
+          <h4>Pro Plan</h4>
+
+          <div class="price">
+            ₹199
+            <span>/month</span>
+          </div>
+
+          <button type="button" class="upgrade-btn">Get Pro</button>
+        </div>
+
+        <!-- PRO PLUS -->
+
+        <div class="pricing-card featured">
+          <div class="best-value">Best Value</div>
+
+          <h4>Pro Plus</h4>
+
+          <div class="price">
+            ₹499
+            <span>/3 months</span>
+          </div>
+
+          <button type="button" class="upgrade-btn">Get Pro Plus</button>
+        </div>
+      </div>
     </div>
-
   </div>
-
 </div>

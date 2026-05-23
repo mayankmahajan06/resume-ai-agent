@@ -481,6 +481,227 @@ textarea {
 }
 
 /* ========================================
+   PREMIUM FINAL CTA UPGRADE
+======================================== */
+
+.final-download-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.08);
+  color: #4f46e5;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+}
+
+.premium-glow {
+  position: relative;
+  overflow: hidden;
+  height: 68px;
+  font-size: 17px;
+  font-weight: 800;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow:
+    0 20px 40px rgba(79, 70, 229, 0.22),
+    0 8px 20px rgba(79, 70, 229, 0.12);
+  transition: all 0.3s ease;
+}
+
+.premium-glow:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 26px 50px rgba(79, 70, 229, 0.28),
+    0 10px 24px rgba(79, 70, 229, 0.16);
+}
+
+.trust-line {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+.secondary-btn {
+  height: 56px;
+  border: 1px solid #dbe2ea;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.secondary-btn:hover {
+  border-color: #4f46e5;
+  color: #4f46e5;
+  background: #fafaff;
+}
+
+.upgrade-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.upgrade-modal {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border-radius: 24px;
+  padding: 36px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+
+  h2 {
+    margin: 0 0 16px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+}
+
+.pricing-highlight {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  margin-bottom: 28px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 14px;
+}
+
+.cancel-btn,
+.upgrade-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.cancel-btn {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.upgrade-btn {
+  background: #4f46e5;
+  color: white;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f8fafc;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+
+  &:hover {
+    background: #eef2ff;
+    color: #4f46e5;
+  }
+}
+
+.plan-comparison {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.plan-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px;
+  margin-top: 18px;
+  text-align: center;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin-bottom: 18px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  button {
+    width: 100%
+  }
+}
+
+.pro-plus {
+  border-color: #4f46e5;
+  background: #fafaff;
+  position: relative;
+}
+
+.best-value-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: #4f46e5;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.savings-line {
+  margin-top: -8px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+/* ========================================
    RESPONSIVE
 ======================================== */
 
@@ -510,5 +731,15 @@ textarea {
 
   .reset-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .upgrade-modal {
+    padding: 28px;
   }
 }

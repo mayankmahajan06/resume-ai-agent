@@ -1,60 +1,122 @@
-<section class="pricing-section">
+<section id="pricing" class="pricing-section">
 
-  <h2>Simple, One-Time Pricing</h2>
+  <h2>Simple, Transparent Pricing</h2>
+
   <p class="subtitle">
     Investment in your career should be affordable and transparent.
   </p>
 
   <div class="pricing-grid">
 
-    <!-- Free Plan -->
+    <!-- FREE PLAN -->
+
     <div class="pricing-card">
-      <h3>Free</h3>
+
+      <h3>Free Plan</h3>
+
       <h4>₹0</h4>
 
       <ul>
-        <li>1 Resume Draft</li>
-        <li>Basic ATS Score Check</li>
-        <li>Standard Template</li>
-        <li>PDF Download</li>
+        <li>1 Resume Build</li>
+        <li>1 Standard Resume Template</li>
+        <li>All Theme Colors</li>
+        <li>ATS Score Check</li>
+        <li>JD Match Score Check</li>
+        <li>Standard PDF Download</li>
       </ul>
 
-      <button>Choose Free</button>
+      <button
+        type="button"
+        (click)="handleFreePlan()"
+      >
+
+        {{
+          isLoggedIn
+            ? 'My Resumes'
+            : 'Get Started Free'
+        }}
+
+      </button>
+
     </div>
 
-    <!-- Pro Plan -->
-    <div class="pricing-card active">
-      <span class="badge">MOST POPULAR</span>
+    <!-- PRO PLAN -->
 
-      <h3>Pro</h3>
-      <h4>₹999 <span>/one-time</span></h4>
+    <div class="pricing-card">
+
+      <h3>Pro Plan</h3>
+
+      <h4>
+        ₹199
+        <span>/Month</span>
+      </h4>
 
       <ul>
         <li>Unlimited Resume Builds</li>
-        <li>Advanced ATS Optimization</li>
-        <li>JD Match Analysis</li>
-        <li>Cover Letter Generator</li>
-        <li>Better Templates</li>
-        <li>Priority Support</li>
+        <li>Premium Resume Templates</li>
+        <li>Premium PDF Download</li>
       </ul>
 
-      <button>Choose Pro</button>
+      <button
+        type="button"
+        [disabled]="
+          userPlan === 'pro' ||
+          userPlan === 'pro_plus'
+        "
+        (click)="handleProPlan()"
+      >
+
+        {{
+          userPlan === 'pro'
+            ? 'Current Plan'
+            : userPlan === 'pro_plus'
+              ? 'Included in Pro Plus'
+              : 'Upgrade to Pro'
+        }}
+
+      </button>
+
     </div>
 
-    <!-- Premium Plan -->
-    <div class="pricing-card">
-      <h3>Premium</h3>
-      <h4>₹2,499 <span>/one-time</span></h4>
+    <!-- PRO PLUS -->
+
+    <div class="pricing-card active">
+
+      <span class="badge">
+        BEST VALUE
+      </span>
+
+      <h3>Pro Plus</h3>
+
+      <h4>
+        ₹499
+        <span>/3 Months</span>
+      </h4>
 
       <ul>
-        <li>Everything in Pro</li>
-        <li>LinkedIn Profile Optimization</li>
-        <li>Interview Preparation Kit</li>
-        <li>Premium Resume Templates</li>
-        <li>Personal Branding Suggestions</li>
+        <li>Includes all Pro features</li>
+        <li>3-Month Access</li>
+        <li>Lower Cost (₹166/month)</li>
       </ul>
 
-      <button>Choose Premium</button>
+      <button
+        type="button"
+        [disabled]="
+          userPlan === 'pro_plus'
+        "
+        (click)="handleProPlusPlan()"
+      >
+
+        {{
+          userPlan === 'pro_plus'
+            ? 'Current Plan'
+            : userPlan === 'pro'
+              ? 'Upgrade to Pro Plus'
+              : 'Go Pro Plus'
+        }}
+
+      </button>
+
     </div>
 
   </div>

@@ -1,0 +1,92 @@
+<section class="my-resumes-page">
+  <!-- HEADER -->
+
+  <app-workspace-header
+    subtitle="Manage Your ATS-Optimized Resumes"
+    [showResumeBuilderButton]="true"
+    (createResume)="navigateToResumeBuilder()"
+  >
+  </app-workspace-header>
+
+  <!-- PAGE -->
+
+  <div class="page-container">
+    <!-- HERO -->
+
+    <div class="page-hero">
+      <div class="hero-left">
+        <span class="dashboard-badge"> Resume Workspace </span>
+
+        <h1>My Resumes</h1>
+
+        <p>Manage, edit, and organize your ATS-friendly resumes.</p>
+      </div>
+
+      <div class="hero-right">
+        <button class="primary-btn" (click)="createNewResume()">
+          + Create Resume
+        </button>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+
+    <div class="loading-state" *ngIf="loading">Loading resumes...</div>
+
+    <!-- EMPTY -->
+
+    <div class="empty-state" *ngIf="!loading && !resumes.length">
+      <h3>No resumes yet</h3>
+
+      <p>
+        Create your first ATS-friendly resume and start optimizing for recruiter
+        shortlisting.
+      </p>
+
+      <button class="primary-btn" (click)="createNewResume()">
+        Create Resume
+      </button>
+    </div>
+
+    <!-- RESUME LIBRARY -->
+
+    <div class="resume-library" *ngIf="!loading && resumes.length">
+      <div class="section-header">
+        <div>
+          <h2>Resume Library</h2>
+
+          <p>Continue editing your saved resumes.</p>
+        </div>
+      </div>
+
+      <!-- GRID -->
+
+      <div class="resumes-grid">
+        <div class="resume-card" *ngFor="let resume of resumes">
+          <div class="resume-content">
+            <h3>
+              {{ resume.title || "Untitled Resume" }}
+            </h3>
+
+            <div class="resume-meta">
+              <span>
+                Theme:
+                {{ resume.selectedTheme || "indigo" }}
+              </span>
+            </div>
+          </div>
+
+          <div class="resume-actions">
+            <button class="edit-btn" (click)="editResume(resume)">
+              Edit Resume
+            </button>
+
+            <button class="delete-btn" (click)="deleteResume(resume.id)">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,340 @@
+.my-resumes-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 32px;
+}
+
+/* ========================================
+   PAGE CONTAINER
+======================================== */
+
+.page-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 28px 0 60px;
+}
+
+/* ========================================
+   HERO
+======================================== */
+
+.page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 42px 48px;
+  margin-bottom: 34px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 32px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+.hero-left {
+  flex: 1;
+}
+
+.hero-left {
+  flex: 1;
+}
+
+.hero-left h1 {
+  margin: 0 0 12px;
+
+  font-size: 48px;
+  line-height: 1;
+
+  font-weight: 800;
+  letter-spacing: -2px;
+
+  color: #0f172a;
+}
+
+.hero-left p {
+  margin: 0;
+
+  max-width: 620px;
+
+  font-size: 16px;
+  line-height: 1.7;
+
+  color: #64748b;
+}
+
+.hero-right {
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: #eef2ff;
+
+  color: #4f46e5;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  margin-bottom: 18px;
+}
+
+/* ========================================
+   STATES
+======================================== */
+
+.loading-state,
+.empty-state {
+  padding: 60px 40px;
+
+  background: white;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 28px;
+
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+.empty-state h3 {
+  margin: 0 0 12px;
+
+  font-size: 28px;
+  font-weight: 800;
+
+  color: #0f172a;
+}
+
+.empty-state p {
+  margin: 0 0 24px;
+
+  color: #64748b;
+
+  line-height: 1.7;
+}
+
+/* ========================================
+   LIBRARY SECTION
+======================================== */
+
+.resume-library {
+  background: white;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 34px;
+
+  padding: 34px;
+}
+
+.section-header {
+  margin-bottom: 22px;
+}
+
+.section-header h2 {
+  margin: 0 0 8px;
+
+  font-size: 26px;
+  font-weight: 800;
+
+  color: #0f172a;
+}
+
+.section-header p {
+  margin: 0;
+
+  color: #64748b;
+}
+
+/* ========================================
+   GRID
+======================================== */
+
+.resumes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 420px));
+  gap: 24px;
+  align-items: start;
+}
+
+/* ========================================
+   CARD
+======================================== */
+
+.resume-card {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: 26px;
+  border: 1px solid #e2e8f0;
+  background: #fcfcfd;
+  transition: 0.25s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 4px;
+
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  }
+}
+
+.resume-card:hover {
+  transform: translateY(-5px);
+  border-color: #c7d2fe;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+}
+
+.resume-content h3 {
+  margin: 0 0 14px;
+
+  font-size: 28px;
+  line-height: 1.15;
+
+  font-weight: 800;
+
+  color: #0f172a;
+}
+
+.resume-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  margin-bottom: 28px;
+}
+
+.resume-meta span {
+  padding: 8px 12px;
+
+  border-radius: 999px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ========================================
+   ACTIONS
+======================================== */
+
+.resume-actions {
+  display: flex;
+  gap: 14px;
+
+  margin-top: auto;
+}
+
+.edit-btn,
+.delete-btn,
+.primary-btn {
+  height: 46px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.edit-btn {
+  flex: 1;
+
+  background: #0f172a;
+  color: white;
+}
+
+.delete-btn {
+  width: 120px;
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.primary-btn {
+  padding: 0 24px;
+  background: #4f46e5;
+  color: white;
+}
+
+.edit-btn:hover,
+.delete-btn:hover,
+.primary-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+  .my-resumes-page {
+    padding: 18px;
+  }
+
+  .page-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    align-items: flex-start;
+    padding: 28px;
+  }
+
+  .hero-left h1 {
+    font-size: 38px;
+  }
+
+  .hero-right {
+    width: 100%;
+  }
+
+  .hero-right .primary-btn {
+    width: 100%;
+  }
+
+  .page-container {
+    padding-top: 28px;
+  }
+
+  .hero-content h1 {
+    font-size: 42px;
+  }
+
+  .mini-stats {
+    flex-direction: column;
+  }
+
+  .resume-library {
+    padding: 22px;
+  }
+
+  .resume-actions {
+    flex-direction: column;
+  }
+
+  .delete-btn {
+    width: 100%;
+  }
+}

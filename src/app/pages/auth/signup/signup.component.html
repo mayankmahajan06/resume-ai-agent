@@ -1,0 +1,114 @@
+<div class="login-page">
+
+  <!-- Left Section -->
+  <div class="login-left">
+    <div class="brand-box">
+
+      <div class="logo-icon">✦</div>
+
+      <h1>ResumePilot AI</h1>
+
+      <h2>Build resumes that get shortlisted.</h2>
+
+      <p>
+        Smart resume building with ATS optimization, JD matching,
+        premium templates, and recruiter-ready PDF exports.
+      </p>
+
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="login-right">
+    <div class="login-card">
+
+      <h2>Create Account</h2>
+
+      <p class="subtitle">
+        Start building your recruiter-ready resume today.
+      </p>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label>Full Name</label>
+        <input
+          type="text"
+          [(ngModel)]="fullName"
+          placeholder="Enter your full name"
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label>Email Address</label>
+        <input
+          type="email"
+          [(ngModel)]="email"
+          placeholder="Enter your email"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          type="password"
+          [(ngModel)]="password"
+          placeholder="Create password"
+        />
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input
+          type="password"
+          [(ngModel)]="confirmPassword"
+          placeholder="Confirm password"
+        />
+      </div>
+
+      <!-- Create Account Button -->
+      <button
+        class="login-btn"
+        (click)="signup()"
+      >
+        {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+      </button>
+
+      <!-- Error Message -->
+      <p
+        class="error-message"
+        *ngIf="errorMessage"
+      >
+        {{ errorMessage }}
+      </p>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Google Signup -->
+      <button
+        class="google-btn"
+        (click)="googleSignup()"
+      >
+        Continue with Google
+      </button>
+
+      <!-- Bottom Text -->
+      <p class="bottom-text">
+        Already have an account?
+        <span
+          class="create-account"
+          (click)="goToLogin()"
+        >
+          Login
+        </span>
+      </p>
+
+    </div>
+  </div>
+
+</div>

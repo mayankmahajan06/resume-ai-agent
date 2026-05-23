@@ -1,10 +1,13 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef
 } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { PdfService } from '../../services/pdf.service';
+import { UserService }
+  from '../../services/user.service';
 
 @Component({
   selector: 'app-jd-analysis-dialog',
@@ -16,7 +19,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './jd-analysis-dialog.component.html',
   styleUrls: ['./jd-analysis-dialog.component.scss']
 })
-export class JdAnalysisDialogComponent {
+export class JdAnalysisDialogComponent implements OnInit {
 
   jobDescription = '';
 
@@ -26,13 +29,27 @@ export class JdAnalysisDialogComponent {
   matchingSkills: string[] = [];
   missingSkills: string[] = [];
   jdSuggestions: string[] = [];
+  loading = false;
+  isPremiumUser = false;
 
   constructor(
     private dialogRef: MatDialogRef<JdAnalysisDialogComponent>,
-
+    private pdfService: PdfService,
+    private userService: UserService,
     @Inject(MAT_DIALOG_DATA)
     public data: any
   ) { }
+
+  async ngOnInit(): Promise<void> {
+
+    await this.userService
+      .loadUserPlan();
+
+    this.isPremiumUser =
+      this.userService
+        .isPremiumUser();
+
+  }
 
   closeDialog(): void {
     this.dialogRef.close({
@@ -41,155 +58,64 @@ export class JdAnalysisDialogComponent {
   }
 
   analyzeJD(): void {
+
     if (!this.jobDescription.trim()) {
       return;
     }
 
-    const jdText = this.jobDescription.toLowerCase();
+    this.loading = true;
 
-    /*
-     Resume skills
-    */
-    const resumeSkills = (this.data.skills || [])
-      .map((skill: string) =>
-        skill.toLowerCase().trim()
+    this.pdfService
+      .analyzeJD(
+        this.data.resumeData,
+        this.jobDescription
       )
-      .filter((skill: string) =>
-        skill.length > 0
-      );
+      .subscribe({
 
-    /*
-     Matching skills:
-     exact + partial match
-    */
-    this.matchingSkills = resumeSkills.filter(
-      (skill: string) =>
-        jdText.includes(skill) ||
-        skill.split(' ').some(part =>
-          part.length > 3 &&
-          jdText.includes(part)
-        )
-    );
+        next: (response: any) => {
 
-    /*
-     Dynamic JD keyword extraction
-    */
-    const stopWords = [
-      'and', 'or', 'with', 'for', 'the',
-      'a', 'an', 'to', 'in', 'of', 'on',
-      'is', 'are', 'must', 'required',
-      'good', 'strong', 'experience',
-      'knowledge', 'understanding',
-      'ability', 'candidate', 'should',
-      'have', 'working', 'using',
-      'looking', 'developer'
-    ];
+          this.jdMatch =
+            response.jdMatchScore;
 
-    const jdWords = jdText
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .map(word => word.trim())
-      .filter(word =>
-        word.length > 3 &&
-        !stopWords.includes(word)
-      );
+          this.matchingSkills =
+            response.matchedSkills;
 
-    /*
-     Word frequency
-     repeated words = important
-    */
-    const wordFrequency: any = {};
+          this.missingSkills =
+            response.missingSkills;
 
-    jdWords.forEach(word => {
-      wordFrequency[word] =
-        (wordFrequency[word] || 0) + 1;
-    });
+          this.hasAnalyzed = true;
 
-    /*
-     Important JD keywords
-     based on repetition
-    */
-    const importantJDWords = Object.keys(wordFrequency)
-      .filter(word =>
-        wordFrequency[word] >= 1
-      )
-      .slice(0, 10);
+          this.loading = false;
 
-    /*
-     Missing skills
-    */
-    this.missingSkills = importantJDWords.filter(
-      word =>
-        !resumeSkills.some((skill: any) =>
-          skill.includes(word)
-        )
-    ).slice(0, 5);
+        },
 
-    /*
-     Score calculation
-    */
-    const matchedCount =
-      this.matchingSkills.length;
+        error: (error) => {
 
-    const totalExpected =
-      matchedCount +
-      this.missingSkills.length || 1;
+          console.error(
+            'JD Analysis Failed',
+            error
+          );
 
-    let skillScore = Math.round(
-      (matchedCount / totalExpected) * 70
-    );
+          this.loading = false;
 
-    /*
-     Resume quality bonus
-    */
-    let bonus = 0;
+        }
 
-    if (
-      this.data.summary &&
-      this.data.summary.trim().length >= 80
-    ) {
-      bonus += 10;
+      });
+
+  }
+
+  getScoreClass(): string {
+
+    if (this.jdMatch >= 80) {
+      return 'excellent-score';
     }
 
-    if (
-      this.data.experiences &&
-      this.data.experiences.length >= 1
-    ) {
-      bonus += 10;
+    if (this.jdMatch >= 60) {
+      return 'good-score';
     }
 
-    if (
-      this.data.certifications &&
-      this.data.certifications.length >= 1
-    ) {
-      bonus += 5;
-    }
+    return 'low-score';
 
-    /*
-     Final free-tier cap
-    */
-    this.jdMatch = Math.max(
-      35,
-      Math.min(skillScore + bonus, 85)
-    );
-
-    /*
-     Suggestions
-    */
-    this.jdSuggestions = [];
-
-    if (this.missingSkills.length > 0) {
-      this.jdSuggestions.push(
-        `Consider adding: ${this.missingSkills.join(', ')}`
-      );
-    }
-
-    if (bonus < 20) {
-      this.jdSuggestions.push(
-        'Improve summary and work experience sections'
-      );
-    }
-    this.hasAnalyzed = true;
   }
 
 }

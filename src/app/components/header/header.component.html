@@ -21,16 +21,61 @@
 
       <div class="nav-divider"></div>
 
-      <a mat-button class="login-btn">Login</a>
+      <a mat-button class="see-demo" (click)="scrollTo('demo-section')">See Demo</a>
+      <a
+        *ngIf="!isLoggedIn"
+        mat-button
+        class="login-btn"
+        (click)="navigateToLogin()"
+      >
+        Login
+      </a>
 
       <button
         mat-flat-button
         color="primary"
         class="cta-pulse"
-        (click)="navigateToBuilder()"
+        (click)="navigateToPrimaryAction()"
       >
-        Start Free
+        {{ isLoggedIn ? 'My Resume' : 'Start Free' }}
       </button>
+
+      <div
+        *ngIf="isLoggedIn"
+        #profileMenuWrapper
+        class="header-user-profile"
+      >
+        <div class="user-avatar">
+          {{ userInitial }}
+        </div>
+
+        <div class="user-info">
+          <h4>{{ userName }}</h4>
+          <span class="plan-badge">
+            {{
+              userPlan === "free"
+                ? "Free Plan"
+                : userPlan === "pro"
+                  ? "Pro Plan"
+                  : "Pro Plus"
+            }}
+          </span>
+        </div>
+
+        <div class="profile-menu">
+          <button
+            type="button"
+            class="menu-trigger"
+            (click)="toggleProfileMenu()"
+          >
+            <mat-icon>expand_more</mat-icon>
+          </button>
+
+          <div class="dropdown-menu" *ngIf="showProfileMenu">
+            <button type="button" (click)="logout()">Logout</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Mobile Menu Toggle -->
@@ -56,14 +101,48 @@
 
     <hr />
 
-    <a (click)="toggleMenu()" class="login-mobile">Login</a>
+    <a
+      *ngIf="!isLoggedIn"
+      (click)="navigateToLogin(); toggleMenu()"
+      class="login-mobile"
+    >
+      Login
+    </a>
 
     <button
       mat-flat-button
       color="primary"
-      (click)="navigateToBuilder(); toggleMenu()"
+      (click)="navigateToPrimaryAction(); toggleMenu()"
     >
-      Start Free
+      {{ isLoggedIn ? 'My Resume' : 'Start Free' }}
     </button>
+
+    <div *ngIf="isLoggedIn" class="mobile-profile-card">
+      <div class="user-avatar">
+        {{ userInitial }}
+      </div>
+
+      <div class="user-info">
+        <h4>{{ userName }}</h4>
+        <p>{{ userEmail }}</p>
+        <span class="plan-badge">
+          {{
+            userPlan === "free"
+              ? "Free Plan"
+              : userPlan === "pro"
+                ? "Pro Plan"
+                : "Pro Plus"
+          }}
+        </span>
+      </div>
+    </div>
+
+    <a
+      *ngIf="isLoggedIn"
+      (click)="logout()"
+      class="logout-mobile"
+    >
+      Logout
+    </a>
   </nav>
 </div>

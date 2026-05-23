@@ -1,0 +1,108 @@
+<div class="builder-topbar">
+  <!-- LEFT -->
+
+  <div class="brand-section">
+    <div class="brand-icon" (click)="goToHome()">
+      <mat-icon>auto_awesome</mat-icon>
+    </div>
+
+    <div class="brand-content">
+      <h2>ResumePilot AI</h2>
+
+      <p>{{ subtitle }}</p>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+
+  <div class="topbar-actions">
+    <!-- MY RESUMES -->
+
+    <button
+      *ngIf="showMyResumesButton"
+      class="ghost-btn"
+      (click)="navigateToMyResumes()"
+    >
+      My Resumes
+    </button>
+
+    <!-- RESUME BUILDER -->
+
+    <button
+      *ngIf="showResumeBuilderButton"
+      class="ghost-btn"
+      (click)="navigateToResumeBuilder()"
+    >
+      Resume Builder
+    </button>
+
+    <!-- DASHBOARD -->
+
+    <button
+      *ngIf="showDashboardButton"
+      class="ghost-btn"
+    >
+      Dashboard
+    </button>
+
+    <!-- CREATE -->
+
+    <button
+      *ngIf="showCreateResumeButton"
+      class="primary-btn"
+      (click)="createResume.emit()"
+    >
+      Create Resume
+    </button>
+
+    <!-- SAVE -->
+
+    <button
+      *ngIf="showSaveButton"
+      class="primary-btn"
+      (click)="save.emit()"
+      [disabled]="isSaving"
+    >
+      Save Progress
+    </button>
+
+    <!-- USER -->
+
+    <div #profileMenuWrapper class="user-profile">
+      <div class="user-avatar">
+        {{ userInitial }}
+      </div>
+
+      <div class="user-info">
+        <h4>{{ userName }}</h4>
+
+        <p>{{ userEmail }}</p>
+
+        <span class="plan-badge">
+          {{
+            userPlan === "free"
+              ? "Free Plan"
+              : userPlan === "pro"
+                ? "Pro Plan"
+                : "Pro Plus"
+          }}
+        </span>
+      </div>
+
+      <div class="profile-menu">
+        <button
+          class="menu-trigger"
+          (click)="toggleProfileMenu()"
+        >
+          <mat-icon>expand_more</mat-icon>
+        </button>
+
+        <div class="dropdown-menu" *ngIf="showProfileMenu">
+          <button (click)="logout()">
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

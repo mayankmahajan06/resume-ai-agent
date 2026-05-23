@@ -1,0 +1,35 @@
+<div class="delete-dialog">
+
+  <div class="dialog-icon">
+    <mat-icon>
+      delete
+    </mat-icon>
+  </div>
+
+  <h2>
+    Delete Resume?
+  </h2>
+
+  <p>
+    This action cannot be undone.
+  </p>
+
+  <div class="dialog-actions">
+
+    <button
+      class="cancel-btn"
+      (click)="close()"
+    >
+      Cancel
+    </button>
+
+    <button
+      class="delete-btn"
+      (click)="confirmDelete()"
+    >
+      Delete
+    </button>
+
+  </div>
+
+</div>

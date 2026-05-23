@@ -20,7 +20,7 @@ import { ResumeValidationDialogComponent } from '../resume-validation-dialog/res
 })
 export class ResumePreviewComponent implements OnInit {
 
-  atsScore = 92;
+  atsScore = 0;
   jdMatch = 0;
 
   selectedTheme = '';
@@ -42,6 +42,7 @@ export class ResumePreviewComponent implements OnInit {
     this.resumeService.resumeData$
       .subscribe((data) => {
         this.resumeData = data;
+        console.log('Resume Data Updated:', data);
         this.selectedTheme =
           data.selectedTheme || 'indigo';
         this.calculateATSScore();
@@ -135,55 +136,88 @@ export class ResumePreviewComponent implements OnInit {
   }
 
   openJDModal(): void {
+
     const hasSkills =
-      this.skillsArray.length > 0;
+      this.skillsArray
+        ?.filter(skill =>
+          skill.trim()
+        )
+        .length > 0;
 
     const hasSummary =
-      !!this.resumeData.summary?.trim();
+      this.resumeData.summary
+        ?.trim()
+        ?.length >= 20;
 
     const hasExperience =
-      !!this.resumeData.experiences &&
-      this.resumeData.experiences.length > 0;
+      this.resumeData.experiences?.some(
+        (exp: any) =>
 
-    if (!hasSkills || !hasSummary || !hasExperience) {
+          exp.role?.trim() &&
+          exp.company?.trim() &&
+          exp.responsibilities?.trim()
 
-      let missingFields: string[] = [];
+      );
 
-      if (!hasSkills) {
-        missingFields.push(
-          'Skills Required'
-        );
-      }
+    const missingFields: string[] = [];
 
-      if (!hasSummary) {
-        missingFields.push(
-          'Professional Summary Required'
-        );
-      }
+    if (!hasSkills) {
 
-      if (!hasExperience) {
-        missingFields.push(
-          'At least 1 Experience Required'
-        );
-      }
+      missingFields.push(
+        'Skills Required'
+      );
+
+    }
+
+    if (!hasSummary) {
+
+      missingFields.push(
+        'Professional Summary Required'
+      );
+
+    }
+
+    if (!hasExperience) {
+
+      missingFields.push(
+        'At Least 1 Valid Experience Required'
+      );
+
+    }
+
+    /*
+    ========================================
+    SHOW VALIDATION MODAL
+    ========================================
+    */
+
+    if (missingFields.length > 0) {
 
       this.dialog.open(
         ResumeValidationDialogComponent,
         {
           width: '550px',
           maxWidth: '95vw',
-          panelClass: 'validation-dialog-container',
+          panelClass:
+            'validation-dialog-container',
           autoFocus: false,
           disableClose: true,
 
           data: {
-            missingFields: missingFields
+            missingFields
           }
         }
       );
 
       return;
+
     }
+
+    /*
+    ========================================
+    OPEN JD ANALYSIS MODAL
+    ========================================
+    */
 
     const dialogRef = this.dialog.open(
       JdAnalysisDialogComponent,
@@ -191,22 +225,29 @@ export class ResumePreviewComponent implements OnInit {
         width: '900px',
         maxWidth: '95vw',
         maxHeight: '90vh',
-        panelClass: 'jd-dialog-container',
+        panelClass:
+          'jd-dialog-container',
         autoFocus: false,
         disableClose: true,
 
         data: {
-          skills: this.skillsArray,
-          summary: this.resumeData.summary,
-          experiences: this.resumeData.experiences
+          resumeData: this.resumeData
         }
       }
     );
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.jdMatch) {
-        this.jdMatch = result.jdMatch;
-      }
-    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((result) => {
+
+        if (result?.jdMatch) {
+
+          this.jdMatch =
+            result.jdMatch;
+
+        }
+
+      });
 
   }
 

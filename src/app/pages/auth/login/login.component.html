@@ -1,0 +1,102 @@
+<div class="login-page">
+
+  <!-- Left Side -->
+  <div class="login-left">
+    <div class="brand-box">
+
+      <div class="logo-icon">✦</div>
+
+      <h1>ResumePilot AI</h1>
+
+      <h2>Build resumes that get shortlisted.</h2>
+
+      <p>
+        Smart resume building with ATS optimization, JD matching,
+        premium templates, and recruiter-ready PDF exports.
+      </p>
+
+    </div>
+  </div>
+
+  <!-- Right Side -->
+  <div class="login-right">
+    <div class="login-card">
+
+      <h2>Welcome Back</h2>
+
+      <p class="subtitle">
+        Login to continue building your career.
+      </p>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label>Email Address</label>
+        <input
+          type="email"
+          [(ngModel)]="email"
+          placeholder="Enter your email"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          type="password"
+          [(ngModel)]="password"
+          placeholder="Enter your password"
+        />
+      </div>
+
+      <!-- Forgot Password -->
+      <div
+        class="forgot-password"
+        (click)="goToForgotPassword()"
+      >
+        Forgot Password?
+      </div>
+
+      <!-- Login Button -->
+      <button
+        class="login-btn"
+        (click)="login()"
+      >
+        {{ isLoading ? 'Logging in...' : 'Login' }}
+      </button>
+
+      <!-- Error Message -->
+      <p
+        class="error-message"
+        *ngIf="errorMessage"
+      >
+        {{ errorMessage }}
+      </p>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Google Login -->
+      <button
+        class="google-btn"
+        (click)="googleLogin()"
+      >
+        Continue with Google
+      </button>
+
+      <!-- Bottom Text -->
+      <p class="signup-link">
+        Don’t have an account?
+        <span
+          class="create-account"
+          (click)="goToSignup()"
+        >
+          Create Account
+        </span>
+      </p>
+
+    </div>
+  </div>
+
+</div>

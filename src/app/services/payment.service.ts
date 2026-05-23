@@ -1,0 +1,239 @@
+// src/app/services/payment.service.ts
+
+import { Injectable } from '@angular/core';
+
+import { environment } from '../../environments/environment';
+
+import { PdfService } from './pdf.service';
+
+import {
+  Firestore,
+  doc,
+  setDoc
+} from '@angular/fire/firestore';
+
+import {
+  Auth
+} from '@angular/fire/auth';
+
+declare var Razorpay: any;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PaymentService {
+
+  constructor(
+    private pdfService: PdfService,
+    private firestore: Firestore,
+    private auth: Auth
+  ) { }
+
+  /* =====================================
+     START PAYMENT FLOW
+  ===================================== */
+
+  startPremiumUpgrade(
+    planType: 'pro' | 'pro_plus'
+  ): void {
+
+    const payload = {
+      planType
+    };
+
+    fetch(
+      `${environment.apiBaseUrl}/create-order`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify(payload)
+      }
+    )
+      .then(response => response.json())
+
+      .then(data => {
+
+        if (data.success) {
+
+          this.openRazorpayPopup(
+            data.order,
+            planType
+          );
+
+        }
+
+      })
+
+      .catch(error => {
+
+        console.error(
+          'Create order failed',
+          error
+        );
+
+      });
+
+  }
+
+  /* =====================================
+     OPEN RAZORPAY
+  ===================================== */
+
+  private openRazorpayPopup(
+    order: any,
+    planType: 'pro' | 'pro_plus'
+  ): void {
+
+    const options = {
+
+      key:
+        environment.razorpayKey,
+
+      amount:
+        order.amount,
+
+      currency:
+        order.currency,
+
+      name:
+        'ResumePilot AI',
+
+      description:
+        planType === 'pro'
+          ? 'Pro Plan Upgrade'
+          : 'Pro Plus Upgrade',
+
+      order_id:
+        order.id,
+
+      prefill: {
+        name: '',
+        email: '',
+        contact: ''
+      },
+
+      handler:
+        (response: any) => {
+
+          console.log(
+            'Payment Success:',
+            response
+          );
+
+          this.verifyPaymentAndActivatePlan(
+            response
+          );
+
+        },
+
+      theme: {
+        color: '#4f46e5'
+      }
+
+    };
+
+    const razorpay =
+      new Razorpay(options);
+
+    razorpay.open();
+
+  }
+
+  /* =====================================
+     VERIFY PAYMENT
+  ===================================== */
+
+  private verifyPaymentAndActivatePlan(
+    paymentResponse: any
+  ): void {
+
+    this.pdfService
+      .verifyPayment(paymentResponse)
+      .subscribe({
+
+        next:
+          async (verification: any) => {
+
+            if (!verification.success) {
+              return;
+            }
+
+            await this.saveVerifiedPremiumPlanToFirebase(
+              verification
+            );
+
+            alert(
+              'Payment successful'
+            );
+
+            window.location.reload();
+
+          },
+
+        error:
+          (error) => {
+
+            console.error(
+              'Payment verification failed',
+              error
+            );
+
+          }
+
+      });
+
+  }
+
+  /* =====================================
+     SAVE PLAN TO FIREBASE
+  ===================================== */
+
+  private async saveVerifiedPremiumPlanToFirebase(
+    verifiedPayment: any
+  ): Promise<void> {
+
+    const user =
+      this.auth.currentUser;
+
+    if (!user) {
+      return;
+    }
+
+    const userRef =
+      doc(
+        this.firestore,
+        `users/${user.uid}`
+      );
+
+    await setDoc(
+      userRef,
+      {
+
+        userPlan:
+          verifiedPayment.planType,
+
+        paymentStatus:
+          verifiedPayment.paymentStatus,
+
+        planStartDate:
+          verifiedPayment.planStartDate,
+
+        planExpiryDate:
+          verifiedPayment.planExpiryDate,
+
+        paymentId:
+          verifiedPayment.paymentId
+
+      },
+      {
+        merge: true
+      }
+    );
+
+  }
+
+}

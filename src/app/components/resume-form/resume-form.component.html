@@ -5,7 +5,7 @@
   <!-- PREMIUM TOP SECTION -->
   <div class="builder-journey-card">
     <!-- Voice AI -->
-    <div class="voice-ai-strip">
+    <!-- <div class="voice-ai-strip">
       <div class="voice-left">
         <div class="voice-icon">🎙</div>
 
@@ -20,7 +20,7 @@
       </div>
 
       <button type="button" class="voice-btn">Start Recording</button>
-    </div>
+    </div> -->
 
     <!-- Step Intro -->
     <!-- Step Intro -->
@@ -63,7 +63,7 @@
 
     <div class="top-actions">
       <button type="button" class="reset-btn" (click)="startFreshResume()">
-        Start New Resume
+        Start Fresh
       </button>
     </div>
 
@@ -391,10 +391,10 @@
           </p>
         </div>
 
-        <!-- Profile Completion -->
+        <!-- Resume Completion -->
         <div class="completion-card">
           <div class="completion-top">
-            <span>Profile Completion</span>
+            <span>Resume Completion</span>
             <strong>{{ profileCompletion }}%</strong>
           </div>
 
@@ -420,10 +420,26 @@
         </div>
 
         <!-- Final CTA -->
+        <!-- Final CTA -->
         <div class="final-download-zone">
-          <button type="button" class="download-btn large-download-btn">
+          <!-- Premium Badge -->
+          <div class="premium-badge">
+            Recruiter Approved • ATS Optimized • Premium Export
+          </div>
+
+          <!-- Primary CTA -->
+          <button
+            type="button"
+            class="download-btn large-download-btn premium-glow"
+            (click)="downloadPremiumPDF()"
+          >
             Download Premium PDF
           </button>
+
+          <!-- Trust Line -->
+          <p class="trust-line">
+            Secure PDF Export • Razorpay Protected • Instant Download
+          </p>
         </div>
       </div>
     </form>
@@ -450,3 +466,60 @@
     </div>
   </div>
 </section>
+
+<div class="upgrade-modal-overlay" *ngIf="showUpgradeModal">
+  <div class="upgrade-modal">
+    <button class="close-modal-btn" (click)="closeUpgradeModal()">×</button>
+
+    <h2>Choose Your Plan</h2>
+
+    <p>
+      Unlock recruiter-ready Premium PDF export, premium templates, and
+      unlimited resume builds.
+    </p>
+
+    <p class="plan-comparison">
+      Free users get Standard PDF • Paid users unlock Premium PDF
+    </p>
+
+    <div class="plan-card">
+      <h3>Pro Plan</h3>
+      <p>₹199 / month</p>
+
+      <button
+        class="upgrade-btn"
+        [disabled]="userPlan === 'pro' || userPlan === 'pro_plus'"
+        (click)="startPremiumUpgrade('pro')"
+      >
+        {{
+          userPlan === "pro"
+            ? "Current Plan"
+            : userPlan === "pro_plus"
+              ? "Included in Pro Plus"
+              : "Go Pro — ₹199"
+        }}
+      </button>
+    </div>
+
+    <div class="plan-card pro-plus">
+      <div class="best-value-badge">BEST VALUE</div>
+      <h3>Pro Plus</h3>
+      <p>₹499 / 3 Months</p>
+      <p class="savings-line">Only ₹166/month • Save ₹98</p>
+
+      <button
+        class="upgrade-btn"
+        [disabled]="userPlan === 'pro_plus'"
+        (click)="startPremiumUpgrade('pro_plus')"
+      >
+        {{
+          userPlan === "pro_plus"
+            ? "Current Plan"
+            : userPlan === "pro"
+              ? "Upgrade to Pro Plus — ₹499"
+              : "Go Pro Plus — ₹499"
+        }}
+      </button>
+    </div>
+  </div>
+</div>

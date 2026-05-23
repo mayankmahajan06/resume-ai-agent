@@ -1,11 +1,9 @@
 <footer class="footer-section">
-
   <div class="footer-container">
+    <!-- BRAND -->
 
-    <!-- Brand -->
     <div class="footer-brand">
-      <div class="logo-container">
-
+      <div class="logo-container" (click)="scrollTo('hero')">
         <div class="logo-icon">
           <mat-icon>auto_awesome</mat-icon>
         </div>
@@ -13,52 +11,64 @@
         <span class="logo-text">
           ResumePilot <span class="highlight">AI</span>
         </span>
-
       </div>
 
       <p>
-        Helping mid-level IT professionals bridge the gap between their
-        experience and their dream role with AI-powered resume engineering.
+        Build ATS-friendly resumes, improve resume match scores, and optimize
+        resumes for job descriptions faster.
       </p>
+
+      <div class="trust-badges">
+        <span>ATS-Friendly</span>
+
+        <span>Recruiter-Focused</span>
+
+        <span>Secure PDF Export</span>
+      </div>
     </div>
 
-    <!-- Product -->
+    <!-- QUICK LINKS -->
+
     <div class="footer-links">
-      <h3>Product</h3>
-      <a href="#">Builder</a>
-      <a href="#">ATS Scan</a>
-      <a href="#">JD Match</a>
-      <a href="#">Integrations</a>
+      <h3>Quick Links</h3>
+
+      <a (click)="scrollTo('features')"> Features </a>
+
+      <a (click)="scrollTo('pricing')"> Pricing </a>
+
+      <!-- <a (click)="navigateToPrimaryAction()"> My Resume </a> -->
+
+      <a href="mailto:mayankmahajan06@gmail.com"> Contact </a>
     </div>
 
-    <!-- Resources -->
-    <div class="footer-links">
-      <h3>Resources</h3>
-      <a href="#">Career Blog</a>
-      <a href="#">Salary Guide</a>
-      <a href="#">Interview Prep</a>
-      <a href="#">Resume Tips</a>
-    </div>
+    <!-- LEGAL -->
 
-    <!-- Legal -->
     <div class="footer-links">
       <h3>Legal</h3>
-      <a href="#">Privacy Policy</a>
-      <a href="#">Terms of Service</a>
-      <a href="#">Security</a>
-      <a href="#">Cookie Policy</a>
+
+      <a routerLink="/privacy-policy"> Privacy Policy </a>
+
+      <a routerLink="/terms"> Terms of Service </a>
     </div>
 
+    <!-- CTA -->
+
+    <div class="footer-cta">
+      <h3>Ready to Build Your Resume?</h3>
+
+      <p>Start creating recruiter-friendly resumes in minutes.</p>
+
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="navigateToPrimaryAction()"
+      >
+        Build My Resume
+      </button>
+    </div>
   </div>
 
   <div class="footer-bottom">
     <p>© 2026 ResumePilot AI. All rights reserved.</p>
-
-    <div class="social-links">
-      <a href="#">Twitter</a>
-      <a href="#">LinkedIn</a>
-      <a href="#">Instagram</a>
-    </div>
   </div>
-
 </footer>
