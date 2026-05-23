@@ -10,11 +10,13 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { JdAnalysisDialogComponent } from '../jd-analysis-dialog/jd-analysis-dialog.component';
 import { ResumeValidationDialogComponent } from '../resume-validation-dialog/resume-validation-dialog.component';
+import { ModernTemplateComponent } from '../../templates/modern-template/modern-template.component';
+import { PremiumTemplateComponent } from '../../templates/premium-template/premium-template.component';
 
 @Component({
   selector: 'app-resume-preview',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModernTemplateComponent, PremiumTemplateComponent],
   templateUrl: './resume-preview.component.html',
   styleUrls: ['./resume-preview.component.scss']
 })
@@ -31,6 +33,34 @@ export class ResumePreviewComponent implements OnInit {
   jdSuggestions: string[] = [];
 
   resumeData!: ResumeData;
+
+  isDownloading = false;
+
+  downloadSuccessMessage = '';
+
+  downloadErrorMessage = '';
+  templates = [
+
+    {
+      id: 'modern',
+      name: 'Modern',
+      premium: false
+    },
+
+    // {
+    //   id: 'minimal',
+    //   name: 'Minimal ATS',
+    //   premium: true
+    // },
+
+    {
+      id: 'premium',
+      name: 'Premium',
+      premium: true
+    }
+
+  ];
+  selectedTemplate: string = 'modern';
 
   constructor(
     private resumeService: ResumeService,
@@ -62,46 +92,119 @@ export class ResumePreviewComponent implements OnInit {
   ======================================== */
 
   downloadPDF(): void {
+
+    this.isDownloading = true;
+
+    this.downloadSuccessMessage = '';
+
+    this.downloadErrorMessage = '';
+
     const latestData = {
+
       ...this.resumeService.getResumeData(),
+
       selectedTheme: this.selectedTheme
+
     };
 
     this.pdfService
       .saveResumeData(latestData)
       .subscribe({
+
         next: () => {
+
           this.pdfService
             .generatePdf()
-            .subscribe((response: Blob) => {
-              const blob = new Blob(
-                [response],
-                {
-                  type: 'application/pdf'
-                }
-              );
+            .subscribe({
 
-              const url =
-                window.URL.createObjectURL(blob);
+              next: (response: Blob) => {
 
-              const link =
-                document.createElement('a');
+                const blob = new Blob(
+                  [response],
+                  {
+                    type: 'application/pdf'
+                  }
+                );
 
-              link.href = url;
-              link.download = 'resume.pdf';
-              link.click();
+                const url =
+                  window.URL.createObjectURL(blob);
 
-              window.URL.revokeObjectURL(url);
+                const link =
+                  document.createElement('a');
+
+                link.href = url;
+
+                const resumeFileName =
+                  latestData.fullName?.trim()
+                  || 'resume';
+
+                link.download =
+                  `${resumeFileName
+                    .replace(/\s+/g, '_')
+                    .replace(/[^\w\-]/g, '')
+                  }.pdf`;
+
+                link.click();
+
+                window.URL
+                  .revokeObjectURL(url);
+
+                this.isDownloading = false;
+
+                this.downloadSuccessMessage =
+                  'PDF downloaded';
+
+                setTimeout(() => {
+
+                  this.downloadSuccessMessage = '';
+
+                }, 3000);
+
+              },
+
+              error: (error) => {
+
+                console.error(error);
+
+                this.isDownloading = false;
+
+                this.downloadErrorMessage =
+                  'Failed to generate PDF';
+
+                setTimeout(() => {
+
+                  this.downloadErrorMessage = '';
+
+                }, 3000);
+
+              }
+
             });
+
         },
 
         error: (error) => {
+
           console.error(
             'Failed to save resume data',
             error
           );
+
+          this.isDownloading = false;
+
+          this.downloadErrorMessage =
+            'Failed to generate PDF';
+
+          setTimeout(() => {
+
+            this.downloadErrorMessage = '';
+
+          }, 3000);
+
         }
+
       });
+
   }
 
   /* ========================================
@@ -318,5 +421,15 @@ export class ResumePreviewComponent implements OnInit {
     }
 
     this.atsScore = Math.min(score, 100);
+  }
+
+  selectTemplate(templateId: string): void {
+
+    this.selectedTemplate = templateId;
+
+    this.resumeService.updateResumeData({
+      selectedTemplate: templateId
+    });
+
   }
 }

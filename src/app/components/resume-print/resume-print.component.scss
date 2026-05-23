@@ -13,20 +13,29 @@ body {
   padding: 0;
   background: white;
 
-  font-family:
-    Inter,
-    Arial,
-    sans-serif;
+  font-family: Inter, Arial, sans-serif;
 
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
 .print-resume {
+  --accent: #4f46e5;
+
+  --accent-light: #eef2ff;
+
+  --accent-border: #c7d2fe;
+
+  --meta-color: #64748b;
+
+  --divider-color: #dbe2ea;
+
   width: 100%;
+
   max-width: 210mm;
 
   margin: 0 auto;
+
   padding: 2mm;
 
   background: white;
@@ -34,6 +43,7 @@ body {
   color: #111827;
 
   font-size: 13px;
+
   line-height: 1.6;
 }
 
@@ -57,11 +67,9 @@ body {
 
 .left-header h2 {
   margin-top: 8px;
-
   font-size: 17px;
   font-weight: 600;
-
-  color: #4f46e5;
+  color: var(--accent);
 }
 
 .right-header {
@@ -72,14 +80,12 @@ body {
   margin: 0 0 6px;
 
   font-size: 13px;
-  color: #475569;
+  color: var(--meta-color);
 }
 
 .divider {
   height: 1px;
-
-  background: #dbe2ea;
-
+  background: var(--divider-color);
   margin: 22px 0;
 }
 
@@ -91,14 +97,11 @@ body {
 
 .section-block h3 {
   margin: 0 0 12px;
-
   font-size: 13px;
   font-weight: 800;
-
   text-transform: uppercase;
   letter-spacing: 0.5px;
-
-  color: #4f46e5;
+  color: var(--accent);
 }
 
 .section-block p {
@@ -129,16 +132,23 @@ body {
 .skills-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
 }
 
 .skills-list span {
-  padding: 7px 12px;
-  border: 1px solid #dbe2ea;
+  padding: 5px 10px;
+
+  border: 1px solid var(--accent-border);
+
   border-radius: 999px;
-  font-size: 12px;
+
+  font-size: 11px;
+
   font-weight: 600;
-  color: #334155;
+
+  color: var(--accent);
+
+  background: var(--accent-light);
 }
 
 /* EXPERIENCE */
@@ -168,23 +178,21 @@ body {
 .job-header span {
   font-size: 12px;
   font-weight: 600;
-
-  color: #64748b;
-
+  color: var(--meta-color);
   white-space: nowrap;
 }
 
 .company-name {
   font-weight: 700 !important;
-
-  color: #111827 !important;
-
+  color: var(--meta-color) !important;
   margin-bottom: 8px !important;
 }
 
 .project-title {
   margin-bottom: 8px !important;
   color: #111827 !important;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
 }
 
 .project-title strong {
@@ -193,7 +201,7 @@ body {
 
 .content-text {
   white-space: pre-line;
-
+  max-width: 95%;
   line-height: 1.65;
 }
 
@@ -204,7 +212,6 @@ body {
   break-inside: avoid;
 }
 
-.section-block,
 .job-block,
 .project-block,
 .education-block {
@@ -214,54 +221,59 @@ body {
 
 /* THEMES */
 
-.theme-indigo {
-  .left-header h2,
-  .section-block h3 {
-    color: #4f46e5;
-  }
+/* THEMES */
 
-  .divider {
-    background: #dbe2ea;
-  }
+.theme-indigo {
+  --accent: #4f46e5;
+
+  --accent-light: #eef2ff;
+
+  --accent-border: #c7d2fe;
+
+  --meta-color: #6366f1;
+
+  --divider-color: #dbeafe;
 }
 
 .theme-emerald {
-  .left-header h2,
-  .section-block h3 {
-    color: #059669;
-  }
+  --accent: #059669;
 
-  .divider {
-    background: #d1fae5;
-  }
+  --accent-light: #ecfdf5;
+
+  --accent-border: #a7f3d0;
+
+  --meta-color: #047857;
+
+  --divider-color: #d1fae5;
 }
 
 .theme-slate {
-  .left-header h2,
-  .section-block h3 {
-    color: #334155;
-  }
+  --accent: #334155;
 
-  .divider {
-    background: #cbd5e1;
-  }
+  --accent-light: #f8fafc;
+
+  --accent-border: #cbd5e1;
+
+  --meta-color: #475569;
+
+  --divider-color: #cbd5e1;
 }
 
 .theme-burgundy {
-  .left-header h2,
-  .section-block h3 {
-    color: #7f1d1d;
-  }
+  --accent: #7f1d1d;
 
-  .divider {
-    background: #fecaca;
-  }
+  --accent-light: #fef2f2;
+
+  --accent-border: #fecaca;
+
+  --meta-color: #991b1b;
+
+  --divider-color: #fecaca;
 }
 
 /* PRINT */
 
 @media print {
-
   body {
     background: white;
   }
@@ -271,13 +283,11 @@ body {
     margin: 0;
     max-width: 100%;
   }
-
 }
 
 /* RESPONSIVE */
 
 @media screen and (max-width: 900px) {
-
   .main-grid {
     grid-template-columns: 1fr;
   }
@@ -294,5 +304,4 @@ body {
     flex-direction: column;
     gap: 6px;
   }
-
 }

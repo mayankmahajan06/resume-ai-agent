@@ -1,16 +1,38 @@
-import { Component } from '@angular/core';
-import { ResumeData } from '../../services/resume.service';
-import { PdfService } from '../../services/pdf.service';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
+import {
+  CommonModule
+} from '@angular/common';
+
+import {
+  ResumeData
+} from '../../services/resume.service';
+
+import {
+  PdfService
+} from '../../services/pdf.service';
 
 @Component({
   selector: 'app-premium-resume-print',
+
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './premium-resume-print.component.html',
-  styleUrls: ['./premium-resume-print.component.scss']
+
+  imports: [
+    CommonModule
+  ],
+
+  templateUrl:
+    './premium-resume-print.component.html',
+
+  styleUrls: [
+    './premium-resume-print.component.scss'
+  ]
 })
-export class PremiumResumePrintComponent {
+export class PremiumResumePrintComponent
+  implements OnInit {
 
   resumeData!: ResumeData;
 
@@ -20,10 +42,18 @@ export class PremiumResumePrintComponent {
     private pdfService: PdfService
   ) { }
 
+  /*
+  ========================================
+  INIT
+  ========================================
+  */
+
   ngOnInit(): void {
+
     this.pdfService
       .getResumeData()
       .subscribe((data: any) => {
+
         this.resumeData = data;
 
         this.selectedTheme =
@@ -34,12 +64,23 @@ export class PremiumResumePrintComponent {
         before Puppeteer captures PDF
         */
         setTimeout(() => {
+
           window.print();
+
         }, 500);
+
       });
+
   }
 
+  /*
+  ========================================
+  SKILLS ARRAY
+  ========================================
+  */
+
   get skillsArray(): string[] {
+
     if (!this.resumeData?.skills) {
       return [];
     }
@@ -48,6 +89,86 @@ export class PremiumResumePrintComponent {
       .split(',')
       .map(skill => skill.trim())
       .filter(skill => skill.length > 0);
+
+  }
+
+  /*
+  ========================================
+  SANITIZE TEXT
+  ========================================
+  */
+
+  sanitizeText(
+    text: string
+  ): string {
+
+    if (!text) {
+      return '';
+    }
+
+    return text
+      .replace(/[^\x20-\x7E\n]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  }
+
+  /*
+  ========================================
+  VALIDATION HELPERS
+  ========================================
+  */
+
+  hasSkills(): boolean {
+
+    return this.skillsArray?.length > 0;
+
+  }
+
+  hasCertifications(): boolean {
+
+    return this.resumeData.certifications?.some(
+      (cert: any) =>
+        cert.certificationName?.trim()
+    );
+
+  }
+
+  hasEducation(): boolean {
+
+    return this.resumeData.education?.some(
+      (edu: any) =>
+
+        edu.degree?.trim() ||
+        edu.college?.trim() ||
+        edu.graduationYear?.trim()
+    );
+
+  }
+
+  hasExperience(): boolean {
+
+    return this.resumeData.experiences?.some(
+      (exp: any) =>
+
+        exp.role?.trim() ||
+        exp.company?.trim() ||
+        exp.duration?.trim() ||
+        exp.responsibilities?.trim()
+    );
+
+  }
+
+  hasProjects(): boolean {
+
+    return this.resumeData.projects?.some(
+      (project: any) =>
+
+        project.projectName?.trim() ||
+        project.techStack?.trim() ||
+        project.description?.trim()
+    );
+
   }
 
 }

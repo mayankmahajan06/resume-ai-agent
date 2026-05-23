@@ -670,7 +670,7 @@ textarea {
     font-size: 14px;
   }
   button {
-    width: 100%
+    width: 100%;
   }
 }
 
@@ -699,6 +699,68 @@ textarea {
   font-size: 13px;
   font-weight: 600;
   color: #4f46e5;
+}
+
+.download-btn:disabled {
+  opacity: 0.7;
+
+  cursor: not-allowed;
+
+  transform: none !important;
+
+  box-shadow: none !important;
+}
+
+.download-btn:disabled:hover {
+  transform: none;
+}
+
+.download-toast {
+  position: fixed;
+
+  top: 24px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  padding: 14px 20px;
+
+  border-radius: 14px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: white;
+
+  z-index: 9999;
+
+  animation: slideDown 0.25s ease;
+
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.download-toast.success {
+  background: #059669;
+}
+
+.download-toast.error {
+  background: #dc2626;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* ========================================

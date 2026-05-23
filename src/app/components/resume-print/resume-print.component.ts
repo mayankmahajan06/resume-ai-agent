@@ -105,5 +105,21 @@ export class ResumePrintComponent implements OnInit {
 
   }
 
+  sanitizeText(
+    text: string
+  ): string {
+
+    if (!text) {
+      return '';
+    }
+
+    return text
+      .normalize('NFKD')
+      .replace(/[^\x00-\x7F]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  }
+
 
 }

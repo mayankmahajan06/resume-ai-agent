@@ -41,17 +41,13 @@ export class ResumeFormComponent implements OnInit {
 
   profileCompletion = 0;
 
-  aiSuggestions = [
-    'Add measurable achievements in recent experience',
-    'Include leadership keywords for stronger recruiter confidence',
-    'Add one more certification to improve ATS visibility',
-    'Use stronger action verbs in project descriptions'
-  ];
-
   resumeForm!: FormGroup;
   userPlan: 'free' | 'pro' | 'pro_plus' = 'free';
   showUpgradeModal = false;
   selectedTheme = '';
+  isPremiumDownloading = false;
+  downloadSuccessMessage = '';
+  downloadErrorMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -363,44 +359,122 @@ export class ResumeFormComponent implements OnInit {
   }
 
   downloadPremium(): void {
-    const latestData =
-      this.resumeService.getResumeData();
+
+    this.isPremiumDownloading = true;
+
+    this.downloadSuccessMessage = '';
+
+    this.downloadErrorMessage = '';
+
+    const latestData = {
+
+      ...this.resumeService.getResumeData(),
+
+      selectedTheme: this.selectedTheme
+
+    };
 
     this.pdfService
       .saveResumeData(latestData)
       .subscribe({
+
         next: () => {
+
           this.pdfService
             .generatePremiumPdf()
-            .subscribe((response: Blob) => {
-              const blob = new Blob(
-                [response],
-                {
-                  type: 'application/pdf'
-                }
-              );
+            .subscribe({
 
-              const url =
-                window.URL.createObjectURL(blob);
+              next: (response: Blob) => {
 
-              const link =
-                document.createElement('a');
+                const blob = new Blob(
+                  [response],
+                  {
+                    type: 'application/pdf'
+                  }
+                );
 
-              link.href = url;
-              link.download = 'premium-resume.pdf';
-              link.click();
+                const url =
+                  window.URL.createObjectURL(blob);
 
-              window.URL.revokeObjectURL(url);
+                const link =
+                  document.createElement('a');
+
+                link.href = url;
+
+                const resumeFileName =
+                  latestData.fullName?.trim()
+                  || 'premium-resume';
+
+                link.download =
+                  `${resumeFileName
+                    .replace(/\s+/g, '_')
+                    .replace(/[^\w\-]/g, '')
+                  }.pdf`;
+
+                link.click();
+
+                window.URL
+                  .revokeObjectURL(url);
+
+                this.isPremiumDownloading =
+                  false;
+
+                this.downloadSuccessMessage =
+                  'Premium PDF downloaded';
+
+                setTimeout(() => {
+
+                  this.downloadSuccessMessage =
+                    '';
+
+                }, 2000);
+
+              },
+
+              error: (error) => {
+
+                console.error(error);
+
+                this.isPremiumDownloading =
+                  false;
+
+                this.downloadErrorMessage =
+                  'Failed to generate premium PDF';
+
+                setTimeout(() => {
+
+                  this.downloadErrorMessage =
+                    '';
+
+                }, 3000);
+
+              }
+
             });
+
         },
 
         error: (error) => {
-          console.error(
-            'Failed to save resume data',
-            error
-          );
+
+          console.error(error);
+
+          this.isPremiumDownloading =
+            false;
+
+          this.downloadErrorMessage =
+            'Failed to generate premium PDF';
+
+          setTimeout(() => {
+
+            this.downloadErrorMessage =
+              '';
+
+          }, 3000);
+
         }
+
       });
+
   }
 
   closeUpgradeModal(): void {
@@ -450,5 +524,128 @@ export class ResumeFormComponent implements OnInit {
         }
       }
     }
+  }
+
+  get aiSuggestions(): string[] {
+
+    const suggestions: string[] = [];
+
+    const data = this.resumeForm.value;
+
+    /*
+    SUMMARY CHECK
+    */
+
+    if (
+      !data.summary ||
+      data.summary.length < 120
+    ) {
+
+      suggestions.push(
+        'Expand your professional summary with measurable achievements.'
+      );
+
+    }
+
+    /*
+    SKILLS CHECK
+    */
+
+    if (this.skillsArray.length < 8) {
+
+      suggestions.push(
+        'Add more technical keywords to improve ATS matching.'
+      );
+
+    }
+
+    /*
+    CERTIFICATIONS CHECK
+    */
+
+    const hasCertifications =
+      data.certifications?.some(
+        (cert: any) =>
+          cert.certificationName?.trim()
+      );
+
+    if (!hasCertifications) {
+
+      suggestions.push(
+        'Add certifications to improve recruiter trust and ATS visibility.'
+      );
+
+    }
+
+    /*
+    PROJECTS CHECK
+    */
+
+    const hasProjects =
+      data.projects?.some(
+        (project: any) =>
+          project.projectName?.trim()
+      );
+
+    if (!hasProjects) {
+
+      suggestions.push(
+        'Projects significantly improve recruiter engagement.'
+      );
+
+    }
+
+    /*
+    EXPERIENCE CHECK
+    */
+
+    const experienceCount =
+      data.experiences?.filter(
+        (exp: any) =>
+          exp.role?.trim()
+      )?.length || 0;
+
+    if (experienceCount < 2) {
+
+      suggestions.push(
+        'Add more work experience details to strengthen your profile.'
+      );
+
+    }
+
+    /*
+    DEFAULT FALLBACK
+    */
+
+    if (suggestions.length === 0) {
+
+      suggestions.push(
+        'Your resume looks strong and recruiter-ready.'
+      );
+
+      suggestions.push(
+        'ATS optimization score is looking excellent.'
+      );
+
+      suggestions.push(
+        'Your resume has strong section completeness.'
+      );
+
+    }
+
+    return suggestions.slice(0, 4);
+
+  }
+
+  get skillsArray(): string[] {
+
+    const skills =
+      this.resumeForm.value.skills || '';
+
+    return skills
+      .split(',')
+      .map((skill: string) => skill.trim())
+      .filter((skill: string) => skill.length > 0);
+
   }
 }

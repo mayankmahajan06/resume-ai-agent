@@ -54,6 +54,7 @@ export interface ResumeData {
   summary: string;
   selectedTheme: string;
   resumeId?: string;
+  selectedTemplate?: string;
 
   experiences: Experience[];
   projects: Project[];

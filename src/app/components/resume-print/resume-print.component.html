@@ -52,7 +52,7 @@
     </h3>
 
     <p class="summary-text">
-      {{ resumeData.summary }}
+      {{ sanitizeText(resumeData.summary) }}
     </p>
 
   </section>
@@ -68,7 +68,7 @@
       <!-- SKILLS -->
 
       <div
-        class="section-block page-safe"
+        class="section-block"
         *ngIf="hasSkills()"
       >
 
@@ -101,7 +101,7 @@
             *ngIf="cert.certificationName?.trim()"
           >
 
-            {{ cert.certificationName }}
+            {{ sanitizeText(cert.certificationName) }}
 
           </ng-container>
 
@@ -211,7 +211,7 @@
               class="content-text"
               *ngIf="exp.responsibilities?.trim()"
             >
-              {{ exp.responsibilities }}
+              {{ sanitizeText(exp.responsibilities) }}
             </p>
 
           </ng-container>
@@ -267,7 +267,7 @@
               class="content-text"
               *ngIf="project.description?.trim()"
             >
-              {{ project.description }}
+              {{ sanitizeText(project.description) }}
             </p>
 
           </ng-container>

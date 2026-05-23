@@ -406,11 +406,10 @@
           </div>
         </div>
 
-        <!-- AI Recruiter Insights -->
         <div class="insight-card">
           <div class="insight-header">
-            <h3>AI Recruiter Insights</h3>
-            <span>Smart Analysis</span>
+            <h3>General Recommendations</h3>
+            <!-- <span>Smart Analysis</span> -->
           </div>
 
           <div class="insight-item" *ngFor="let item of aiSuggestions">
@@ -431,9 +430,14 @@
           <button
             type="button"
             class="download-btn large-download-btn premium-glow"
+            [disabled]="isPremiumDownloading"
             (click)="downloadPremiumPDF()"
           >
-            Download Premium PDF
+            {{
+              isPremiumDownloading
+                ? "Generating Premium PDF..."
+                : "Download Premium PDF"
+            }}
           </button>
 
           <!-- Trust Line -->
@@ -522,4 +526,12 @@
       </button>
     </div>
   </div>
+</div>
+
+<div *ngIf="downloadSuccessMessage" class="download-toast success">
+  {{ downloadSuccessMessage }}
+</div>
+
+<div *ngIf="downloadErrorMessage" class="download-toast error">
+  {{ downloadErrorMessage }}
 </div>
