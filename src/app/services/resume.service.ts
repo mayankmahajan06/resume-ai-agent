@@ -56,6 +56,10 @@ export interface ResumeData {
   resumeId?: string;
   selectedTemplate?: string;
 
+  /* JD match score — written by resume-form after modal,
+     read by resume-preview via the shared stream          */
+  jdMatch?: number;
+
   experiences: Experience[];
   projects: Project[];
   certifications: Certification[];
@@ -89,36 +93,19 @@ export class ResumeService {
     summary: '',
     selectedTheme: 'indigo',
     resumeId: '',
+    jdMatch: 0,
 
     experiences: [
-      {
-        company: '',
-        role: '',
-        duration: '',
-        responsibilities: ''
-      }
+      { company: '', role: '', duration: '', responsibilities: '' }
     ],
-
     projects: [
-      {
-        projectName: '',
-        techStack: '',
-        description: ''
-      }
+      { projectName: '', techStack: '', description: '' }
     ],
-
     certifications: [
-      {
-        certificationName: ''
-      }
+      { certificationName: '' }
     ],
     education: [
-      {
-        degree: '',
-        college: '',
-        graduationYear: '',
-        cgpa: ''
-      }
+      { degree: '', college: '', graduationYear: '', cgpa: '' }
     ],
 
     skills: ''
@@ -141,7 +128,7 @@ export class ResumeService {
   }
 
   /* =====================================
-     UPDATE DATA
+     UPDATE DATA (partial merge)
   ===================================== */
 
   updateResumeData(
@@ -155,9 +142,7 @@ export class ResumeService {
       ...data
     };
 
-    this.resumeDataSubject.next(
-      updatedData
-    );
+    this.resumeDataSubject.next(updatedData);
 
     localStorage.setItem(
       'resumeData',
@@ -166,112 +151,50 @@ export class ResumeService {
   }
 
   /* =====================================
-   SAVE OR UPDATE RESUME
-===================================== */
+     SAVE OR UPDATE RESUME
+  ===================================== */
 
   async saveResume(): Promise<void> {
 
-    const user =
-      this.auth.currentUser;
+    const user = this.auth.currentUser;
 
     if (!user) {
-
-      throw new Error(
-        'User not logged in'
-      );
-
+      throw new Error('User not logged in');
     }
 
-    const currentResumeData =
-      this.getResumeData();
-
-    /*
-    =====================================
-    UPDATE EXISTING RESUME
-    =====================================
-    */
+    const currentResumeData = this.getResumeData();
 
     if (currentResumeData.resumeId) {
 
-      const resumeDocRef =
-        doc(
-          this.firestore,
-          `users/${user.uid}/resumes/${currentResumeData.resumeId}`
-        );
-
-      await updateDoc(
-        resumeDocRef,
-        {
-
-          title:
-            currentResumeData.currentRole ||
-            'Untitled Resume',
-
-          resumeData:
-            currentResumeData,
-
-          selectedTheme:
-            currentResumeData.selectedTheme,
-
-          updatedAt:
-            serverTimestamp()
-
-        }
+      const resumeDocRef = doc(
+        this.firestore,
+        `users/${user.uid}/resumes/${currentResumeData.resumeId}`
       );
+
+      await updateDoc(resumeDocRef, {
+        title: currentResumeData.currentRole || 'Untitled Resume',
+        resumeData: currentResumeData,
+        selectedTheme: currentResumeData.selectedTheme,
+        updatedAt: serverTimestamp()
+      });
 
       return;
-
     }
 
-    /*
-    =====================================
-    CREATE NEW RESUME
-    =====================================
-    */
+    const resumesCollection = collection(
+      this.firestore,
+      `users/${user.uid}/resumes`
+    );
 
-    const resumesCollection =
-      collection(
-        this.firestore,
-        `users/${user.uid}/resumes`
-      );
-
-    const docRef =
-      await addDoc(
-        resumesCollection,
-        {
-
-          title:
-            currentResumeData.currentRole ||
-            'Untitled Resume',
-
-          resumeData:
-            currentResumeData,
-
-          selectedTheme:
-            currentResumeData.selectedTheme,
-
-          createdAt:
-            serverTimestamp(),
-
-          updatedAt:
-            serverTimestamp()
-
-        }
-      );
-
-    /*
-    =====================================
-    STORE RESUME ID
-    =====================================
-    */
-
-    this.updateResumeData({
-
-      resumeId:
-        docRef.id
-
+    const docRef = await addDoc(resumesCollection, {
+      title: currentResumeData.currentRole || 'Untitled Resume',
+      resumeData: currentResumeData,
+      selectedTheme: currentResumeData.selectedTheme,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
 
+    this.updateResumeData({ resumeId: docRef.id });
   }
 
   /* =====================================
@@ -279,109 +202,69 @@ export class ResumeService {
   ===================================== */
 
   resetResumeData(): void {
-    localStorage.removeItem(
-      'resumeData'
-    );
-
-    this.resumeDataSubject.next(
-      this.initialData
-    );
+    localStorage.removeItem('resumeData');
+    this.resumeDataSubject.next(this.initialData);
   }
 
   private getStoredResumeData(): ResumeData {
-    const savedData =
-      localStorage.getItem('resumeData');
-
-    return savedData
-      ? JSON.parse(savedData)
-      : this.initialData;
+    const savedData = localStorage.getItem('resumeData');
+    return savedData ? JSON.parse(savedData) : this.initialData;
   }
 
   /* =====================================
-   GET USER RESUMES
-===================================== */
+     GET USER RESUMES
+  ===================================== */
 
   getUserResumes(): Observable<any[]> {
 
-    const user =
-      this.auth.currentUser;
+    const user = this.auth.currentUser;
 
     if (!user) {
-
-      throw new Error(
-        'User not logged in'
-      );
-
+      throw new Error('User not logged in');
     }
 
-    const resumesCollection =
-      collection(
-        this.firestore,
-        `users/${user.uid}/resumes`
-      );
+    const resumesCollection = collection(
+      this.firestore,
+      `users/${user.uid}/resumes`
+    );
 
-    const resumesQuery =
-      query(
-        resumesCollection,
-        orderBy(
-          'updatedAt',
-          'desc'
-        )
-      );
+    const resumesQuery = query(
+      resumesCollection,
+      orderBy('updatedAt', 'desc')
+    );
 
-    return collectionData(
-      resumesQuery,
-      {
-        idField: 'id'
-      }
-    ) as Observable<any[]>;
-
+    return collectionData(resumesQuery, { idField: 'id' }) as Observable<any[]>;
   }
 
   createNewResume(): void {
     this.resetResumeData();
   }
 
-  loadResumeForEditing(
-    resume: any
-  ): void {
-
+  loadResumeForEditing(resume: any): void {
     const resumeData = {
       ...resume.resumeData,
       resumeId: resume.id
     };
 
-    this.resumeDataSubject.next(
-      resumeData
-    );
+    this.resumeDataSubject.next(resumeData);
 
     localStorage.setItem(
       'resumeData',
       JSON.stringify(resumeData)
     );
-
   }
 
-  async deleteResume(
-    resumeId: string
-  ): Promise<void> {
+  async deleteResume(resumeId: string): Promise<void> {
 
-    const user =
-      this.auth.currentUser;
+    const user = this.auth.currentUser;
 
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
-    const resumeDocRef =
-      doc(
-        this.firestore,
-        `users/${user.uid}/resumes/${resumeId}`
-      );
-
-    await deleteDoc(
-      resumeDocRef
+    const resumeDocRef = doc(
+      this.firestore,
+      `users/${user.uid}/resumes/${resumeId}`
     );
 
+    await deleteDoc(resumeDocRef);
   }
 }

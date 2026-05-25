@@ -9,6 +9,7 @@ import {
   FormArray,
   ReactiveFormsModule
 } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 import {
   Firestore,
   doc,
@@ -23,13 +24,28 @@ import {
 } from '../../services/resume.service';
 import { PdfService } from '../../services/pdf.service';
 import { PaymentService } from '../../services/payment.service';
+import { MatDialog } from '@angular/material/dialog';
+import { JdAnalysisDialogComponent } from '../jd-analysis-dialog/jd-analysis-dialog.component';
+import { ResumeValidationDialogComponent } from '../resume-validation-dialog/resume-validation-dialog.component';
+
+/* ========================================
+   TEMPLATE DEFINITION
+======================================== */
+
+export interface ResumeTemplate {
+  id: string;
+  name: string;
+  description: string;
+  pro: boolean;
+}
 
 @Component({
   selector: 'app-resume-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ],
   templateUrl: './resume-form.component.html',
   styleUrls: ['./resume-form.component.scss']
@@ -46,8 +62,54 @@ export class ResumeFormComponent implements OnInit {
   showUpgradeModal = false;
   selectedTheme = '';
   isPremiumDownloading = false;
+  isDownloading = false;
   downloadSuccessMessage = '';
   downloadErrorMessage = '';
+
+  /* ========================================
+     TEMPLATE LIST — single source of truth
+  ======================================== */
+
+  readonly templates: ResumeTemplate[] = [
+    {
+      id: 'modern',
+      name: 'Modern Classic',
+      description: 'Free standard top-down single-column track layout.',
+      pro: false
+    },
+    {
+      id: 'executive',
+      name: 'Executive Left Rail',
+      description: 'Sleek multi-grid layout separating segments into highlights.',
+      pro: true
+    },
+    {
+      id: 'compact',
+      name: 'Compact Grid',
+      description: 'High-density formatted layout optimised for rich experiences.',
+      pro: true
+    },
+    {
+      id: 'clean',
+      name: 'Clean Light',
+      description: 'Prestige light, spacious spacing with elegant fine lines.',
+      pro: true
+    },
+    {
+      id: 'brand',
+      name: 'Brand Innovator',
+      description: 'Full-bleed modern colored heading block layout system.',
+      pro: true
+    },
+    {
+      id: 'academic',
+      name: 'Academic CV Label',
+      description: 'Traditional scholarly labeled layout with structured rows.',
+      pro: true
+    }
+  ];
+
+  selectedTemplate = 'modern';
 
   constructor(
     private fb: FormBuilder,
@@ -55,7 +117,8 @@ export class ResumeFormComponent implements OnInit {
     private paymentService: PaymentService,
     private pdfService: PdfService,
     private auth: Auth,
-    private firestore: Firestore
+    private firestore: Firestore,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -142,7 +205,7 @@ export class ResumeFormComponent implements OnInit {
   }
 
   /* ========================================
-     GETTERS
+     GETTERS — Form Arrays
   ======================================== */
 
   get experiences(): FormArray {
@@ -159,6 +222,67 @@ export class ResumeFormComponent implements OnInit {
 
   get education(): FormArray {
     return this.resumeForm.get('education') as FormArray;
+  }
+
+  /* ========================================
+     GETTERS — Plan helpers
+     Used in the template to keep HTML clean
+  ======================================== */
+
+  /** True for pro or pro_plus users */
+  get isPro(): boolean {
+    return this.userPlan === 'pro' || this.userPlan === 'pro_plus';
+  }
+
+  /** Label shown on the free track download button */
+  get freeDownloadLabel(): string {
+    return this.isDownloading ? 'Generating...' : '⬇ Download Free PDF';
+  }
+
+  /** Label shown on the pro track download button */
+  get proDownloadLabel(): string {
+    if (this.isPro) {
+      return this.isPremiumDownloading ? 'Generating...' : '⬇ Download Premium PDF';
+    }
+    return '💳 Unlock Premium for ₹199';
+  }
+
+  /** Plan pill label — shown as the "active plan" track pill */
+  get activePlanLabel(): string {
+    if (this.userPlan === 'pro_plus') return 'PRO PLUS';
+    if (this.userPlan === 'pro') return 'PRO';
+    return 'FREE';
+  }
+
+  /** Number of locked (pro) templates the user cannot access */
+  get lockedTemplateCount(): number {
+    return this.templates.filter(t => t.pro && !this.isPro).length;
+  }
+
+  /* ========================================
+     TEMPLATE SELECTION
+  ======================================== */
+
+  selectTemplate(template: ResumeTemplate): void {
+    // Block free users from selecting pro templates
+    if (template.pro && !this.isPro) {
+      this.showUpgradeModal = true;
+      return;
+    }
+
+    this.selectedTemplate = template.id;
+
+    this.resumeService.updateResumeData({
+      selectedTemplate: template.id
+    });
+  }
+
+  isTemplateSelected(templateId: string): boolean {
+    return this.selectedTemplate === templateId;
+  }
+
+  isTemplateLocked(template: ResumeTemplate): boolean {
+    return template.pro && !this.isPro;
   }
 
   /* ========================================
@@ -255,16 +379,11 @@ export class ResumeFormComponent implements OnInit {
 
     const checkField = (field: any) => {
       totalFields++;
-
-      if (
-        field &&
-        field.toString().trim() !== ''
-      ) {
+      if (field && field.toString().trim() !== '') {
         filledFields++;
       }
     };
 
-    /* Basic fields */
     checkField(value.fullName);
     checkField(value.email);
     checkField(value.phone);
@@ -275,7 +394,6 @@ export class ResumeFormComponent implements OnInit {
     checkField(value.summary);
     checkField(value.skills);
 
-    /* Experience */
     value.experiences?.forEach((exp: any) => {
       checkField(exp.company);
       checkField(exp.role);
@@ -283,14 +401,12 @@ export class ResumeFormComponent implements OnInit {
       checkField(exp.responsibilities);
     });
 
-    /* Projects */
     value.projects?.forEach((project: any) => {
       checkField(project.projectName);
       checkField(project.techStack);
       checkField(project.description);
     });
 
-    /* Certifications */
     value.certifications?.forEach((cert: any) => {
       checkField(cert.certificationName);
     });
@@ -314,33 +430,21 @@ export class ResumeFormComponent implements OnInit {
   nextStep(): void {
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
-
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   prevStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
-
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   startFreshResume(): void {
     this.resumeService.resetResumeData();
-
-    const freshData =
-      this.resumeService.getResumeData();
-
+    const freshData = this.resumeService.getResumeData();
     this.initializeForm(freshData);
-
     this.currentStep = 1;
   }
 
@@ -348,173 +452,137 @@ export class ResumeFormComponent implements OnInit {
     this.currentStep = step;
   }
 
+  /* ========================================
+     DOWNLOAD — FREE PDF
+  ======================================== */
+
+  downloadFreePDF(): void {
+    this.isDownloading = true;
+    this.downloadSuccessMessage = '';
+    this.downloadErrorMessage = '';
+
+    const latestData = {
+      ...this.resumeService.getResumeData(),
+      selectedTheme: this.selectedTheme
+    };
+
+    this.pdfService.saveResumeData(latestData).subscribe({
+      next: () => {
+        this.pdfService.generatePdf().subscribe({
+          next: (response: Blob) => {
+            this._triggerDownload(response, latestData.fullName || 'resume');
+            this.isDownloading = false;
+            this.downloadSuccessMessage = 'Free PDF downloaded successfully';
+            setTimeout(() => { this.downloadSuccessMessage = ''; }, 3000);
+          },
+          error: (error) => {
+            console.error(error);
+            this.isDownloading = false;
+            this.downloadErrorMessage = 'Failed to generate PDF. Please try again.';
+            setTimeout(() => { this.downloadErrorMessage = ''; }, 3000);
+          }
+        });
+      },
+      error: (error) => {
+        console.error(error);
+        this.isDownloading = false;
+        this.downloadErrorMessage = 'Failed to generate PDF. Please try again.';
+        setTimeout(() => { this.downloadErrorMessage = ''; }, 3000);
+      }
+    });
+  }
+
+  /* ========================================
+     DOWNLOAD — PREMIUM PDF
+  ======================================== */
+
   downloadPremiumPDF(): void {
-    if (this.userPlan === 'free') {
+    if (!this.isPro) {
       this.showUpgradeModal = true;
       return;
     }
     this.downloadPremium();
-
-    //alert('Premium PDF Download Started');
   }
 
   downloadPremium(): void {
-
     this.isPremiumDownloading = true;
-
     this.downloadSuccessMessage = '';
-
     this.downloadErrorMessage = '';
 
     const latestData = {
-
       ...this.resumeService.getResumeData(),
-
       selectedTheme: this.selectedTheme
-
     };
 
-    this.pdfService
-      .saveResumeData(latestData)
-      .subscribe({
-
-        next: () => {
-
-          this.pdfService
-            .generatePremiumPdf()
-            .subscribe({
-
-              next: (response: Blob) => {
-
-                const blob = new Blob(
-                  [response],
-                  {
-                    type: 'application/pdf'
-                  }
-                );
-
-                const url =
-                  window.URL.createObjectURL(blob);
-
-                const link =
-                  document.createElement('a');
-
-                link.href = url;
-
-                const resumeFileName =
-                  latestData.fullName?.trim()
-                  || 'premium-resume';
-
-                link.download =
-                  `${resumeFileName
-                    .replace(/\s+/g, '_')
-                    .replace(/[^\w\-]/g, '')
-                  }.pdf`;
-
-                link.click();
-
-                window.URL
-                  .revokeObjectURL(url);
-
-                this.isPremiumDownloading =
-                  false;
-
-                this.downloadSuccessMessage =
-                  'Premium PDF downloaded';
-
-                setTimeout(() => {
-
-                  this.downloadSuccessMessage =
-                    '';
-
-                }, 2000);
-
-              },
-
-              error: (error) => {
-
-                console.error(error);
-
-                this.isPremiumDownloading =
-                  false;
-
-                this.downloadErrorMessage =
-                  'Failed to generate premium PDF';
-
-                setTimeout(() => {
-
-                  this.downloadErrorMessage =
-                    '';
-
-                }, 3000);
-
-              }
-
-            });
-
-        },
-
-        error: (error) => {
-
-          console.error(error);
-
-          this.isPremiumDownloading =
-            false;
-
-          this.downloadErrorMessage =
-            'Failed to generate premium PDF';
-
-          setTimeout(() => {
-
-            this.downloadErrorMessage =
-              '';
-
-          }, 3000);
-
-        }
-
-      });
-
+    this.pdfService.saveResumeData(latestData).subscribe({
+      next: () => {
+        this.pdfService.generatePremiumPdf().subscribe({
+          next: (response: Blob) => {
+            this._triggerDownload(response, latestData.fullName || 'premium-resume');
+            this.isPremiumDownloading = false;
+            this.downloadSuccessMessage = 'Premium PDF downloaded successfully';
+            setTimeout(() => { this.downloadSuccessMessage = ''; }, 2000);
+          },
+          error: (error) => {
+            console.error(error);
+            this.isPremiumDownloading = false;
+            this.downloadErrorMessage = 'Failed to generate premium PDF. Please try again.';
+            setTimeout(() => { this.downloadErrorMessage = ''; }, 3000);
+          }
+        });
+      },
+      error: (error) => {
+        console.error(error);
+        this.isPremiumDownloading = false;
+        this.downloadErrorMessage = 'Failed to generate premium PDF. Please try again.';
+        setTimeout(() => { this.downloadErrorMessage = ''; }, 3000);
+      }
+    });
   }
+
+  /** Shared helper — creates blob URL and clicks download link */
+  private _triggerDownload(blob: Blob, fileName: string): void {
+    const fileBlob = new Blob([blob], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(fileBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileName
+      .trim()
+      .replace(/\s+/g, '_')
+      .replace(/[^\w\-]/g, '')
+    }.pdf`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  /* ========================================
+     MODAL
+  ======================================== */
 
   closeUpgradeModal(): void {
     this.showUpgradeModal = false;
   }
 
-  startPremiumUpgrade(
-    planType: 'pro' | 'pro_plus'
-  ): void {
-
-    this.paymentService
-      .startPremiumUpgrade(
-        planType
-      );
-
+  startPremiumUpgrade(planType: 'pro' | 'pro_plus'): void {
+    this.paymentService.startPremiumUpgrade(planType);
   }
+
+  /* ========================================
+     FIREBASE PLAN LOADER
+  ======================================== */
 
   async loadUserPlanFromFirebase(): Promise<void> {
     const user = this.auth.currentUser;
-
     if (!user) return;
 
-    const userRef = doc(
-      this.firestore,
-      `users/${user.uid}`
-    );
-
+    const userRef = doc(this.firestore, `users/${user.uid}`);
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
       const data: any = snapshot.data();
 
-      if (
-        data.paymentStatus === 'active' &&
-        data.userPlan
-      ) {
-        const expiryDate = new Date(
-          data.planExpiryDate
-        );
-
+      if (data.paymentStatus === 'active' && data.userPlan) {
+        const expiryDate = new Date(data.planExpiryDate);
         const today = new Date();
 
         if (expiryDate > today) {
@@ -526,126 +594,125 @@ export class ResumeFormComponent implements OnInit {
     }
   }
 
+  /* ========================================
+     JD ANALYSIS MODAL
+     Opens the same JdAnalysisDialog used in preview.
+     On close, writes jdMatch into ResumeService so
+     resume-preview picks it up via resumeData$ stream.
+  ======================================== */
+
+  openJDModal(): void {
+    if (!this.isPro) {
+      this.showUpgradeModal = true;
+      return;
+    }
+
+    const currentData = this.resumeService.getResumeData();
+
+    const skillsArray = (currentData.skills || '')
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0);
+
+    const hasSkills     = skillsArray.length > 0;
+    const hasSummary    = currentData.summary?.trim()?.length >= 20;
+    const hasExperience = currentData.experiences?.some(
+      (exp: any) => exp.role?.trim() && exp.company?.trim() && exp.responsibilities?.trim()
+    );
+
+    const missingFields: string[] = [];
+    if (!hasSkills)     missingFields.push('Skills Required');
+    if (!hasSummary)    missingFields.push('Professional Summary Required');
+    if (!hasExperience) missingFields.push('At Least 1 Valid Experience Required');
+
+    if (missingFields.length > 0) {
+      this.dialog.open(ResumeValidationDialogComponent, {
+        width: '550px',
+        maxWidth: '95vw',
+        panelClass: 'validation-dialog-container',
+        autoFocus: false,
+        disableClose: true,
+        data: { missingFields }
+      });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(JdAnalysisDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'jd-dialog-container',
+      autoFocus: false,
+      disableClose: true,
+      data: { resumeData: currentData }
+    });
+
+    /* Write score into shared service — resume-preview reads it automatically */
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.jdMatch) {
+        this.resumeService.updateResumeData({ jdMatch: result.jdMatch });
+      }
+    });
+  }
+
+  /* ========================================
+     AI SUGGESTIONS
+  ======================================== */
+
   get aiSuggestions(): string[] {
-
     const suggestions: string[] = [];
-
     const data = this.resumeForm.value;
 
-    /*
-    SUMMARY CHECK
-    */
-
-    if (
-      !data.summary ||
-      data.summary.length < 120
-    ) {
-
-      suggestions.push(
-        'Expand your professional summary with measurable achievements.'
-      );
-
+    if (!data.summary || data.summary.length < 120) {
+      suggestions.push('Expand your professional summary with measurable achievements.');
     }
-
-    /*
-    SKILLS CHECK
-    */
 
     if (this.skillsArray.length < 8) {
-
-      suggestions.push(
-        'Add more technical keywords to improve ATS matching.'
-      );
-
+      suggestions.push('Add more technical keywords to improve ATS matching.');
     }
 
-    /*
-    CERTIFICATIONS CHECK
-    */
-
-    const hasCertifications =
-      data.certifications?.some(
-        (cert: any) =>
-          cert.certificationName?.trim()
-      );
+    const hasCertifications = data.certifications?.some(
+      (cert: any) => cert.certificationName?.trim()
+    );
 
     if (!hasCertifications) {
-
-      suggestions.push(
-        'Add certifications to improve recruiter trust and ATS visibility.'
-      );
-
+      suggestions.push('Add certifications to improve recruiter trust and ATS visibility.');
     }
 
-    /*
-    PROJECTS CHECK
-    */
-
-    const hasProjects =
-      data.projects?.some(
-        (project: any) =>
-          project.projectName?.trim()
-      );
+    const hasProjects = data.projects?.some(
+      (project: any) => project.projectName?.trim()
+    );
 
     if (!hasProjects) {
-
-      suggestions.push(
-        'Projects significantly improve recruiter engagement.'
-      );
-
+      suggestions.push('Projects significantly improve recruiter engagement.');
     }
 
-    /*
-    EXPERIENCE CHECK
-    */
-
-    const experienceCount =
-      data.experiences?.filter(
-        (exp: any) =>
-          exp.role?.trim()
-      )?.length || 0;
+    const experienceCount = data.experiences?.filter(
+      (exp: any) => exp.role?.trim()
+    )?.length || 0;
 
     if (experienceCount < 2) {
-
-      suggestions.push(
-        'Add more work experience details to strengthen your profile.'
-      );
-
+      suggestions.push('Add more work experience details to strengthen your profile.');
     }
 
-    /*
-    DEFAULT FALLBACK
-    */
-
     if (suggestions.length === 0) {
-
-      suggestions.push(
-        'Your resume looks strong and recruiter-ready.'
-      );
-
-      suggestions.push(
-        'ATS optimization score is looking excellent.'
-      );
-
-      suggestions.push(
-        'Your resume has strong section completeness.'
-      );
-
+      suggestions.push('Your resume looks strong and recruiter-ready.');
+      suggestions.push('ATS optimization score is looking excellent.');
+      suggestions.push('Your resume has strong section completeness.');
     }
 
     return suggestions.slice(0, 4);
-
   }
 
+  /* ========================================
+     SKILLS ARRAY
+  ======================================== */
+
   get skillsArray(): string[] {
-
-    const skills =
-      this.resumeForm.value.skills || '';
-
+    const skills = this.resumeForm.value.skills || '';
     return skills
       .split(',')
       .map((skill: string) => skill.trim())
       .filter((skill: string) => skill.length > 0);
-
   }
 }

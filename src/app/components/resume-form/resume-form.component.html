@@ -2,135 +2,54 @@
 <!-- COMPLETE FILE -->
 
 <section class="resume-form">
-  <!-- PREMIUM TOP SECTION -->
+
+  <!-- BUILDER JOURNEY CARD -->
   <div class="builder-journey-card">
-    <!-- Voice AI -->
-    <!-- <div class="voice-ai-strip">
-      <div class="voice-left">
-        <div class="voice-icon">🎙</div>
 
-        <div class="voice-content">
-          <span class="mini-label">AI FEATURE</span>
-          <h3>Build with Voice AI</h3>
-          <p>
-            Speak naturally and let AI generate your recruiter-ready resume
-            instantly.
-          </p>
-        </div>
-      </div>
-
-      <button type="button" class="voice-btn">Start Recording</button>
-    </div> -->
-
-    <!-- Step Intro -->
-    <!-- Step Intro -->
     <div class="step-intro">
-      <span class="step-count">
-        STEP {{ currentStep }} OF {{ totalSteps }}
-      </span>
-
+      <span class="step-count">STEP {{ currentStep }} OF {{ totalSteps }}</span>
       <h2 *ngIf="currentStep === 1">Personal Information</h2>
       <h2 *ngIf="currentStep === 2">Work Experience</h2>
       <h2 *ngIf="currentStep === 3">Projects</h2>
       <h2 *ngIf="currentStep === 4">Education</h2>
       <h2 *ngIf="currentStep === 5">Skills & Certifications</h2>
       <h2 *ngIf="currentStep === 6">Final Review</h2>
-
-      <p *ngIf="currentStep === 1">
-        Add your personal details and define your target role.
-      </p>
-
-      <p *ngIf="currentStep === 2">
-        Showcase measurable achievements and business impact.
-      </p>
-
-      <p *ngIf="currentStep === 3">
-        Highlight your strongest and most relevant projects.
-      </p>
-
-      <p *ngIf="currentStep === 4">
-        Add your academic background and educational qualifications.
-      </p>
-
-      <p *ngIf="currentStep === 5">
-        Improve ATS score with strong skills and certifications.
-      </p>
-
-      <p *ngIf="currentStep === 6">
-        Final optimization before recruiter-ready PDF export.
-      </p>
+      <p *ngIf="currentStep === 1">Add your personal details and define your target role.</p>
+      <p *ngIf="currentStep === 2">Showcase measurable achievements and business impact.</p>
+      <p *ngIf="currentStep === 3">Highlight your strongest and most relevant projects.</p>
+      <p *ngIf="currentStep === 4">Add your academic background and educational qualifications.</p>
+      <p *ngIf="currentStep === 5">Improve ATS score with strong skills and certifications.</p>
+      <p *ngIf="currentStep === 6">Final optimization before recruiter-ready PDF export.</p>
     </div>
 
     <div class="top-actions">
-      <button type="button" class="reset-btn" (click)="startFreshResume()">
-        Start Fresh
-      </button>
+      <button type="button" class="reset-btn" (click)="startFreshResume()">Start Fresh</button>
     </div>
 
     <!-- Step Pills -->
     <div class="step-pills">
-      <div
-        class="step-pill"
-        [class.active]="currentStep >= 1"
-        (click)="goToStep(1)"
-      >
-        <span>1</span>
-        <label>Personal</label>
+      <div class="step-pill" [class.active]="currentStep >= 1" (click)="goToStep(1)">
+        <span>1</span><label>Personal</label>
       </div>
-
       <div class="pill-line" [class.active]="currentStep >= 2"></div>
-
-      <div
-        class="step-pill"
-        [class.active]="currentStep >= 2"
-        (click)="goToStep(2)"
-      >
-        <span>2</span>
-        <label>Experience</label>
+      <div class="step-pill" [class.active]="currentStep >= 2" (click)="goToStep(2)">
+        <span>2</span><label>Experience</label>
       </div>
-
       <div class="pill-line" [class.active]="currentStep >= 3"></div>
-
-      <div
-        class="step-pill"
-        [class.active]="currentStep >= 3"
-        (click)="goToStep(3)"
-      >
-        <span>3</span>
-        <label>Projects</label>
+      <div class="step-pill" [class.active]="currentStep >= 3" (click)="goToStep(3)">
+        <span>3</span><label>Projects</label>
       </div>
-
       <div class="pill-line" [class.active]="currentStep >= 4"></div>
-
-      <div
-        class="step-pill"
-        [class.active]="currentStep >= 4"
-        (click)="goToStep(4)"
-      >
-        <span>4</span>
-        <label>Education</label>
+      <div class="step-pill" [class.active]="currentStep >= 4" (click)="goToStep(4)">
+        <span>4</span><label>Education</label>
       </div>
-
       <div class="pill-line" [class.active]="currentStep >= 5"></div>
-
-      <div
-        class="step-pill"
-        [class.active]="currentStep >= 5"
-        (click)="goToStep(5)"
-      >
-        <span>5</span>
-        <label>Skills</label>
+      <div class="step-pill" [class.active]="currentStep >= 5" (click)="goToStep(5)">
+        <span>5</span><label>Skills</label>
       </div>
-
       <div class="pill-line" [class.active]="currentStep >= 6"></div>
-
-      <div
-        class="step-pill"
-        [class.active]="currentStep >= 6"
-        (click)="goToStep(6)"
-      >
-        <span>6</span>
-        <label>Export</label>
+      <div class="step-pill" [class.active]="currentStep >= 6" (click)="goToStep(6)">
+        <span>6</span><label>Export</label>
       </div>
     </div>
   </div>
@@ -138,400 +57,283 @@
   <!-- MAIN FORM -->
   <div class="form-card">
     <form [formGroup]="resumeForm">
+
       <!-- STEP 1 -->
       <div *ngIf="currentStep === 1">
         <div class="section-title">Basic Information</div>
-
         <div class="form-grid">
-          <input
-            type="text"
-            placeholder="Full Name"
-            formControlName="fullName"
-          />
-          <input
-            type="text"
-            placeholder="Current Role"
-            formControlName="currentRole"
-          />
-          <input
-            type="email"
-            placeholder="Email Address"
-            formControlName="email"
-          />
-          <input
-            type="text"
-            placeholder="Phone Number"
-            formControlName="phone"
-          />
-          <input
-            type="text"
-            placeholder="Location"
-            formControlName="location"
-          />
-          <input
-            type="text"
-            placeholder="LinkedIn Profile"
-            formControlName="linkedIn"
-          />
-          <input
-            type="text"
-            placeholder="Target Role"
-            formControlName="targetRole"
-          />
+          <input type="text" placeholder="Full Name" formControlName="fullName" />
+          <input type="text" placeholder="Current Role" formControlName="currentRole" />
+          <input type="email" placeholder="Email Address" formControlName="email" />
+          <input type="text" placeholder="Phone Number" formControlName="phone" />
+          <input type="text" placeholder="Location" formControlName="location" />
+          <input type="text" placeholder="LinkedIn Profile" formControlName="linkedIn" />
+          <input type="text" placeholder="Target Role" formControlName="targetRole" />
         </div>
-
-        <textarea
-          rows="5"
-          placeholder="Professional Summary"
-          formControlName="summary"
-        >
-        </textarea>
+        <textarea rows="5" placeholder="Professional Summary" formControlName="summary"></textarea>
       </div>
 
       <!-- STEP 2 -->
       <div *ngIf="currentStep === 2">
         <div class="section-title">Experience Details</div>
-
         <div formArrayName="experiences">
-          <div
-            *ngFor="let exp of experiences.controls; let i = index"
-            [formGroupName]="i"
-            class="dynamic-card"
-          >
+          <div *ngFor="let exp of experiences.controls; let i = index" [formGroupName]="i" class="dynamic-card">
             <div class="card-top-actions">
-              <button
-                type="button"
-                class="remove-btn"
-                (click)="removeExperience(i)"
-              >
-                Remove
-              </button>
+              <button type="button" class="remove-btn" (click)="removeExperience(i)">Remove</button>
             </div>
-
-            <input
-              type="text"
-              placeholder="Company Name"
-              formControlName="company"
-            />
-            <input
-              type="text"
-              placeholder="Role / Designation"
-              formControlName="role"
-            />
-            <input
-              type="text"
-              placeholder="Duration"
-              formControlName="duration"
-            />
-
-            <textarea
-              rows="5"
-              placeholder="Responsibilities and achievements"
-              formControlName="responsibilities"
-            >
-            </textarea>
+            <input type="text" placeholder="Company Name" formControlName="company" />
+            <input type="text" placeholder="Role / Designation" formControlName="role" />
+            <input type="text" placeholder="Duration" formControlName="duration" />
+            <textarea rows="5" placeholder="Responsibilities and achievements" formControlName="responsibilities"></textarea>
           </div>
         </div>
-
-        <button type="button" class="add-btn" (click)="addExperience()">
-          + Add Another Experience
-        </button>
+        <button type="button" class="add-btn" (click)="addExperience()">+ Add Another Experience</button>
       </div>
 
       <!-- STEP 3 -->
       <div *ngIf="currentStep === 3">
         <div class="section-title">Project Details</div>
-
         <div formArrayName="projects">
-          <div
-            *ngFor="let project of projects.controls; let i = index"
-            [formGroupName]="i"
-            class="dynamic-card"
-          >
+          <div *ngFor="let project of projects.controls; let i = index" [formGroupName]="i" class="dynamic-card">
             <div class="card-top-actions">
-              <button
-                type="button"
-                class="remove-btn"
-                (click)="removeProject(i)"
-              >
-                Remove
-              </button>
+              <button type="button" class="remove-btn" (click)="removeProject(i)">Remove</button>
             </div>
-
-            <input
-              type="text"
-              placeholder="Project Name"
-              formControlName="projectName"
-            />
-            <input
-              type="text"
-              placeholder="Tech Stack Used"
-              formControlName="techStack"
-            />
-
-            <textarea
-              rows="5"
-              placeholder="Project details"
-              formControlName="description"
-            >
-            </textarea>
+            <input type="text" placeholder="Project Name" formControlName="projectName" />
+            <input type="text" placeholder="Tech Stack Used" formControlName="techStack" />
+            <textarea rows="5" placeholder="Project details" formControlName="description"></textarea>
           </div>
         </div>
-
-        <button type="button" class="add-btn" (click)="addProject()">
-          + Add Another Project
-        </button>
+        <button type="button" class="add-btn" (click)="addProject()">+ Add Another Project</button>
       </div>
 
       <!-- STEP 4 -->
       <div *ngIf="currentStep === 4">
         <div class="section-title">Education</div>
-
         <div formArrayName="education">
-          <div
-            *ngFor="let edu of education.controls; let i = index"
-            [formGroupName]="i"
-            class="dynamic-card"
-          >
+          <div *ngFor="let edu of education.controls; let i = index" [formGroupName]="i" class="dynamic-card">
             <div class="card-top-actions">
-              <button
-                type="button"
-                class="remove-btn"
-                (click)="removeEducation(i)"
-              >
-                Remove
-              </button>
+              <button type="button" class="remove-btn" (click)="removeEducation(i)">Remove</button>
             </div>
-
-            <input
-              type="text"
-              placeholder="Degree (B.Tech, MBA...)"
-              formControlName="degree"
-            />
-
-            <input
-              type="text"
-              placeholder="College / University"
-              formControlName="college"
-            />
-
-            <input
-              type="text"
-              placeholder="Graduation Year"
-              formControlName="graduationYear"
-            />
-
-            <input
-              type="text"
-              placeholder="CGPA / Percentage (Optional)"
-              formControlName="cgpa"
-            />
+            <input type="text" placeholder="Degree (B.Tech, MBA...)" formControlName="degree" />
+            <input type="text" placeholder="College / University" formControlName="college" />
+            <input type="text" placeholder="Graduation Year" formControlName="graduationYear" />
+            <input type="text" placeholder="CGPA / Percentage (Optional)" formControlName="cgpa" />
           </div>
         </div>
-
-        <button type="button" class="add-btn" (click)="addEducation()">
-          + Add Another Education
-        </button>
+        <button type="button" class="add-btn" (click)="addEducation()">+ Add Another Education</button>
       </div>
 
       <!-- STEP 5 -->
       <div *ngIf="currentStep === 5">
         <div class="section-title">Skills & Certifications</div>
-
-        <!-- SKILLS -->
         <div class="section-title" style="margin-top: 32px">Skills</div>
-
-        <input
-          type="text"
-          placeholder="Technical Skills (Angular, AWS, RxJS, TypeScript...)"
-          formControlName="skills"
-        />
-
-        <!-- CERTIFICATIONS -->
+        <input type="text" placeholder="Technical Skills (Angular, AWS, RxJS, TypeScript...)" formControlName="skills" />
         <div class="section-title" style="margin-top: 32px">Certifications</div>
-
         <div formArrayName="certifications">
-          <div
-            *ngFor="let cert of certifications.controls; let i = index"
-            [formGroupName]="i"
-            class="dynamic-card"
-          >
+          <div *ngFor="let cert of certifications.controls; let i = index" [formGroupName]="i" class="dynamic-card">
             <div class="card-top-actions">
-              <button
-                type="button"
-                class="remove-btn"
-                (click)="removeCertification(i)"
-              >
-                Remove
-              </button>
+              <button type="button" class="remove-btn" (click)="removeCertification(i)">Remove</button>
             </div>
-
-            <input
-              type="text"
-              placeholder="Certification Name"
-              formControlName="certificationName"
-            />
+            <input type="text" placeholder="Certification Name" formControlName="certificationName" />
           </div>
         </div>
-
-        <button type="button" class="add-btn" (click)="addCertification()">
-          + Add Another Certification
-        </button>
+        <button type="button" class="add-btn" (click)="addCertification()">+ Add Another Certification</button>
       </div>
 
-      <!-- STEP 6 -->
+      <!-- ============================================================
+           STEP 6 — FINAL REVIEW (fully dynamic based on userPlan)
+      ============================================================ -->
       <div *ngIf="currentStep === 6" class="final-review-dashboard">
+
         <!-- Header -->
         <div class="review-header">
           <h3>Final Resume Optimization</h3>
-
-          <p>
-            Your resume is almost recruiter-ready. Review the final insights
-            before downloading.
-          </p>
+          <p>Your resume is almost recruiter-ready. Review the final insights before downloading.</p>
         </div>
 
-        <!-- Resume Completion -->
+        <!-- Resume Completion Bar -->
         <div class="completion-card">
           <div class="completion-top">
             <span>Resume Completion</span>
             <strong>{{ profileCompletion }}%</strong>
           </div>
-
           <div class="completion-bar">
-            <div
-              class="completion-fill"
-              [style.width.%]="profileCompletion"
-            ></div>
+            <div class="completion-fill" [style.width.%]="profileCompletion"></div>
           </div>
         </div>
 
+        <!-- AI Recommendations -->
         <div class="insight-card">
           <div class="insight-header">
             <h3>General Recommendations</h3>
-            <!-- <span>Smart Analysis</span> -->
           </div>
-
           <div class="insight-item" *ngFor="let item of aiSuggestions">
             <div class="insight-dot"></div>
             <p>{{ item }}</p>
           </div>
         </div>
 
-        <!-- Final CTA -->
-        <!-- Final CTA -->
-        <div class="final-download-zone">
-          <!-- Premium Badge -->
-          <div class="premium-badge">
-            Recruiter Approved • ATS Optimized • Premium Export
+        <!-- =============================================
+             PLAN TRACKS — dynamic based on userPlan
+        ============================================= -->
+        <div class="plan-tracks-row">
+
+          <!-- FREE PLAN TRACK -->
+          <div class="plan-track free-track" [class.active-track]="userPlan === 'free'">
+            <div class="track-labels">
+              <span class="track-pill free-pill">FREE PLAN TRACK</span>
+              <span class="track-pill active-pill" *ngIf="userPlan === 'free'">ACTIVE PLAN</span>
+            </div>
+
+            <h4>STANDARD EXPORT</h4>
+            <p class="track-desc">Perfect for standard applications. Get a sleek resume formatted for instant printing.</p>
+
+            <ul class="track-features">
+              <li>Modern single-column theme</li>
+              <li>Infinite lifetime edits</li>
+              <li>Clean high-definition text rules</li>
+            </ul>
+
+            <!-- Free download: always available to everyone -->
+            <button
+              type="button"
+              class="track-download-btn free-download-btn"
+              [disabled]="isDownloading"
+              (click)="downloadFreePDF()"
+            >
+              {{ freeDownloadLabel }}
+            </button>
+
+            <p class="track-sub">Standard A4/Letter size • Quick export</p>
           </div>
 
-          <!-- Primary CTA -->
-          <button
-            type="button"
-            class="download-btn large-download-btn premium-glow"
-            [disabled]="isPremiumDownloading"
-            (click)="downloadPremiumPDF()"
+          <!-- PREMIUM PRO TRACK -->
+          <div
+            class="plan-track pro-track"
+            [class.active-track]="isPro"
+            [class.locked-track]="!isPro"
           >
-            {{
-              isPremiumDownloading
-                ? "Generating Premium PDF..."
-                : "Download Premium PDF"
-            }}
-          </button>
+            <div class="track-labels">
+              <span class="track-pill pro-pill">⚡ PREMIUM PRO TRACK</span>
+              <!-- Show price only to free users; show "ACTIVE PLAN" to pro users -->
+              <span class="track-price" *ngIf="!isPro">₹199 / month</span>
+              <span class="track-pill active-pill pro-active-pill" *ngIf="isPro">ACTIVE PLAN</span>
+            </div>
 
-          <!-- Trust Line -->
-          <p class="trust-line">
-            Secure PDF Export • Razorpay Protected • Instant Download
-          </p>
+            <h4>PRO RECRUITER EXPORT</h4>
+            <p class="track-desc">Lock in premium layouts, customizable color themes, and our real-time AI ATS keyword alignment score checker.</p>
+
+            <ul class="track-features pro-features">
+              <li>Premium dual-column layout style</li>
+              <li>Lock in all 5 custom theme colors</li>
+              <li>Live AI-powered Job Description Matcher</li>
+            </ul>
+
+            <!-- Pro download: opens upgrade modal for free users -->
+            <button
+              type="button"
+              class="track-download-btn"
+              [class.pro-download-btn]="isPro"
+              [class.unlock-btn]="!isPro"
+              [disabled]="isPremiumDownloading"
+              (click)="downloadPremiumPDF()"
+            >
+              {{ proDownloadLabel }}
+            </button>
+
+            <p class="track-sub">
+              {{ isPro ? 'Priority rendering • Unlimited exports' : 'Razorpay Protected • Refund Guarantee' }}
+            </p>
+          </div>
+
         </div>
+
+        <!-- =============================================
+             TEMPLATE GRID — dynamic locked state
+        ============================================= -->
+        <div class="template-chooser">
+          <div class="template-chooser-header">
+            <h4>Choose Template Layout</h4>
+            <!-- Show locked count only when user has locked templates -->
+            <span class="locked-badge" *ngIf="!isPro">
+              {{ lockedTemplateCount }} PRO OPTIONS LOCKED
+            </span>
+            <span class="unlocked-badge" *ngIf="isPro">
+              ALL TEMPLATES UNLOCKED
+            </span>
+          </div>
+
+          <div class="template-grid-s6">
+            <div
+              *ngFor="let template of templates"
+              class="template-tile"
+              [class.active-tile]="isTemplateSelected(template.id)"
+              [class.locked-tile]="isTemplateLocked(template)"
+              [class.free-tile]="!template.pro"
+              [class.pro-tile]="template.pro"
+              (click)="selectTemplate(template)"
+            >
+              <div class="tile-top">
+                <span class="tile-name">{{ template.name }}</span>
+                <span class="tile-tag" [class.free-tag]="!template.pro" [class.pro-tag]="template.pro">
+                  {{ template.pro ? 'PRO' : 'FREE' }}
+                </span>
+              </div>
+              <p class="tile-desc">{{ template.description }}</p>
+              <span class="lock-icon" *ngIf="isTemplateLocked(template)">🔒</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================
+             JD ALIGNMENT TRACKER
+             Locked for free users, active for pro
+        ============================================= -->
+        <div
+          class="jd-tracker-card"
+          [class.jd-locked]="!isPro"
+          [class.jd-active]="isPro"
+        >
+          <div class="jd-tracker-left">
+            <span class="jd-icon">⚡</span>
+            <div>
+              <h4>Job Description Alignment Tracker</h4>
+              <p>Paste your target job description to match skills and compute index scores.</p>
+            </div>
+          </div>
+
+          <!-- Lock badge for free; CTA for pro -->
+          <span class="pro-feature-badge" *ngIf="!isPro">🔒 PRO FEATURE</span>
+          <button
+            *ngIf="isPro"
+            type="button"
+            class="jd-analyze-btn"
+            (click)="openJDModal()"
+          >
+            Analyze JD →
+          </button>
+        </div>
+
       </div>
+      <!-- END STEP 6 -->
+
     </form>
 
     <!-- Navigation -->
     <div class="button-row">
-      <button
-        *ngIf="currentStep > 1"
-        type="button"
-        class="back-btn"
-        (click)="prevStep()"
-      >
+      <button *ngIf="currentStep > 1" type="button" class="back-btn" (click)="prevStep()">
         ← Previous
       </button>
-
-      <button
-        *ngIf="currentStep < 6"
-        type="button"
-        class="next-btn"
-        (click)="nextStep()"
-      >
+      <button *ngIf="currentStep < 6" type="button" class="next-btn" (click)="nextStep()">
         Save & Next →
       </button>
     </div>
   </div>
+
 </section>
 
-<div class="upgrade-modal-overlay" *ngIf="showUpgradeModal">
-  <div class="upgrade-modal">
-    <button class="close-modal-btn" (click)="closeUpgradeModal()">×</button>
+<!-- UPGRADE MODAL -->
 
-    <h2>Choose Your Plan</h2>
 
-    <p>
-      Unlock recruiter-ready Premium PDF export, premium templates, and
-      unlimited resume builds.
-    </p>
-
-    <p class="plan-comparison">
-      Free users get Standard PDF • Paid users unlock Premium PDF
-    </p>
-
-    <div class="plan-card">
-      <h3>Pro Plan</h3>
-      <p>₹199 / month</p>
-
-      <button
-        class="upgrade-btn"
-        [disabled]="userPlan === 'pro' || userPlan === 'pro_plus'"
-        (click)="startPremiumUpgrade('pro')"
-      >
-        {{
-          userPlan === "pro"
-            ? "Current Plan"
-            : userPlan === "pro_plus"
-              ? "Included in Pro Plus"
-              : "Go Pro — ₹199"
-        }}
-      </button>
-    </div>
-
-    <div class="plan-card pro-plus">
-      <div class="best-value-badge">BEST VALUE</div>
-      <h3>Pro Plus</h3>
-      <p>₹499 / 3 Months</p>
-      <p class="savings-line">Only ₹166/month • Save ₹98</p>
-
-      <button
-        class="upgrade-btn"
-        [disabled]="userPlan === 'pro_plus'"
-        (click)="startPremiumUpgrade('pro_plus')"
-      >
-        {{
-          userPlan === "pro_plus"
-            ? "Current Plan"
-            : userPlan === "pro"
-              ? "Upgrade to Pro Plus — ₹499"
-              : "Go Pro Plus — ₹499"
-        }}
-      </button>
-    </div>
-  </div>
-</div>
-
-<div *ngIf="downloadSuccessMessage" class="download-toast success">
-  {{ downloadSuccessMessage }}
-</div>
-
-<div *ngIf="downloadErrorMessage" class="download-toast error">
-  {{ downloadErrorMessage }}
-</div>
+<div *ngIf="downloadSuccessMessage" class="download-toast success">{{ downloadSuccessMessage }}</div>
+<div *ngIf="downloadErrorMessage" class="download-toast error">{{ downloadErrorMessage }}</div>

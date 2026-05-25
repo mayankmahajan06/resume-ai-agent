@@ -1,0 +1,79 @@
+<div class="upgrade-modal-overlay">
+
+  <div class="upgrade-modal">
+
+    <button
+      class="close-modal-btn"
+      (click)="close()"
+    >
+      ×
+    </button>
+
+    <h2>
+      Choose Your Plan
+    </h2>
+
+    <p>
+      Unlock recruiter-ready Premium PDF export,
+      premium templates,
+      and unlimited resume builds.
+    </p>
+
+    <p class="plan-comparison">
+      Free users get Standard PDF •
+      Paid users unlock Premium PDF
+    </p>
+
+    <!-- PRO PLAN -->
+
+    <div class="plan-card">
+
+      <h3>
+        Pro Plan
+      </h3>
+
+      <p>
+        ₹199 / month
+      </p>
+
+      <button
+        class="upgrade-btn"
+        (click)="startPremiumUpgrade('pro')"
+      >
+        Go Pro — ₹199
+      </button>
+
+    </div>
+
+    <!-- PRO PLUS -->
+
+    <div class="plan-card pro-plus">
+
+      <div class="best-value-badge">
+        BEST VALUE
+      </div>
+
+      <h3>
+        Pro Plus
+      </h3>
+
+      <p>
+        ₹499 / 3 Months
+      </p>
+
+      <p class="savings-line">
+        Only ₹166/month • Save ₹98
+      </p>
+
+      <button
+        class="upgrade-btn"
+        (click)="startPremiumUpgrade('pro_plus')"
+      >
+        Go Pro Plus — ₹499
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
