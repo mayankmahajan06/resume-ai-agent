@@ -78,6 +78,7 @@ export class MyResumesComponent
         next: (resumes) => {
 
           this.resumes = resumes;
+          console.log(this.resumes);
 
           this.loading = false;
 

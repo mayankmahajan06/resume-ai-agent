@@ -69,11 +69,32 @@
             </h3>
 
             <div class="resume-meta">
-              <span>
-                Theme:
+              <span class="template-chip">
+                {{ resume.resumeData?.selectedTemplate || "modern" }}
+              </span>
+
+              <span class="theme-chip">
                 {{ resume.selectedTheme || "indigo" }}
               </span>
+
+              <span
+                class="score-chip"
+                [class.high-score]="(resume.resumeData?.atsScore || 0) >= 80"
+                [class.medium-score]="
+                  (resume.resumeData?.atsScore || 0) >= 60 &&
+                  (resume.resumeData?.atsScore || 0) < 80
+                "
+                [class.low-score]="(resume.resumeData?.atsScore || 0) < 60"
+              >
+                ATS:
+                {{ resume.resumeData?.atsScore || 0 }}%
+              </span>
             </div>
+
+            <p class="updated-at">
+              Updated
+              {{ resume.updatedAt?.toDate() | date: "mediumDate" }}
+            </p>
           </div>
 
           <div class="resume-actions">

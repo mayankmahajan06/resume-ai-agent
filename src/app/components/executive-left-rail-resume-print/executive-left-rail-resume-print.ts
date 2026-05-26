@@ -1,19 +1,34 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 
-import { PdfService } from '../../services/pdf.service';
+import {
+  CommonModule
+} from '@angular/common';
+
 import {
   ResumeData
 } from '../../services/resume.service';
 
+import {
+  PdfService
+} from '../../services/pdf.service';
+
 @Component({
-  selector: 'app-resume-print',
+  selector: 'app-premium-resume-print',
+
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './resume-print.component.html',
-  styleUrls: ['./resume-print.component.scss']
+
+  imports: [
+    CommonModule
+  ],
+
+  templateUrl: './executive-left-rail-resume-print.html',
+  styleUrls: ['./executive-left-rail-resume-print.scss']
 })
-export class ResumePrintComponent implements OnInit {
+export class ExecutiveLeftRailResumePrintComponent
+  implements OnInit {
 
   resumeData!: ResumeData;
 
@@ -23,10 +38,18 @@ export class ResumePrintComponent implements OnInit {
     private pdfService: PdfService
   ) { }
 
+  /*
+  ========================================
+  INIT
+  ========================================
+  */
+
   ngOnInit(): void {
+
     this.pdfService
       .getResumeData()
       .subscribe((data: any) => {
+
         this.resumeData = data;
 
         this.selectedTheme =
@@ -37,12 +60,23 @@ export class ResumePrintComponent implements OnInit {
         before Puppeteer captures PDF
         */
         setTimeout(() => {
+
           window.print();
+
         }, 500);
+
       });
+
   }
 
+  /*
+  ========================================
+  SKILLS ARRAY
+  ========================================
+  */
+
   get skillsArray(): string[] {
+
     if (!this.resumeData?.skills) {
       return [];
     }
@@ -51,7 +85,35 @@ export class ResumePrintComponent implements OnInit {
       .split(',')
       .map(skill => skill.trim())
       .filter(skill => skill.length > 0);
+
   }
+
+  /*
+  ========================================
+  SANITIZE TEXT
+  ========================================
+  */
+
+  sanitizeText(
+    text: string
+  ): string {
+
+    if (!text) {
+      return '';
+    }
+
+    return text
+      .replace(/[^\x20-\x7E\n]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  }
+
+  /*
+  ========================================
+  VALIDATION HELPERS
+  ========================================
+  */
 
   hasSkills(): boolean {
 
@@ -104,22 +166,5 @@ export class ResumePrintComponent implements OnInit {
     );
 
   }
-
-  sanitizeText(
-    text: string
-  ): string {
-
-    if (!text) {
-      return '';
-    }
-
-    return text
-      .normalize('NFKD')
-      .replace(/[^\x00-\x7F]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-  }
-
 
 }

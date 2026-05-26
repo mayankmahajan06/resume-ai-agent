@@ -1,14 +1,13 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-premium-template',
+  selector: 'app-brand-innovator-template',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './premium-template.component.html',
-  styleUrls: ['./premium-template.component.scss']
+  imports: [],
+  templateUrl: './brand-innovator-template.component.html',
+  styleUrl: './brand-innovator-template.component.scss'
 })
-export class PremiumTemplateComponent {
+export class BrandInnovatorTemplateComponent {
 
   @Input() resumeData: any;
 

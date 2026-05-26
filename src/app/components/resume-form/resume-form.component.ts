@@ -27,6 +27,7 @@ import { PaymentService } from '../../services/payment.service';
 import { MatDialog } from '@angular/material/dialog';
 import { JdAnalysisDialogComponent } from '../jd-analysis-dialog/jd-analysis-dialog.component';
 import { ResumeValidationDialogComponent } from '../resume-validation-dialog/resume-validation-dialog.component';
+import { UpgradeModalComponent } from '../../shared/modals/upgrade-modal/upgrade-modal.component';
 
 /* ========================================
    TEMPLATE DEFINITION
@@ -201,7 +202,7 @@ export class ResumeFormComponent implements OnInit {
       )
 
     });
-
+    this.selectedTemplate = data.selectedTemplate || 'modern';
   }
 
   /* ========================================
@@ -263,18 +264,13 @@ export class ResumeFormComponent implements OnInit {
      TEMPLATE SELECTION
   ======================================== */
 
-  selectTemplate(template: ResumeTemplate): void {
-    // Block free users from selecting pro templates
-    if (template.pro && !this.isPro) {
-      this.showUpgradeModal = true;
-      return;
-    }
-
+  selectTemplate(template: any): void {
     this.selectedTemplate = template.id;
-
-    this.resumeService.updateResumeData({
-      selectedTemplate: template.id
-    });
+    this.resumeService
+      .updateResumeData({
+        selectedTemplate:
+          template.id
+      });
   }
 
   isTemplateSelected(templateId: string): boolean {
@@ -550,7 +546,7 @@ export class ResumeFormComponent implements OnInit {
       .trim()
       .replace(/\s+/g, '_')
       .replace(/[^\w\-]/g, '')
-    }.pdf`;
+      }.pdf`;
     link.click();
     window.URL.revokeObjectURL(url);
   }
@@ -614,15 +610,15 @@ export class ResumeFormComponent implements OnInit {
       .map((s: string) => s.trim())
       .filter((s: string) => s.length > 0);
 
-    const hasSkills     = skillsArray.length > 0;
-    const hasSummary    = currentData.summary?.trim()?.length >= 20;
+    const hasSkills = skillsArray.length > 0;
+    const hasSummary = currentData.summary?.trim()?.length >= 20;
     const hasExperience = currentData.experiences?.some(
       (exp: any) => exp.role?.trim() && exp.company?.trim() && exp.responsibilities?.trim()
     );
 
     const missingFields: string[] = [];
-    if (!hasSkills)     missingFields.push('Skills Required');
-    if (!hasSummary)    missingFields.push('Professional Summary Required');
+    if (!hasSkills) missingFields.push('Skills Required');
+    if (!hasSummary) missingFields.push('Professional Summary Required');
     if (!hasExperience) missingFields.push('At Least 1 Valid Experience Required');
 
     if (missingFields.length > 0) {
@@ -714,5 +710,82 @@ export class ResumeFormComponent implements OnInit {
       .split(',')
       .map((skill: string) => skill.trim())
       .filter((skill: string) => skill.length > 0);
+  }
+
+  handleResumeAction(): void {
+
+    if (
+      this.selectedTemplate === 'modern'
+    ) {
+
+      this.downloadFreePDF();
+
+      return;
+
+    }
+
+    if (!this.isPro) {
+
+      this.openUpgradeModal();
+
+      return;
+
+    }
+
+    this.downloadPremiumPDF();
+
+  }
+
+  getMainCTAButtonText(): string {
+    return 'Download Resume';
+  }
+
+  getMainCTASubtext(): string {
+
+    const isPremiumTemplate =
+      this.selectedTemplate !== 'modern';
+
+    if (
+      !this.isPro &&
+      isPremiumTemplate
+    ) {
+
+      return 'Premium template selected • Export unlock required';
+
+    }
+
+    if (
+      this.isPro &&
+      isPremiumTemplate
+    ) {
+
+      return 'Premium recruiter export enabled';
+
+    }
+
+    return 'Standard export • Modern template';
+
+  }
+
+  handleJDTrackerClick(): void {
+
+    if (this.isPro) {
+      return;
+    }
+
+    this.openUpgradeModal();
+
+  }
+
+  openUpgradeModal(): void {
+
+    this.dialog.open(
+      UpgradeModalComponent,
+      {
+        width: '520px',
+        panelClass: 'upgrade-dialog'
+      }
+    );
+
   }
 }

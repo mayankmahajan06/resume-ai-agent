@@ -1,11 +1,8 @@
 <section class="print-resume" [ngClass]="'theme-' + selectedTheme">
-
   <!-- HEADER -->
 
   <header class="print-header">
-
     <div class="left-header">
-
       <h1 *ngIf="resumeData.fullName?.trim()">
         {{ resumeData.fullName }}
       </h1>
@@ -13,11 +10,9 @@
       <h2 *ngIf="resumeData.currentRole?.trim()">
         {{ resumeData.currentRole }}
       </h2>
-
     </div>
 
     <div class="right-header">
-
       <p *ngIf="resumeData.location?.trim()">
         {{ resumeData.location }}
       </p>
@@ -33,96 +28,60 @@
       <p *ngIf="resumeData.linkedIn?.trim()">
         {{ resumeData.linkedIn }}
       </p>
-
     </div>
-
   </header>
 
   <div class="divider"></div>
 
   <!-- SUMMARY -->
 
-  <section
-    class="section-block"
-    *ngIf="resumeData.summary?.trim()"
-  >
-
-    <h3>
-      Professional Summary
-    </h3>
+  <section class="section-block" *ngIf="resumeData.summary?.trim()">
+    <h3>Professional Summary</h3>
 
     <p class="summary-text">
       {{ sanitizeText(resumeData.summary) }}
     </p>
-
   </section>
 
   <!-- MAIN GRID -->
 
   <section class="main-grid">
-
     <!-- LEFT COLUMN -->
 
     <aside class="left-column">
-
       <!-- SKILLS -->
 
-      <div
-        class="section-block"
-        *ngIf="hasSkills()"
-      >
-
+      <div class="section-block" *ngIf="hasSkills()">
         <h3>Skills</h3>
 
         <div class="skills-list">
-
           <span *ngFor="let skill of skillsArray">
             {{ skill }}
           </span>
-
         </div>
-
       </div>
 
       <!-- CERTIFICATIONS -->
 
-      <div
-        class="section-block page-safe"
-        *ngIf="hasCertifications()"
-      >
-
+      <div class="section-block page-safe" *ngIf="hasCertifications()">
         <h3>Certifications</h3>
 
-        <p
-          *ngFor="let cert of resumeData.certifications"
-        >
-
-          <ng-container
-            *ngIf="cert.certificationName?.trim()"
-          >
-
+        <ng-container *ngFor="let cert of resumeData.certifications">
+          <p *ngIf="cert.certificationName?.trim()">
             {{ sanitizeText(cert.certificationName) }}
-
-          </ng-container>
-
-        </p>
-
+          </p>
+        </ng-container>
       </div>
 
       <!-- EDUCATION -->
 
-      <div
-        class="section-block page-safe"
-        *ngIf="hasEducation()"
-      >
-
+      <div class="section-block page-safe" *ngIf="hasEducation()">
         <h3>Education</h3>
 
         <div
           class="education-block page-safe"
           *ngFor="let edu of resumeData.education"
         >
-
           <ng-container
             *ngIf="
               edu.degree?.trim() ||
@@ -130,13 +89,10 @@
               edu.graduationYear?.trim()
             "
           >
-
             <p *ngIf="edu.degree?.trim()">
-
               <strong>
                 {{ edu.degree }}
               </strong>
-
             </p>
 
             <p *ngIf="edu.college?.trim()">
@@ -144,41 +100,27 @@
             </p>
 
             <p *ngIf="edu.graduationYear?.trim()">
-
               {{ edu.graduationYear }}
 
-              <span *ngIf="edu.cgpa">
-                | CGPA: {{ edu.cgpa }}
-              </span>
-
+              <span *ngIf="edu.cgpa"> | CGPA: {{ edu.cgpa }} </span>
             </p>
-
           </ng-container>
-
         </div>
-
       </div>
-
     </aside>
 
     <!-- RIGHT COLUMN -->
 
     <main class="right-column">
-
       <!-- EXPERIENCE -->
 
-      <div
-        class="section-block"
-        *ngIf="hasExperience()"
-      >
-
+      <div class="section-block" *ngIf="hasExperience()">
         <h3>Experience</h3>
 
         <div
           class="job-block page-safe"
           *ngFor="let exp of resumeData.experiences"
         >
-
           <ng-container
             *ngIf="
               exp.role?.trim() ||
@@ -187,9 +129,7 @@
               exp.responsibilities?.trim()
             "
           >
-
             <div class="job-header">
-
               <strong *ngIf="exp.role?.trim()">
                 {{ exp.role }}
               </strong>
@@ -197,43 +137,28 @@
               <span *ngIf="exp.duration?.trim()">
                 {{ exp.duration }}
               </span>
-
             </div>
 
-            <p
-              class="company-name"
-              *ngIf="exp.company?.trim()"
-            >
+            <p class="company-name" *ngIf="exp.company?.trim()">
               {{ exp.company }}
             </p>
 
-            <p
-              class="content-text"
-              *ngIf="exp.responsibilities?.trim()"
-            >
+            <p class="content-text" *ngIf="exp.responsibilities?.trim()">
               {{ sanitizeText(exp.responsibilities) }}
             </p>
-
           </ng-container>
-
         </div>
-
       </div>
 
       <!-- PROJECTS -->
 
-      <div
-        class="section-block"
-        *ngIf="hasProjects()"
-      >
-
+      <div class="section-block" *ngIf="hasProjects()">
         <h3>Projects</h3>
 
         <div
           class="project-block page-safe"
           *ngFor="let project of resumeData.projects"
         >
-
           <ng-container
             *ngIf="
               project.projectName?.trim() ||
@@ -241,43 +166,23 @@
               project.description?.trim()
             "
           >
-
             <p class="project-title">
-
-              <strong
-                *ngIf="project.projectName?.trim()"
-              >
-
+              <strong *ngIf="project.projectName?.trim()">
                 {{ project.projectName }}
-
               </strong>
 
-              <span
-                *ngIf="project.techStack?.trim()"
-              >
-
+              <span *ngIf="project.techStack?.trim()">
                 —
                 {{ project.techStack }}
-
               </span>
-
             </p>
 
-            <p
-              class="content-text"
-              *ngIf="project.description?.trim()"
-            >
+            <p class="content-text" *ngIf="project.description?.trim()">
               {{ sanitizeText(project.description) }}
             </p>
-
           </ng-container>
-
         </div>
-
       </div>
-
     </main>
-
   </section>
-
 </section>

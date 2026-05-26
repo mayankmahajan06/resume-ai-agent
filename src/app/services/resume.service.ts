@@ -55,6 +55,7 @@ export interface ResumeData {
   selectedTheme: string;
   resumeId?: string;
   selectedTemplate?: string;
+  atsScore?: number;
 
   /* JD match score — written by resume-form after modal,
      read by resume-preview via the shared stream          */
@@ -154,7 +155,7 @@ export class ResumeService {
      SAVE OR UPDATE RESUME
   ===================================== */
 
-  async saveResume(): Promise<void> {
+  async saveResume(atsScore: number): Promise<void> {
 
     const user = this.auth.currentUser;
 
@@ -163,6 +164,7 @@ export class ResumeService {
     }
 
     const currentResumeData = this.getResumeData();
+    currentResumeData.atsScore = atsScore;
 
     if (currentResumeData.resumeId) {
 

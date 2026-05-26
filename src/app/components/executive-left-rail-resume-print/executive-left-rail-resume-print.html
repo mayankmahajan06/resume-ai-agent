@@ -1,0 +1,183 @@
+<section class="premium-resume" [ngClass]="'theme-' + selectedTheme">
+  <!-- HEADER -->
+
+  <header class="premium-header">
+    <div class="header-top">
+      <div class="header-left">
+        <h1 *ngIf="resumeData.fullName?.trim()">
+          {{ sanitizeText(resumeData.fullName) }}
+        </h1>
+
+        <h2 *ngIf="resumeData.currentRole?.trim()">
+          {{ sanitizeText(resumeData.currentRole) }}
+        </h2>
+      </div>
+
+      <div class="header-right">
+        <span *ngIf="resumeData.location?.trim()">
+          {{ sanitizeText(resumeData.location) }}
+        </span>
+
+        <span *ngIf="resumeData.phone?.trim()">
+          {{ sanitizeText(resumeData.phone) }}
+        </span>
+
+        <span *ngIf="resumeData.email?.trim()">
+          {{ sanitizeText(resumeData.email) }}
+        </span>
+
+        <span *ngIf="resumeData.linkedIn?.trim()">
+          {{ sanitizeText(resumeData.linkedIn) }}
+        </span>
+      </div>
+    </div>
+
+    <section class="summary-section" *ngIf="resumeData.summary?.trim()">
+      <h3>Professional Summary</h3>
+
+      <p class="summary-text">
+        {{ sanitizeText(resumeData.summary) }}
+      </p>
+    </section>
+  </header>
+
+  <div class="header-divider"></div>
+
+  <!-- MAIN LAYOUT -->
+
+  <section class="main-layout">
+    <!-- LEFT COLUMN -->
+
+    <aside class="left-column">
+      <!-- SKILLS -->
+
+      <section class="left-section" *ngIf="hasSkills()">
+        <h3>Skills</h3>
+
+        <div class="skills-container">
+          <span *ngFor="let skill of skillsArray">
+            {{ sanitizeText(skill) }}
+          </span>
+        </div>
+      </section>
+
+      <!-- CERTIFICATIONS -->
+
+      <section class="left-section" *ngIf="hasCertifications()">
+        <h3>Certifications</h3>
+
+        <div class="left-item" *ngFor="let cert of resumeData.certifications">
+          <ng-container *ngIf="cert.certificationName?.trim()">
+            {{ sanitizeText(cert.certificationName) }}
+          </ng-container>
+        </div>
+      </section>
+
+      <!-- EDUCATION -->
+
+      <section class="left-section" *ngIf="hasEducation()">
+        <h3>Education</h3>
+
+        <div class="education-item" *ngFor="let edu of resumeData.education">
+          <ng-container
+            *ngIf="
+              edu.degree?.trim() ||
+              edu.college?.trim() ||
+              edu.graduationYear?.trim()
+            "
+          >
+            <strong *ngIf="edu.degree?.trim()">
+              {{ sanitizeText(edu.degree) }}
+            </strong>
+
+            <p *ngIf="edu.college?.trim()">
+              {{ sanitizeText(edu.college) }}
+            </p>
+
+            <p *ngIf="edu.graduationYear?.trim()">
+              {{ sanitizeText(edu.graduationYear) }}
+
+              <span *ngIf="edu.cgpa">
+                • CGPA:
+                {{ edu.cgpa }}
+              </span>
+            </p>
+          </ng-container>
+        </div>
+      </section>
+    </aside>
+
+    <!-- RIGHT COLUMN -->
+
+    <main class="right-column">
+      <!-- EXPERIENCE -->
+
+      <section class="content-section" *ngIf="hasExperience()">
+        <h3>Experience</h3>
+
+        <div class="experience-item" *ngFor="let exp of resumeData.experiences">
+          <ng-container
+            *ngIf="
+              exp.role?.trim() ||
+              exp.company?.trim() ||
+              exp.duration?.trim() ||
+              exp.responsibilities?.trim()
+            "
+          >
+            <div class="experience-header">
+              <div>
+                <h4 *ngIf="exp.role?.trim()">
+                  {{ sanitizeText(exp.role) }}
+                </h4>
+
+                <p class="company-name" *ngIf="exp.company?.trim()">
+                  {{ sanitizeText(exp.company) }}
+                </p>
+              </div>
+
+              <span class="duration" *ngIf="exp.duration?.trim()">
+                {{ sanitizeText(exp.duration) }}
+              </span>
+            </div>
+
+            <p class="experience-text" *ngIf="exp.responsibilities?.trim()">
+              {{ sanitizeText(exp.responsibilities) }}
+            </p>
+          </ng-container>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+
+      <section class="content-section" *ngIf="hasProjects()">
+        <h3>Projects</h3>
+
+        <div class="project-item" *ngFor="let project of resumeData.projects">
+          <ng-container
+            *ngIf="
+              project.projectName?.trim() ||
+              project.techStack?.trim() ||
+              project.description?.trim()
+            "
+          >
+            <div class="project-header">
+              <div class="project-title-block">
+                <h4 *ngIf="project.projectName?.trim()">
+                  {{ sanitizeText(project.projectName) }}
+                </h4>
+
+                <p class="project-stack" *ngIf="project.techStack?.trim()">
+                  {{ sanitizeText(project.techStack) }}
+                </p>
+              </div>
+            </div>
+
+            <p class="project-description" *ngIf="project.description?.trim()">
+              {{ sanitizeText(project.description) }}
+            </p>
+          </ng-container>
+        </div>
+      </section>
+    </main>
+  </section>
+</section>

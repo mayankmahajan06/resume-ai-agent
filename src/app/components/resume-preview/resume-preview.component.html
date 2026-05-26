@@ -31,7 +31,7 @@
 
       <div class="mini-score">
         <span>Recruiter Visibility</span>
-        <strong>{{recruiterVisibility}}</strong>
+        <strong>{{ recruiterVisibility }}</strong>
       </div>
     </div>
   </div>
@@ -96,40 +96,54 @@
   </div>
 
   <!-- ==========================================
-       TEMPLATE SELECTOR
-  =========================================== -->
-  <div class="template-toolbar">
-    <h3>Choose Template</h3>
-
-    <div class="template-grid">
-      <div
-        class="template-card"
-        *ngFor="let template of templates"
-        [class.active]="selectedTemplate === template.id"
-        [class.locked-template]="template.premium && userPlan === 'free'"
-        [class.premium-active]="template.premium && userPlan !== 'free'"
-        (click)="selectTemplate(template.id)"
-      >
-        <h4>{{ template.name }}</h4>
-        <div class="pro-badge" *ngIf="template.premium && userPlan === 'free'">
-          PRO
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================
        LIVE RESUME RENDER
   =========================================== -->
+  
   <app-modern-template
     *ngIf="selectedTemplate === 'modern'"
     [resumeData]="resumeData"
     [selectedTheme]="selectedTheme"
   ></app-modern-template>
 
-  <app-premium-template
-    *ngIf="selectedTemplate === 'premium'"
+  <app-executive-left-rail-template
+    *ngIf="selectedTemplate === 'executive'"
     [resumeData]="resumeData"
     [selectedTheme]="selectedTheme"
-  ></app-premium-template>
+  ></app-executive-left-rail-template>
+
+  <!-- COMPACT GRID -->
+
+  <app-compact-grid-template
+    *ngIf="selectedTemplate === 'compact'"
+    [resumeData]="resumeData"
+    [selectedTheme]="selectedTheme"
+  >
+  </app-compact-grid-template>
+
+  <!-- CLEAN LIGHT -->
+
+  <app-clean-light-template
+    *ngIf="selectedTemplate === 'clean'"
+    [resumeData]="resumeData"
+    [selectedTheme]="selectedTheme"
+  >
+  </app-clean-light-template>
+
+  <!-- BRAND INNOVATOR -->
+
+  <app-brand-innovator-template
+    *ngIf="selectedTemplate === 'innovator'"
+    [resumeData]="resumeData"
+    [selectedTheme]="selectedTheme"
+  >
+  </app-brand-innovator-template>
+
+  <!-- ACADEMIC CV -->
+
+  <app-academic-cv-template
+    *ngIf="selectedTemplate === 'academic'"
+    [resumeData]="resumeData"
+    [selectedTheme]="selectedTheme"
+  >
+  </app-academic-cv-template>
 </section>

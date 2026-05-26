@@ -299,7 +299,7 @@
   flex-shrink: 0;
 
   &::after {
-    content: '✓';
+    content: "✓";
     font-size: 11px;
     color: #4f46e5;
     font-weight: 800;
@@ -415,7 +415,7 @@
     position: relative;
 
     &::before {
-      content: '•';
+      content: "•";
       position: absolute;
       left: 0;
       color: #94a3b8;
@@ -508,7 +508,7 @@
     gap: 8px;
 
     &::before {
-      content: '∨';
+      content: "∨";
       font-size: 12px;
       color: #64748b;
     }
@@ -533,15 +533,36 @@
 
 .template-tile {
   border: 2px solid #e2e8f0;
+
   border-radius: 16px;
-  padding: 16px;
+
+  padding: 16px 18px;
+
+  min-height: 105px;
+
   cursor: pointer;
+
   position: relative;
-  transition: all 0.2s ease;
+
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
   background: #ffffff;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: space-between;
 
   &:hover {
     border-color: #cbd5e1;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
   }
 }
 
@@ -598,12 +619,29 @@
   line-height: 1.55;
 }
 
+.tile-badge-group {
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+}
+
 .lock-icon {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  font-size: 14px;
-  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 22px;
+  height: 22px;
+
+  border-radius: 999px;
+
+  background: #f8fafc;
+
+  color: #94a3b8;
+
+  font-size: 11px;
 }
 
 /* ========================================
@@ -655,6 +693,10 @@
   border-radius: 12px;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.jd-locked {
+  cursor: pointer;
 }
 
 /* ========================================
@@ -836,6 +878,58 @@ textarea {
   }
 }
 
+.main-export-cta {
+  margin-top: 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-download-btn {
+  width: 100%;
+  max-width: 520px;
+
+  border: none;
+  outline: none;
+
+  cursor: pointer;
+
+  padding: 18px 24px;
+
+  border-radius: 18px;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  color: white;
+
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.main-download-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 24px 48px rgba(99, 102, 241, 0.35);
+}
+
+.main-cta-subtext {
+  margin-top: 12px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #64748b;
+
+  text-align: center;
+}
+
 @media (max-width: 600px) {
   .upgrade-modal {
     padding: 28px;
@@ -897,7 +991,9 @@ textarea {
   background: #f0fdf4;
   border-color: #86efac;
 
-  h4 { color: #15803d; }
+  h4 {
+    color: #15803d;
+  }
 }
 
 /* JD analyze button (pro users) */

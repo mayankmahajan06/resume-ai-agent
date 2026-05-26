@@ -1,0 +1,178 @@
+<div class="premium-resume" [ngClass]="'theme-' + selectedTheme">
+  <!-- HEADER -->
+
+  <header class="premium-header">
+    <div class="header-top">
+      <div class="header-left">
+        <h1 *ngIf="resumeData.fullName">
+          {{ resumeData.fullName }}
+        </h1>
+
+        <h2 *ngIf="resumeData.currentRole">
+          {{ resumeData.currentRole }}
+        </h2>
+      </div>
+
+      <div class="header-right">
+        <span *ngIf="resumeData.location">
+          {{ resumeData.location }}
+        </span>
+
+        <span *ngIf="resumeData.phone">
+          {{ resumeData.phone }}
+        </span>
+
+        <span *ngIf="resumeData.email">
+          {{ resumeData.email }}
+        </span>
+
+        <span *ngIf="resumeData.linkedIn">
+          {{ resumeData.linkedIn }}
+        </span>
+      </div>
+    </div>
+
+    <div class="header-divider"></div>
+
+    <!-- SUMMARY -->
+
+    <section class="summary-section" *ngIf="resumeData.summary">
+      <h3>Professional Summary</h3>
+
+      <p class="summary-text">
+        {{ resumeData.summary }}
+      </p>
+    </section>
+  </header>
+
+  <div class="header-divider"></div>
+
+  <!-- MAIN LAYOUT -->
+
+  <section class="main-layout">
+    <!-- LEFT COLUMN -->
+
+    <aside class="left-column">
+      <!-- SKILLS -->
+
+      <section class="left-section" *ngIf="skillsArray?.length">
+        <h3>Skills</h3>
+
+        <div class="skills-container">
+          <span *ngFor="let skill of skillsArray">
+            {{ skill }}
+          </span>
+        </div>
+      </section>
+
+      <!-- CERTIFICATIONS -->
+
+      <section class="left-section" *ngIf="resumeData.certifications?.length">
+        <h3>Certifications</h3>
+
+        <ng-container *ngFor="let cert of resumeData.certifications">
+          <div class="left-item" *ngIf="cert.certificationName">
+            {{ cert.certificationName }}
+          </div>
+        </ng-container>
+      </section>
+
+      <!-- EDUCATION -->
+
+      <section class="left-section" *ngIf="resumeData.education?.length">
+        <h3>Education</h3>
+
+        <div class="education-item" *ngFor="let edu of resumeData.education">
+          <ng-container *ngIf="edu.degree || edu.college || edu.graduationYear">
+            <p *ngIf="edu.degree">
+              <strong>
+                {{ edu.degree }}
+              </strong>
+            </p>
+
+            <p *ngIf="edu.college">
+              {{ edu.college }}
+            </p>
+
+            <p *ngIf="edu.graduationYear">
+              {{ edu.graduationYear }}
+
+              <span *ngIf="edu.cgpa">
+                • CGPA:
+                {{ edu.cgpa }}
+              </span>
+            </p>
+          </ng-container>
+        </div>
+      </section>
+    </aside>
+
+    <!-- RIGHT COLUMN -->
+
+    <main class="right-column">
+      <!-- EXPERIENCE -->
+
+      <section class="content-section" *ngIf="resumeData.experiences?.length">
+        <h3>Experience</h3>
+
+        <div class="experience-item" *ngFor="let exp of resumeData.experiences">
+          <ng-container
+            *ngIf="
+              exp.role || exp.company || exp.duration || exp.responsibilities
+            "
+          >
+            <div class="experience-header">
+              <div>
+                <h4 *ngIf="exp.role">
+                  {{ exp.role }}
+                </h4>
+
+                <p class="company-name" *ngIf="exp.company">
+                  {{ exp.company }}
+                </p>
+              </div>
+
+              <span class="duration" *ngIf="exp.duration">
+                {{ exp.duration }}
+              </span>
+            </div>
+
+            <p class="experience-text" *ngIf="exp.responsibilities">
+              {{ exp.responsibilities }}
+            </p>
+          </ng-container>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+
+      <section class="content-section" *ngIf="resumeData.projects?.length">
+        <h3>Projects</h3>
+
+        <div class="project-item" *ngFor="let project of resumeData.projects">
+          <ng-container
+            *ngIf="
+              project.projectName || project.techStack || project.description
+            "
+          >
+            <div class="project-header">
+              <div class="project-title-block">
+                <h4 *ngIf="project.projectName">
+                  {{ project.projectName }}
+                </h4>
+
+                <p class="project-stack" *ngIf="project.techStack">
+                  {{ project.techStack }}
+                </p>
+              </div>
+            </div>
+
+            <p class="project-description" *ngIf="project.description">
+              {{ project.description }}
+            </p>
+          </ng-container>
+        </div>
+      </section>
+    </main>
+  </section>
+</div>

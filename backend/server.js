@@ -89,7 +89,7 @@ app.get("/generate-pdf", async (req, res) => {
     Open Angular print route
     */
     await page.goto(
-      "http://localhost:4200/resume-print",
+      "http://localhost:4200/modern-resume-print",
       {
         waitUntil: "domcontentloaded"
       }
@@ -169,7 +169,7 @@ app.get("/generate-premium-pdf", async (req, res) => {
     Open Angular print route
     */
     await page.goto(
-      "http://localhost:4200/premium-resume-print",
+      "http://localhost:4200/executive-left-rail-resume-print",
       {
         waitUntil: "networkidle0"
       }

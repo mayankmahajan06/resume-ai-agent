@@ -1,38 +1,19 @@
-import {
-  Component,
-  OnInit
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-import {
-  CommonModule
-} from '@angular/common';
-
+import { PdfService } from '../../services/pdf.service';
 import {
   ResumeData
 } from '../../services/resume.service';
 
-import {
-  PdfService
-} from '../../services/pdf.service';
-
 @Component({
-  selector: 'app-premium-resume-print',
-
+  selector: 'app-resume-print',
   standalone: true,
-
-  imports: [
-    CommonModule
-  ],
-
-  templateUrl:
-    './premium-resume-print.component.html',
-
-  styleUrls: [
-    './premium-resume-print.component.scss'
-  ]
+  imports: [CommonModule],
+  templateUrl: './modern-resume-print.component.html',
+  styleUrls: ['./modern-resume-print.component.scss']
 })
-export class PremiumResumePrintComponent
-  implements OnInit {
+export class ModernResumePrintComponent implements OnInit {
 
   resumeData!: ResumeData;
 
@@ -42,18 +23,10 @@ export class PremiumResumePrintComponent
     private pdfService: PdfService
   ) { }
 
-  /*
-  ========================================
-  INIT
-  ========================================
-  */
-
   ngOnInit(): void {
-
     this.pdfService
       .getResumeData()
       .subscribe((data: any) => {
-
         this.resumeData = data;
 
         this.selectedTheme =
@@ -64,23 +37,12 @@ export class PremiumResumePrintComponent
         before Puppeteer captures PDF
         */
         setTimeout(() => {
-
           window.print();
-
         }, 500);
-
       });
-
   }
 
-  /*
-  ========================================
-  SKILLS ARRAY
-  ========================================
-  */
-
   get skillsArray(): string[] {
-
     if (!this.resumeData?.skills) {
       return [];
     }
@@ -89,35 +51,7 @@ export class PremiumResumePrintComponent
       .split(',')
       .map(skill => skill.trim())
       .filter(skill => skill.length > 0);
-
   }
-
-  /*
-  ========================================
-  SANITIZE TEXT
-  ========================================
-  */
-
-  sanitizeText(
-    text: string
-  ): string {
-
-    if (!text) {
-      return '';
-    }
-
-    return text
-      .replace(/[^\x20-\x7E\n]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-  }
-
-  /*
-  ========================================
-  VALIDATION HELPERS
-  ========================================
-  */
 
   hasSkills(): boolean {
 
@@ -170,5 +104,22 @@ export class PremiumResumePrintComponent
     );
 
   }
+
+  sanitizeText(
+    text: string
+  ): string {
+
+    if (!text) {
+      return '';
+    }
+
+    return text
+      .normalize('NFKD')
+      .replace(/[^\x00-\x7F]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  }
+
 
 }

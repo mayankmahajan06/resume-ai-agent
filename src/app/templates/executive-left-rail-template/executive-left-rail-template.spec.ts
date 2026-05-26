@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ResumePrintComponent } from './resume-print.component';
+import { PremiumTemplateComponent } from './executive-left-rail-template';
 
-describe('ResumePrintComponent', () => {
-  let component: ResumePrintComponent;
-  let fixture: ComponentFixture<ResumePrintComponent>;
+describe('PremiumTemplateComponent', () => {
+  let component: PremiumTemplateComponent;
+  let fixture: ComponentFixture<PremiumTemplateComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResumePrintComponent]
+      imports: [PremiumTemplateComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(ResumePrintComponent);
+    fixture = TestBed.createComponent(PremiumTemplateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

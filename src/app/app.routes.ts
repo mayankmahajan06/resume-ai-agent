@@ -2,13 +2,13 @@ import { Routes } from '@angular/router';
 
 import { LandingPageComponent } from './pages/landing-page/landing-page.component';
 import { ResumeBuilderComponent } from './pages/resume-builder/resume-builder.component';
-import { ResumePrintComponent } from './components/resume-print/resume-print.component';
+import { ModernResumePrintComponent } from './components/modern-resume-print/modern-resume-print.component';
 
 import { LoginComponent } from './pages/auth/login/login.component';
 import { SignupComponent } from './pages/auth/signup/signup.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { authGuard } from './guards/auth.guard';
-import { PremiumResumePrintComponent } from './components/premium-resume-print/premium-resume-print.component';
+import { ExecutiveLeftRailResumePrintComponent } from './components/executive-left-rail-resume-print/executive-left-rail-resume-print';
 import { MyResumesComponent } from './pages/my-resumes/my-resumes.component';
 
 export const routes: Routes = [
@@ -40,11 +40,11 @@ export const routes: Routes = [
 
   {
     path: 'resume-print',
-    component: ResumePrintComponent
+    component: ModernResumePrintComponent
   },
   {
     path: 'premium-resume-print',
-    component: PremiumResumePrintComponent
+    component: ExecutiveLeftRailResumePrintComponent
   },
   {
     path: 'my-resumes',

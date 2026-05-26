@@ -19,6 +19,7 @@ import { WorkspaceHeaderComponent } from '../../shared/workspace-header/workspac
 export class ResumeBuilderComponent implements OnInit {
 
   isSaving = false;
+  atsScore = 0;
 
   constructor(
     private router: Router,
@@ -51,7 +52,7 @@ export class ResumeBuilderComponent implements OnInit {
     try {
 
       await this.resumeService
-        .saveResume();
+        .saveResume(this.atsScore);
 
       this.saveSuccessMessage =
         'Resume changes saved';

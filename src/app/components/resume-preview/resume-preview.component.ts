@@ -1,7 +1,7 @@
 // resume-preview.component.ts
 // COMPLETE FILE
 
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -26,8 +26,12 @@ import { UpgradeModalComponent }
 import { ModernTemplateComponent }
   from '../../templates/modern-template/modern-template.component';
 
-import { PremiumTemplateComponent }
-  from '../../templates/premium-template/premium-template.component';
+import { ExecutiveLeftRailTemplateComponent }
+  from '../../templates/executive-left-rail-template/executive-left-rail-template';
+import { AcademicCvTemplateComponent } from '../../templates/academic-cv-template/academic-cv-template.component';
+import { BrandInnovatorTemplateComponent } from '../../templates/brand-innovator-template/brand-innovator-template.component';
+import { CleanLightTemplateComponent } from '../../templates/clean-light-template/clean-light-template.component';
+import { CompactGridTemplateComponent } from '../../templates/compact-grid-template/compact-grid-template.component';
 
 @Component({
   selector: 'app-resume-preview',
@@ -36,7 +40,11 @@ import { PremiumTemplateComponent }
     CommonModule,
     FormsModule,
     ModernTemplateComponent,
-    PremiumTemplateComponent
+    ExecutiveLeftRailTemplateComponent,
+    CompactGridTemplateComponent,
+    CleanLightTemplateComponent,
+    BrandInnovatorTemplateComponent,
+    AcademicCvTemplateComponent
   ],
   templateUrl: './resume-preview.component.html',
   styleUrls: ['./resume-preview.component.scss']
@@ -54,6 +62,9 @@ export class ResumePreviewComponent implements OnInit {
     { id: 'premium', name: 'Premium', premium: true }
   ];
   recruiterVisibility = 'Low';
+  @Output()
+  atsScoreChange =
+    new EventEmitter<number>();
 
   constructor(
     private resumeService: ResumeService,
@@ -211,6 +222,9 @@ export class ResumePreviewComponent implements OnInit {
 
     this.atsScore = Math.min(score, 100);
     this.updateRecruiterVisibility();
+    this.atsScoreChange.emit(
+      this.atsScore
+    );
   }
 
   /* ========================================
