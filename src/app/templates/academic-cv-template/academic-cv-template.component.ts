@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-academic-cv-template',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './academic-cv-template.component.html',
   styleUrl: './academic-cv-template.component.scss'
 })

@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-clean-light-template',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './clean-light-template.component.html',
   styleUrl: './clean-light-template.component.scss'
 })

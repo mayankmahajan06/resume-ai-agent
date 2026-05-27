@@ -17,6 +17,11 @@ import {
 import {
   PdfService
 } from '../../services/pdf.service';
+import { CompactGridTemplateComponent } from '../../templates/compact-grid-template/compact-grid-template.component';
+import { CleanLightTemplateComponent } from '../../templates/clean-light-template/clean-light-template.component';
+import { BrandInnovatorTemplateComponent } from '../../templates/brand-innovator-template/brand-innovator-template.component';
+import { AcademicCvTemplateComponent } from '../../templates/academic-cv-template/academic-cv-template.component';
+import { ModernTemplateComponent } from '../../templates/modern-template/modern-template.component';
 
 @Component({
   selector: 'app-premium-resume-print',
@@ -24,7 +29,12 @@ import {
   standalone: true,
 
   imports: [
-    CommonModule
+    CommonModule,
+    CompactGridTemplateComponent,
+    CleanLightTemplateComponent,
+    BrandInnovatorTemplateComponent,
+    AcademicCvTemplateComponent,
+    ModernTemplateComponent
   ],
 
   templateUrl: './executive-left-rail-resume-print.component.html',
@@ -52,6 +62,8 @@ export class ExecutiveLeftRailResumePrintComponent
   resumeData!: ResumeData;
 
   selectedTheme = 'indigo';
+
+  selectedTemplate = 'executive';
 
   /*
   Two flags for the Puppeteer render-ready signal:
@@ -82,6 +94,9 @@ export class ExecutiveLeftRailResumePrintComponent
 
         this.selectedTheme =
           data.selectedTheme || 'indigo';
+
+        this.selectedTemplate =
+          data.selectedTemplate || 'executive';
 
         /*
         Mark data as loaded. Angular will run one more

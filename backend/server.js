@@ -95,19 +95,12 @@ app.get("/generate-pdf", async (req, res) => {
       }
     );
 
-    /*
-    Wait until print component loads
-    */
-    await page.waitForSelector(
-      ".print-resume"
+    await page.waitForFunction(
+      () => document.body.dataset.resumeReady === "true",
+      { timeout: 15000 }
     );
 
-    /*
-    Extra wait for API fetch + Angular render
-    */
-    await new Promise(resolve =>
-      setTimeout(resolve, 1500)
-    );
+    await page.evaluateHandle("document.fonts.ready");
 
     /*
     Generate final PDF

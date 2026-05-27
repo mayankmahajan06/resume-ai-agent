@@ -1,0 +1,157 @@
+.clean-resume {
+  --accent: #334155;
+  --soft: #f8fafc;
+  --line: #e2e8f0;
+  --muted: #64748b;
+
+  padding: 34px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow: visible;
+}
+
+.theme-indigo { --accent: #4338ca; }
+.theme-emerald { --accent: #047857; }
+.theme-slate { --accent: #334155; }
+.theme-burgundy { --accent: #991b1b; }
+.theme-navy { --accent: #1d4ed8; }
+
+.clean-header,
+.clean-columns,
+.clean-row {
+  display: grid;
+  gap: 24px;
+}
+
+.clean-header {
+  grid-template-columns: 1fr 230px;
+  align-items: start;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 8px;
+  font-size: 34px;
+  line-height: 1.08;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.clean-contact {
+  text-align: right;
+}
+
+.clean-contact p,
+.clean-section p,
+.clean-copy,
+.clean-meta,
+.clean-item,
+.clean-row strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.clean-contact p {
+  margin-bottom: 5px;
+  color: var(--muted);
+}
+
+.clean-columns {
+  grid-template-columns: 235px 1fr;
+}
+
+.clean-section {
+  margin-bottom: 24px;
+  min-width: 0;
+}
+
+.clean-section h3 {
+  margin-bottom: 10px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.clean-item {
+  margin-bottom: 18px;
+}
+
+.clean-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.clean-row span,
+.clean-meta {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.clean-row span {
+  white-space: nowrap;
+}
+
+.clean-copy {
+  white-space: pre-line;
+}
+
+.clean-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.clean-tags span {
+  max-width: 100%;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--accent);
+  font-weight: 700;
+  border-radius: 999px;
+  overflow-wrap: anywhere;
+}
+
+.page-safe,
+.clean-item {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+@media print {
+  .clean-resume {
+    padding: 0;
+  }
+
+  .clean-header,
+  .clean-columns,
+  .clean-side,
+  .clean-main {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+}
+
+@media (max-width: 900px) {
+  .clean-header,
+  .clean-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .clean-contact {
+    text-align: left;
+  }
+}

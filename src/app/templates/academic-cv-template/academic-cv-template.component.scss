@@ -1,0 +1,139 @@
+.academic-resume {
+  --accent: #334155;
+  --line: #cbd5e1;
+  --muted: #64748b;
+
+  padding: 34px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow: visible;
+}
+
+.theme-indigo { --accent: #4338ca; }
+.theme-emerald { --accent: #047857; }
+.theme-burgundy { --accent: #991b1b; }
+.theme-navy { --accent: #1d4ed8; }
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+.academic-header {
+  text-align: center;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+}
+
+h1 {
+  margin-bottom: 6px;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+h2 {
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.academic-contact {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  color: var(--muted);
+}
+
+.academic-section {
+  margin-bottom: 24px;
+  min-width: 0;
+}
+
+.academic-section h3 {
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--line);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.academic-item {
+  margin-bottom: 16px;
+}
+
+.academic-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+}
+
+.academic-row span,
+.academic-meta {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.academic-row span {
+  white-space: nowrap;
+}
+
+.academic-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.academic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.academic-tags span {
+  max-width: 100%;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  border-radius: 999px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.academic-contact span,
+.academic-section p,
+.academic-item,
+.academic-row strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.page-safe,
+.academic-item {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+@media print {
+  .academic-resume {
+    padding: 0;
+  }
+
+  .academic-header,
+  .academic-section,
+  .academic-two {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+}
+
+@media (max-width: 900px) {
+  .academic-two {
+    grid-template-columns: 1fr;
+  }
+}

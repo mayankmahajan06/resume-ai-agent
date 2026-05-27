@@ -45,6 +45,55 @@ body {
   overflow: hidden;
 }
 
+.premium-template-print {
+  width: 794px;
+
+  min-height: 1123px;
+
+  margin: 0 auto;
+
+  padding: 38px 42px;
+
+  background: #ffffff;
+
+  color: #111827;
+
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.premium-template-print .left-column,
+.premium-template-print .right-column {
+  width: auto;
+
+  min-width: 0;
+
+  flex-shrink: 1;
+
+  align-self: auto;
+
+  display: block;
+
+  padding: 0;
+
+  background: transparent;
+
+  color: inherit;
+}
+
+.premium-template-print .education-item,
+.premium-template-print .job-item,
+.premium-template-print .project-item {
+  margin-bottom: 18px;
+
+  padding-bottom: 0;
+
+  border-bottom: 0;
+
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
 /* THEMES */
 
 .theme-indigo {
@@ -483,6 +532,23 @@ body {
     box-shadow: 0 4px 40px rgba(0, 0, 0, 0.13);
 
     margin: 24px auto;
+  }
+
+  .premium-template-print {
+    width: 794px !important;
+
+    min-height: 1123px;
+
+    margin: 0 auto !important;
+
+    padding: 42px 42px 44px;
+
+    background: #ffffff;
+
+    overflow: visible;
+
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 }
 

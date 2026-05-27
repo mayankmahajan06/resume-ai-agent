@@ -1,1 +1,72 @@
-<p>clean-light-template works!</p>
+<article class="clean-resume" [ngClass]="'theme-' + selectedTheme">
+  <header class="clean-header">
+    <div>
+      <h1 *ngIf="resumeData.fullName">{{ resumeData.fullName }}</h1>
+      <h2 *ngIf="resumeData.currentRole">{{ resumeData.currentRole }}</h2>
+    </div>
+
+    <div class="clean-contact">
+      <p *ngIf="resumeData.location">{{ resumeData.location }}</p>
+      <p *ngIf="resumeData.phone">{{ resumeData.phone }}</p>
+      <p *ngIf="resumeData.email">{{ resumeData.email }}</p>
+      <p *ngIf="resumeData.linkedIn">{{ resumeData.linkedIn }}</p>
+    </div>
+  </header>
+
+  <section class="clean-section" *ngIf="resumeData.summary">
+    <h3>Profile</h3>
+    <p>{{ resumeData.summary }}</p>
+  </section>
+
+  <section class="clean-columns">
+    <aside class="clean-side">
+      <section class="clean-section" *ngIf="skillsArray?.length">
+        <h3>Skills</h3>
+        <div class="clean-tags">
+          <span *ngFor="let skill of skillsArray">{{ skill }}</span>
+        </div>
+      </section>
+
+      <section class="clean-section" *ngIf="resumeData.certifications?.length">
+        <h3>Certifications</h3>
+        <p *ngFor="let cert of resumeData.certifications">
+          {{ cert.certificationName }}
+        </p>
+      </section>
+
+      <section class="clean-section" *ngIf="resumeData.education?.length">
+        <h3>Education</h3>
+        <div class="clean-item page-safe" *ngFor="let edu of resumeData.education">
+          <strong *ngIf="edu.degree">{{ edu.degree }}</strong>
+          <p *ngIf="edu.college">{{ edu.college }}</p>
+          <p *ngIf="edu.graduationYear">
+            {{ edu.graduationYear }}<span *ngIf="edu.cgpa"> | CGPA: {{ edu.cgpa }}</span>
+          </p>
+        </div>
+      </section>
+    </aside>
+
+    <main class="clean-main">
+      <section class="clean-section" *ngIf="resumeData.experiences?.length">
+        <h3>Experience</h3>
+        <div class="clean-item page-safe" *ngFor="let exp of resumeData.experiences">
+          <div class="clean-row">
+            <strong *ngIf="exp.role">{{ exp.role }}</strong>
+            <span *ngIf="exp.duration">{{ exp.duration }}</span>
+          </div>
+          <p class="clean-meta" *ngIf="exp.company">{{ exp.company }}</p>
+          <p class="clean-copy" *ngIf="exp.responsibilities">{{ exp.responsibilities }}</p>
+        </div>
+      </section>
+
+      <section class="clean-section" *ngIf="resumeData.projects?.length">
+        <h3>Projects</h3>
+        <div class="clean-item page-safe" *ngFor="let project of resumeData.projects">
+          <strong *ngIf="project.projectName">{{ project.projectName }}</strong>
+          <p class="clean-meta" *ngIf="project.techStack">{{ project.techStack }}</p>
+          <p class="clean-copy" *ngIf="project.description">{{ project.description }}</p>
+        </div>
+      </section>
+    </main>
+  </section>
+</article>

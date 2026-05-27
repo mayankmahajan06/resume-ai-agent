@@ -135,6 +135,8 @@
     font-size: 14px;
     color: var(--meta-color);
     line-height: 1.6;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
 
@@ -228,6 +230,8 @@
   color: #334155;
   white-space: pre-line;
   margin-bottom: 18px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* ========================================
@@ -274,6 +278,12 @@
     background:
       var(--accent-light);
 
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
   }
 
 }
@@ -294,9 +304,12 @@
   margin-bottom: 10px;
 
   strong {
+    min-width: 0;
     font-size: 15px;
     color: #0f172a;
     font-weight: 700;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   span {
@@ -313,6 +326,44 @@
 
 .project-item {
   margin-bottom: 24px;
+}
+
+.left-column,
+.right-column,
+.resume-block,
+.resume-block p,
+.education-item,
+.project-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media print {
+  .resume-paper {
+    padding: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .resume-top,
+  .resume-columns,
+  .left-column,
+  .right-column {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .resume-block {
+    break-inside: auto;
+  }
+
+  .education-item,
+  .job-item,
+  .project-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 }
 
 /* ========================================

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { PdfService } from '../../services/pdf.service';
@@ -13,11 +13,14 @@ import {
   templateUrl: './modern-resume-print.component.html',
   styleUrls: ['./modern-resume-print.component.scss']
 })
-export class ModernResumePrintComponent implements OnInit {
+export class ModernResumePrintComponent implements OnInit, AfterViewChecked {
 
   resumeData!: ResumeData;
 
   selectedTheme = 'indigo';
+
+  private dataLoaded = false;
+  private signalSent = false;
 
   constructor(
     private pdfService: PdfService
@@ -32,14 +35,15 @@ export class ModernResumePrintComponent implements OnInit {
         this.selectedTheme =
           data.selectedTheme || 'indigo';
 
-        /*
-        Wait for Angular render
-        before Puppeteer captures PDF
-        */
-        setTimeout(() => {
-          window.print();
-        }, 500);
+        this.dataLoaded = true;
       });
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.dataLoaded && !this.signalSent) {
+      this.signalSent = true;
+      document.body.dataset['resumeReady'] = 'true';
+    }
   }
 
   get skillsArray(): string[] {

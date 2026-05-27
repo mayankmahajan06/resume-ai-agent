@@ -81,6 +81,9 @@ body {
 
   font-size: 13px;
   color: var(--meta-color);
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .divider {
@@ -149,6 +152,11 @@ body {
   color: var(--accent);
 
   background: var(--accent-light);
+
+  max-width: 100%;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* EXPERIENCE */
@@ -169,10 +177,15 @@ body {
 }
 
 .job-header strong {
+  min-width: 0;
+
   font-size: 14px;
   font-weight: 700;
 
   color: #111827;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .job-header span {
@@ -203,6 +216,9 @@ body {
   white-space: pre-line;
   max-width: 95%;
   line-height: 1.65;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* PAGE BREAK */
@@ -217,6 +233,16 @@ body {
 .education-block {
   page-break-inside: avoid;
   break-inside: avoid;
+}
+
+.left-column,
+.right-column,
+.section-block,
+.section-block p,
+.project-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* THEMES */
@@ -282,6 +308,22 @@ body {
     padding: 0;
     margin: 0;
     max-width: 100%;
+  }
+
+  .print-header,
+  .main-grid,
+  .left-column,
+  .right-column {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .main-grid {
+    break-inside: auto;
+  }
+
+  .section-block {
+    break-inside: auto;
   }
 }
 

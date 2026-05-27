@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-compact-grid-template',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './compact-grid-template.component.html',
   styleUrl: './compact-grid-template.component.scss'
 })

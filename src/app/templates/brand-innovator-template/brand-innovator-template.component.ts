@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-brand-innovator-template',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './brand-innovator-template.component.html',
   styleUrl: './brand-innovator-template.component.scss'
 })

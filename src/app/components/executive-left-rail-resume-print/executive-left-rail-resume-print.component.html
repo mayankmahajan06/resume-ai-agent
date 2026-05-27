@@ -1,3 +1,4 @@
+<ng-container *ngIf="selectedTemplate === 'executive'; else premiumTemplatePrint">
 <div class="premium-resume" [ngClass]="'theme-' + selectedTheme">
 
   <!-- MAIN LAYOUT -->
@@ -252,3 +253,44 @@
   </section>
 
 </div>
+</ng-container>
+
+<ng-template #premiumTemplatePrint>
+  <main class="premium-template-print">
+    <app-compact-grid-template
+      *ngIf="selectedTemplate === 'compact'"
+      [resumeData]="resumeData"
+      [selectedTheme]="selectedTheme"
+    ></app-compact-grid-template>
+
+    <app-clean-light-template
+      *ngIf="selectedTemplate === 'clean'"
+      [resumeData]="resumeData"
+      [selectedTheme]="selectedTheme"
+    ></app-clean-light-template>
+
+    <app-brand-innovator-template
+      *ngIf="selectedTemplate === 'brand'"
+      [resumeData]="resumeData"
+      [selectedTheme]="selectedTheme"
+    ></app-brand-innovator-template>
+
+    <app-academic-cv-template
+      *ngIf="selectedTemplate === 'academic'"
+      [resumeData]="resumeData"
+      [selectedTheme]="selectedTheme"
+    ></app-academic-cv-template>
+
+    <app-modern-template
+      *ngIf="
+        selectedTemplate === 'modern' ||
+        selectedTemplate !== 'compact' &&
+        selectedTemplate !== 'clean' &&
+        selectedTemplate !== 'brand' &&
+        selectedTemplate !== 'academic'
+      "
+      [resumeData]="resumeData"
+      [selectedTheme]="selectedTheme"
+    ></app-modern-template>
+  </main>
+</ng-template>
