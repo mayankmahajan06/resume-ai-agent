@@ -78,14 +78,15 @@ h2 {
 .brand-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 250px;
-  gap: 30px;
+  gap: 34px;
   padding: 24px 32px 34px;
 }
 
 .brand-body aside {
-  padding: 18px;
-  background: var(--rail);
-  border-top: 4px solid var(--accent);
+  padding: 0 0 0 22px;
+  background: transparent;
+  border-top: 0;
+  border-left: 1px solid var(--line);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
@@ -97,19 +98,29 @@ h2 {
 
 .brand-section h3,
 .brand-summary h3 {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: var(--accent);
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 7px;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.brand-section h3::after,
+.brand-summary h3::after {
+  content: "";
+  display: block;
+  width: 34px;
+  height: 2px;
+  margin-top: 7px;
+  background: var(--accent);
 }
 
 .brand-item {
   margin-bottom: 18px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .brand-item:last-child {
