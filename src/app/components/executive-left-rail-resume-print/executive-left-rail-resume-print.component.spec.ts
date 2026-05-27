@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ExecutiveLeftRailResumePrintComponent } from './executive-left-rail-resume-print';
+import { ExecutiveLeftRailResumePrintComponent } from './executive-left-rail-resume-print.component';
 
 describe('ExecutiveLeftRailResumePrintComponent', () => {
   let component: ExecutiveLeftRailResumePrintComponent;

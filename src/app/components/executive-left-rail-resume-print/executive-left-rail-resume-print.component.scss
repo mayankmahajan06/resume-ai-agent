@@ -16,18 +16,18 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Inter", sans-serif;
+
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
 .premium-resume {
-
   --sidebar-width: 220px;
 
   --accent-color: #059669;
   --sidebar-bg: #065f46;
   --sidebar-text: #ffffff;
-  --sidebar-pill: rgba(255,255,255,0.12);
+  --sidebar-pill: rgba(255, 255, 255, 0.12);
   --divider-color: #e2e8f0;
 
   width: 794px;
@@ -75,17 +75,18 @@ body {
 /* MAIN LAYOUT */
 
 .main-layout {
-
-  display: grid;
-
-  grid-template-columns: var(--sidebar-width) 1fr;
+  display: flex;
 
   align-items: stretch;
+  height: auto;
 }
 
 /* LEFT COLUMN */
 
 .left-column {
+  width: var(--sidebar-width);
+
+  flex-shrink: 0;
 
   background: var(--sidebar-bg);
 
@@ -97,23 +98,23 @@ body {
 
   flex-direction: column;
 
-  min-height: 100%;
+  align-self: stretch;
 
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
-.profile-block {
+/* PROFILE */
 
+.profile-block {
   margin-bottom: 28px;
 
   padding-bottom: 18px;
 
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .profile-block h1 {
-
   margin: 0;
 
   font-size: 30px;
@@ -122,70 +123,69 @@ body {
 
   font-weight: 800;
 
-  color: white;
+  color: #ffffff;
 }
 
 .profile-block h2 {
-
   margin: 10px 0 0;
 
   font-size: 14px;
 
   font-weight: 700;
 
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.contact-list {
+/* CONTACT */
 
+.contact-list {
   display: flex;
 
   flex-direction: column;
 
-  gap: 6px;
+  gap: 8px;
 
   margin-top: 18px;
-}
 
-.contact-list span {
-
-  font-size: 11px;
-
-  line-height: 1.5;
-
-  color: rgba(255,255,255,0.9);
+  width: 100%;
 }
 
 .contact-item {
-
   display: flex;
 
   align-items: center;
 
   gap: 8px;
 
+  width: 100%;
+
   font-size: 11px;
 
   line-height: 1.5;
 
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .icon {
-
   font-size: 14px;
 
   width: 14px;
 
   height: 14px;
 
-  color: rgba(255,255,255,0.72);
-
   flex-shrink: 0;
+
+  color: rgba(255, 255, 255, 0.72);
 }
+
+/* LEFT SECTIONS */
 
 .left-section {
   margin-bottom: 24px;
+
+  width: 100%;
+
+  display: block;
 }
 
 .left-section:last-child {
@@ -193,7 +193,6 @@ body {
 }
 
 .left-section h3 {
-
   margin: 0 0 10px;
 
   font-size: 10px;
@@ -204,9 +203,9 @@ body {
 
   text-transform: uppercase;
 
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.6);
 
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 
   padding-bottom: 6px;
 }
@@ -214,16 +213,16 @@ body {
 /* SKILLS */
 
 .skills-container {
-
   display: flex;
 
   flex-wrap: wrap;
 
   gap: 6px;
+
+  width: 100%;
 }
 
 .skills-container span {
-
   padding: 4px 10px;
 
   background: var(--sidebar-pill);
@@ -235,21 +234,20 @@ body {
   font-weight: 600;
 
   white-space: nowrap;
+  border-radius: 999px;
 
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
-  border-radius: 999px;
 }
 
 /* CERTIFICATIONS */
 
 .left-item {
-
   font-size: 11px;
 
   line-height: 1.55;
 
-  color: rgba(255,255,255,0.88);
+  color: rgba(255, 255, 255, 0.88);
 
   margin-bottom: 8px;
 }
@@ -269,45 +267,40 @@ body {
 }
 
 .education-item strong {
-
   display: block;
 
   font-size: 12px;
 
   line-height: 1.4;
 
-  color: white;
+  color: #ffffff;
 
   font-weight: 700;
 }
 
 .education-item p {
-
   margin: 2px 0 0;
 
   font-size: 11px;
 
   line-height: 1.5;
 
-  color: rgba(255,255,255,0.78);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 /* RIGHT COLUMN */
 
 .right-column {
-
-  padding: 32px 28px;
+  padding: 32px 28px 40px;
 }
 
 /* SUMMARY */
 
 .summary-section {
-
   margin-bottom: 28px;
 }
 
 .summary-section h3 {
-
   margin: 0 0 10px;
 
   font-size: 11px;
@@ -322,7 +315,6 @@ body {
 }
 
 .summary-text {
-
   margin: 0;
 
   font-size: 12.5px;
@@ -336,6 +328,7 @@ body {
 
 .content-section {
   margin-bottom: 24px;
+  padding-top: 8px;
 }
 
 .content-section:last-child {
@@ -343,7 +336,6 @@ body {
 }
 
 .content-section > h3 {
-
   margin: 0 0 14px;
 
   font-size: 11px;
@@ -361,9 +353,10 @@ body {
   padding-bottom: 6px;
 }
 
+/* EXPERIENCE */
+
 .experience-item,
 .project-item {
-
   margin-bottom: 18px;
 
   padding-bottom: 14px;
@@ -377,7 +370,6 @@ body {
 
 .experience-item:last-child,
 .project-item:last-child {
-
   margin-bottom: 0;
 
   padding-bottom: 0;
@@ -386,7 +378,6 @@ body {
 }
 
 .experience-header {
-
   display: flex;
 
   justify-content: space-between;
@@ -400,7 +391,6 @@ body {
 
 .experience-header h4,
 .project-title-block h4 {
-
   margin: 0;
 
   font-size: 15px;
@@ -413,7 +403,6 @@ body {
 }
 
 .company-name {
-
   margin: 3px 0 0;
 
   font-size: 12px;
@@ -424,7 +413,6 @@ body {
 }
 
 .duration {
-
   font-size: 11px;
 
   font-weight: 700;
@@ -435,7 +423,6 @@ body {
 }
 
 .project-stack {
-
   margin: 3px 0 0;
 
   font-size: 11px;
@@ -449,7 +436,6 @@ body {
 
 .experience-text,
 .project-description {
-
   margin: 5px 0 0;
 
   color: #374151;
@@ -459,40 +445,53 @@ body {
   font-size: 12.5px;
 }
 
-/* PRINT */
-
-@media print {
-
-  html,
-  body {
-
-    margin: 0 !important;
-
-    padding: 0 !important;
-
-    width: 794px !important;
-  }
-
-  .premium-resume {
-
-    width: 794px !important;
-
-    margin: 0 auto !important;
-  }
-}
-
 /* SCREEN */
 
 @media screen {
-
   html {
     background: #f1f5f9;
   }
 
   .premium-resume {
-
-    box-shadow: 0 4px 40px rgba(0,0,0,0.13);
+    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.13);
 
     margin: 24px auto;
+  }
+}
+
+/* PRINT */
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    width: 794px !important;
+
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .premium-resume {
+    width: 794px !important;
+
+    margin: 0 auto !important;
+  }
+
+  .content-section {
+    break-inside: auto;
+  }
+
+  .experience-item,
+  .project-item {
+    break-inside: avoid;
+
+    page-break-inside: avoid;
+  }
+
+  .right-column {
+    padding-top: 42px;
   }
 }

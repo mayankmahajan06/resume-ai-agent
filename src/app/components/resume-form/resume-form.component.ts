@@ -61,7 +61,7 @@ export class ResumeFormComponent implements OnInit {
   resumeForm!: FormGroup;
   userPlan: 'free' | 'pro' | 'pro_plus' = 'free';
   showUpgradeModal = false;
-  selectedTheme = '';
+  selectedTheme = 'indigo';
   isPremiumDownloading = false;
   isDownloading = false;
   downloadSuccessMessage = '';
@@ -458,8 +458,7 @@ export class ResumeFormComponent implements OnInit {
     this.downloadErrorMessage = '';
 
     const latestData = {
-      ...this.resumeService.getResumeData(),
-      selectedTheme: this.selectedTheme
+      ...this.resumeService.getResumeData()
     };
 
     this.pdfService.saveResumeData(latestData).subscribe({
@@ -506,8 +505,7 @@ export class ResumeFormComponent implements OnInit {
     this.downloadErrorMessage = '';
 
     const latestData = {
-      ...this.resumeService.getResumeData(),
-      selectedTheme: this.selectedTheme
+      ...this.resumeService.getResumeData()
     };
 
     this.pdfService.saveResumeData(latestData).subscribe({
@@ -737,7 +735,18 @@ export class ResumeFormComponent implements OnInit {
   }
 
   getMainCTAButtonText(): string {
-    return 'Download Resume';
+
+    if (
+      this.isDownloading ||
+      this.isPremiumDownloading
+    ) {
+
+      return 'Generating PDF...';
+
+    }
+
+    return 'Download PDF';
+
   }
 
   getMainCTASubtext(): string {

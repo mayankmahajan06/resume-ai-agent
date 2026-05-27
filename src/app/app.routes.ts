@@ -8,7 +8,7 @@ import { LoginComponent } from './pages/auth/login/login.component';
 import { SignupComponent } from './pages/auth/signup/signup.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { authGuard } from './guards/auth.guard';
-import { ExecutiveLeftRailResumePrintComponent } from './components/executive-left-rail-resume-print/executive-left-rail-resume-print';
+import { ExecutiveLeftRailResumePrintComponent } from './components/executive-left-rail-resume-print/executive-left-rail-resume-print.component';
 import { MyResumesComponent } from './pages/my-resumes/my-resumes.component';
 
 export const routes: Routes = [
@@ -39,11 +39,11 @@ export const routes: Routes = [
   },
 
   {
-    path: 'resume-print',
+    path: 'modern-resume-print',
     component: ModernResumePrintComponent
   },
   {
-    path: 'premium-resume-print',
+    path: 'executive-left-rail-resume-print',
     component: ExecutiveLeftRailResumePrintComponent
   },
   {

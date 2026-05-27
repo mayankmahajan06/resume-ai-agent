@@ -154,82 +154,72 @@ app.get("/generate-pdf", async (req, res) => {
 app.get("/generate-premium-pdf", async (req, res) => {
   let browser;
 
+  const theme = req.query.theme || "default";
+
   try {
     browser = await puppeteer.launch({
       headless: true,
       args: [
         "--no-sandbox",
-        "--disable-setuid-sandbox"
+        "--disable-setuid-sandbox",
       ]
     });
 
     const page = await browser.newPage();
 
     /*
-    Open Angular print route
+    A4 at 96dpi = 794px wide. Setting this viewport means
+    Puppeteer renders at the same width as the PDF page,
+    so layout matches the browser preview exactly.
     */
+    await page.setViewport({
+      width: 794,
+      height: 1123,
+      deviceScaleFactor: 1
+    });
+
     await page.goto(
-      "http://localhost:4200/executive-left-rail-resume-print",
-      {
-        waitUntil: "networkidle0"
-      }
+      `http://localhost:4200/executive-left-rail-resume-print?theme=${theme}`,
+      { waitUntil: "domcontentloaded" }
     );
 
     /*
-    Wait until print component loads
+    CRITICAL — Wait for Angular to signal render complete.
+    The component sets document.body.dataset.resumeReady = "true"
+    in ngAfterViewChecked once all data is loaded and rendered.
+    This is the only reliable signal — blind timeouts and
+    networkidle0 both fire before Angular finishes its
+    change detection + *ngFor rendering cycles.
     */
-    await page.waitForSelector(
-      ".premium-resume"
+    await page.waitForFunction(
+      () => document.body.dataset.resumeReady === "true",
+      { timeout: 15000 }
     );
 
-    /*
-    Extra wait for API fetch + Angular render
-    */
-    await new Promise(resolve =>
-      setTimeout(resolve, 1500)
-    );
-
-    /*
-    Generate final PDF
-    */
+    await page.evaluateHandle("document.fonts.ready");
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      preferCSSPageSize: true,
-      margin: {
-        top: "0",
-        right: "0",
-        bottom: "0",
-        left: "0"
-      }
+      margin: { top: "0", right: "0", bottom: "0", left: "0" }
     });
 
     await browser.close();
 
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition":
-        "attachment; filename=resume.pdf",
+      "Content-Disposition": "attachment; filename=resume.pdf",
       "Content-Length": pdf.length
     });
 
     res.send(pdf);
 
   } catch (error) {
-    console.error(
-      "PDF generation failed:",
-      error
-    );
-
-    if (browser) {
-      await browser.close();
-    }
-
-    res
-      .status(500)
-      .send("PDF generation failed");
+    console.error("PDF generation failed:", error);
+    if (browser) await browser.close();
+    res.status(500).send("PDF generation failed");
   }
 });
+
 
 /*
 CREATE RAZORPAY ORDER
