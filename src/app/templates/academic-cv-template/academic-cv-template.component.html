@@ -49,12 +49,27 @@
       </div>
     </section>
 
-    <section class="academic-section" *ngIf="skillsArray?.length || resumeData.certifications?.length">
-      <h3>Skills & Certifications</h3>
-      <div class="academic-tags" *ngIf="skillsArray?.length">
-        <span *ngFor="let skill of skillsArray">{{ skill }}</span>
-      </div>
-      <p *ngFor="let cert of resumeData.certifications">{{ cert.certificationName }}</p>
-    </section>
+    <div class="academic-support">
+      <section class="academic-section compact-section" *ngIf="skillsArray?.length">
+        <h3>Skills</h3>
+        <ul class="academic-skill-list">
+          <li *ngFor="let skill of skillsArray">
+            {{ skill }}
+          </li>
+        </ul>
+      </section>
+
+      <section
+        class="academic-section compact-section"
+        *ngIf="resumeData.certifications?.length"
+      >
+        <h3>Certifications</h3>
+        <ul class="academic-list">
+          <li *ngFor="let cert of resumeData.certifications">
+            {{ cert.certificationName }}
+          </li>
+        </ul>
+      </section>
+    </div>
   </section>
 </article>

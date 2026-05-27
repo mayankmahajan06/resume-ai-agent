@@ -4,6 +4,7 @@
   --soft: #eef2ff;
   --line: #dbe2ea;
   --muted: #64748b;
+  --rail: #f8fafc;
 
   background: #ffffff;
   color: #111827;
@@ -44,7 +45,7 @@ h1, h2, h3, p {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
   gap: 22px;
-  padding: 30px;
+  padding: 34px 32px;
   background: var(--accent-dark);
   color: #ffffff;
   -webkit-print-color-adjust: exact;
@@ -53,7 +54,7 @@ h1, h2, h3, p {
 
 h1 {
   margin-bottom: 8px;
-  font-size: 34px;
+  font-size: 38px;
   line-height: 1.08;
 }
 
@@ -71,14 +72,22 @@ h2 {
 }
 
 .brand-summary {
-  padding: 24px 30px 0;
+  padding: 24px 32px 0;
 }
 
 .brand-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 245px;
-  gap: 28px;
-  padding: 24px 30px 32px;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 30px;
+  padding: 24px 32px 34px;
+}
+
+.brand-body aside {
+  padding: 18px;
+  background: var(--rail);
+  border-top: 4px solid var(--accent);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .brand-section {
@@ -91,12 +100,21 @@ h2 {
   margin-bottom: 10px;
   color: var(--accent);
   font-size: 11px;
-  letter-spacing: 0.9px;
+  letter-spacing: 1px;
   text-transform: uppercase;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 7px;
 }
 
 .brand-item {
   margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .brand-row {
