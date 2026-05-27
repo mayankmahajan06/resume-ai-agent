@@ -88,6 +88,8 @@ body {
 
   flex-shrink: 0;
 
+  min-width: 0;
+
   background: var(--sidebar-bg);
 
   color: var(--sidebar-text);
@@ -153,7 +155,7 @@ body {
 .contact-item {
   display: flex;
 
-  align-items: center;
+  align-items: flex-start;
 
   gap: 8px;
 
@@ -166,6 +168,14 @@ body {
   color: rgba(255, 255, 255, 0.92);
 }
 
+.contact-item span:last-child {
+  min-width: 0;
+
+  overflow-wrap: anywhere;
+
+  word-break: break-word;
+}
+
 .icon {
   font-size: 14px;
 
@@ -176,6 +186,8 @@ body {
   flex-shrink: 0;
 
   color: rgba(255, 255, 255, 0.72);
+
+  margin-top: 1px;
 }
 
 /* LEFT SECTIONS */
@@ -233,7 +245,14 @@ body {
 
   font-weight: 600;
 
-  white-space: nowrap;
+  max-width: 100%;
+
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+
+  word-break: break-word;
+
   border-radius: 999px;
 
   -webkit-print-color-adjust: exact;
@@ -250,6 +269,10 @@ body {
   color: rgba(255, 255, 255, 0.88);
 
   margin-bottom: 8px;
+
+  overflow-wrap: anywhere;
+
+  word-break: break-word;
 }
 
 .left-item:last-child {
@@ -286,6 +309,10 @@ body {
   line-height: 1.5;
 
   color: rgba(255, 255, 255, 0.78);
+
+  overflow-wrap: anywhere;
+
+  word-break: break-word;
 }
 
 /* RIGHT COLUMN */
@@ -515,6 +542,50 @@ body {
 
   .left-column {
     background: transparent;
+
+    padding: 42px 18px 32px;
+
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .profile-block {
+    margin-bottom: 22px;
+
+    padding-bottom: 14px;
+  }
+
+  .contact-list {
+    gap: 6px;
+
+    margin-top: 16px;
+  }
+
+  .left-section {
+    margin-bottom: 18px;
+  }
+
+  .left-section h3 {
+    margin-bottom: 8px;
+  }
+
+  .skills-container {
+    gap: 5px;
+  }
+
+  .skills-container span {
+    padding: 3px 8px;
+  }
+
+  .left-item {
+    margin-bottom: 6px;
+  }
+
+  .education-item {
+    margin-bottom: 10px;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .content-section {
