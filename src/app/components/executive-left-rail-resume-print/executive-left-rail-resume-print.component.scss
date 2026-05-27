@@ -478,6 +478,43 @@ body {
     width: 794px !important;
 
     margin: 0 auto !important;
+
+    background: transparent;
+
+    overflow: visible;
+
+    position: relative;
+  }
+
+  .premium-resume::before {
+    content: "";
+
+    position: fixed;
+
+    top: 0;
+
+    bottom: 0;
+
+    left: 0;
+
+    width: var(--sidebar-width);
+
+    background: var(--sidebar-bg);
+
+    z-index: 0;
+
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .main-layout {
+    position: relative;
+
+    z-index: 1;
+  }
+
+  .left-column {
+    background: transparent;
   }
 
   .content-section {
@@ -492,6 +529,9 @@ body {
   }
 
   .right-column {
-    padding-top: 42px;
+    padding: 42px 28px 40px;
+
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 }
