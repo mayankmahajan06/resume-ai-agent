@@ -1,88 +1,41 @@
 import {
-  Component,
-  Input,
-  OnInit,
   AfterViewChecked,
+  Component,
+  OnInit,
   ViewEncapsulation
 } from '@angular/core';
 
-import {
-  CommonModule
-} from '@angular/common';
+import { CommonModule } from '@angular/common';
+
+import { PdfService } from '../../services/pdf.service';
 
 import {
   ResumeData
 } from '../../services/resume.service';
 
-import {
-  PdfService
-} from '../../services/pdf.service';
-import { CompactGridTemplateComponent } from '../../templates/compact-grid-template/compact-grid-template.component';
-import { CleanLightTemplateComponent } from '../../templates/clean-light-template/clean-light-template.component';
-import { BrandInnovatorTemplateComponent } from '../../templates/brand-innovator-template/brand-innovator-template.component';
-import { AcademicCvTemplateComponent } from '../../templates/academic-cv-template/academic-cv-template.component';
-import { ModernTemplateComponent } from '../../templates/modern-template/modern-template.component';
-
 @Component({
-  selector: 'app-premium-resume-print',
-
+  selector: 'app-compact-grid-resume-print',
   standalone: true,
-
-  imports: [
-    CommonModule,
-    CompactGridTemplateComponent,
-    CleanLightTemplateComponent,
-    BrandInnovatorTemplateComponent,
-    AcademicCvTemplateComponent,
-    ModernTemplateComponent
-  ],
-
-  templateUrl: './executive-left-rail-resume-print.component.html',
-  styleUrls: ['./executive-left-rail-resume-print.component.scss'],
-
-  /*
-  ViewEncapsulation.None is required for print components.
-
-  Angular's default (Emulated) adds [_ngcontent-xxx] attribute
-  selectors to every CSS rule. This breaks:
-    - Rules targeting `body` and `html` (Puppeteer's root elements)
-    - `@page` rules (not inside a component shadow)
-    - `linear-gradient` on .premium-resume (specificity mismatch)
-    - Any rule that needs to apply globally in the print document
-
-  With None, your SCSS applies exactly as written — no scoping.
-  This is safe here because this is a dedicated print route with
-  no other components that could be affected.
-  */
+  imports: [CommonModule],
+  templateUrl: './compact-grid-resume-print.component.html',
+  styleUrls: ['./compact-grid-resume-print.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class ExecutiveLeftRailResumePrintComponent
+export class CompactGridResumePrintComponent
   implements OnInit, AfterViewChecked {
 
   resumeData!: ResumeData;
 
   selectedTheme = 'indigo';
+  selectedTemplate = 'compact';
 
-  selectedTemplate = 'executive';
-
-  /*
-  Two flags for the Puppeteer render-ready signal:
-    dataLoaded      — true once PdfService returns data
-    signalSent      — ensures we only write the flag once,
-                      not on every subsequent change detection
-  */
   private dataLoaded = false;
+
   private signalSent = false;
 
   constructor(
     private pdfService: PdfService
-  ) {}
-
-  /*
-  ========================================
-  INIT
-  ========================================
-  */
+  ) { }
 
   ngOnInit(): void {
 

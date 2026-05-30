@@ -30,8 +30,6 @@ body {
   --sidebar-pill: rgba(255,255,255,0.12);
   --divider-color: #e2e8f0;
 
-  width: 794px;
-
   margin: 0 auto;
 
   background: #ffffff;
@@ -41,8 +39,6 @@ body {
   font-size: 13px;
 
   line-height: 1.6;
-
-  overflow: hidden;
 }
 
 /* THEMES */
@@ -502,7 +498,7 @@ body {
 
   .premium-resume {
 
-    width: 794px !important;
+    width: 100%;
 
     margin: 0 auto !important;
   }

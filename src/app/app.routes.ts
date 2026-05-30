@@ -10,6 +10,7 @@ import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-pas
 import { authGuard } from './guards/auth.guard';
 import { ExecutiveLeftRailResumePrintComponent } from './components/executive-left-rail-resume-print/executive-left-rail-resume-print.component';
 import { MyResumesComponent } from './pages/my-resumes/my-resumes.component';
+import { CompactGridResumePrintComponent } from './components/compact-grid-resume-print/compact-grid-resume-print.component';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,10 @@ export const routes: Routes = [
   {
     path: 'executive-left-rail-resume-print',
     component: ExecutiveLeftRailResumePrintComponent
+  },
+  {
+    path: 'compact-grid-resume-print',
+    component: CompactGridResumePrintComponent
   },
   {
     path: 'my-resumes',
