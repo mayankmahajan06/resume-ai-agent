@@ -7,7 +7,6 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const admin = require("firebase-admin");
 const analyzeJD = require("./services/jdAnalyzer");
-const serviceAccount = require("./resumepilot-ai-serviceAccountKey.json");
 
 /*
 Import server-side HTML template builders.
@@ -20,6 +19,16 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+
+const isProduction = process.env.NODE_ENV === "production";
+
+let serviceAccount;
+
+if (isProduction) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+} else {
+  serviceAccount = require("./resumepilot-ai-serviceAccountKey.json");
+}
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -284,12 +293,10 @@ app.post("/verify-payment", async (req, res) => {
     } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res
-        .status(400)
-        .send({
-          success: false,
-          message: "Missing payment verification details",
-        });
+      return res.status(400).send({
+        success: false,
+        message: "Missing payment verification details",
+      });
     }
 
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
@@ -298,12 +305,10 @@ app.post("/verify-payment", async (req, res) => {
       .update(payload)
       .digest("hex");
     if (expectedSignature !== razorpay_signature) {
-      return res
-        .status(400)
-        .send({
-          success: false,
-          message: "Payment signature verification failed",
-        });
+      return res.status(400).send({
+        success: false,
+        message: "Payment signature verification failed",
+      });
     }
     const order = await razorpay.orders.fetch(razorpay_order_id);
     const planType = order.notes?.planType;
@@ -315,12 +320,10 @@ app.post("/verify-payment", async (req, res) => {
     }
 
     if (!firebaseIdToken) {
-      return res
-        .status(400)
-        .send({
-          success: false,
-          message: "Missing authenticated user details",
-        });
+      return res.status(400).send({
+        success: false,
+        message: "Missing authenticated user details",
+      });
     }
 
     const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
