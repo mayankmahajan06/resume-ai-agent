@@ -9,6 +9,6 @@ export const environment = {
     messagingSenderId: "1053211465411",
     appId: "1:1053211465411:web:bf5dbe39e1c7e574097476"
   },
-  apiBaseUrl: 'http://localhost:3000',
+  apiBaseUrl: 'https://resumepilot-backend-itwf.onrender.com',
   razorpayKey: 'rzp_live_SqsN0B4pfk1MLv'
 };
