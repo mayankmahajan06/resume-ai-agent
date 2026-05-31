@@ -115,7 +115,6 @@ app.get("/generate-pdf", async (req, res) => {
   try {
     console.log("Chrome Path:", puppeteer.executablePath());
     browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(),
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
@@ -170,7 +169,6 @@ app.get("/generate-premium-pdf", async (req, res) => {
   try {
     console.log("Chrome Path:", puppeteer.executablePath());
     browser = await puppeteer.launch({
-      executablePath: puppeteer.executablePath(),
       headless: true,
       args: [
         "--no-sandbox",
