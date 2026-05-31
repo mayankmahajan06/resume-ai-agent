@@ -5,6 +5,7 @@ const cors = require("cors");
 const puppeteer = require("puppeteer");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const admin = require("firebase-admin");
 const analyzeJD = require("./services/jdAnalyzer");
 
 /*
@@ -18,6 +19,22 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+
+const firebaseServiceAccount =
+  process.env.FIREBASE_SERVICE_ACCOUNT_KEY || process.env.FIREBASE_SERVICE_ACCOUNT;
+
+if (!admin.apps.length) {
+  const firebaseConfig = firebaseServiceAccount
+    ? {
+        credential: admin.credential.cert(JSON.parse(firebaseServiceAccount)),
+      }
+    : {
+        credential: admin.credential.applicationDefault(),
+        projectId: process.env.FIREBASE_PROJECT_ID || "resumepilot-ai-app",
+      };
+
+  admin.initializeApp(firebaseConfig);
+}
 
 const plans = {
   pro: {
@@ -33,6 +50,45 @@ const plans = {
 };
 
 let latestResumeData = {};
+
+function parseExistingExpiryDate(planExpiryDate) {
+  if (!planExpiryDate) return null;
+
+  if (typeof planExpiryDate.toDate === "function") {
+    const date = planExpiryDate.toDate();
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  if (planExpiryDate instanceof Date) {
+    return Number.isNaN(planExpiryDate.getTime()) ? null : planExpiryDate;
+  }
+
+  const date = new Date(planExpiryDate);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function calculatePlanDates(existingUserData, plan) {
+  const now = new Date();
+  const existingExpiryDate =
+    existingUserData?.paymentStatus === "active" &&
+    ["pro", "pro_plus"].includes(existingUserData?.userPlan)
+      ? parseExistingExpiryDate(existingUserData.planExpiryDate)
+      : null;
+
+  const baseDate =
+    existingExpiryDate && existingExpiryDate > now
+      ? existingExpiryDate
+      : now;
+
+  const planStartDate = now;
+  const planExpiryDate = new Date(baseDate);
+  planExpiryDate.setDate(planExpiryDate.getDate() + plan.durationDays);
+
+  return {
+    planStartDate,
+    planExpiryDate,
+  };
+}
 
 app.use(cors());
 app.use(express.json());
@@ -229,10 +285,18 @@ VERIFY RAZORPAY PAYMENT
 */
 app.post("/verify-payment", async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      firebaseIdToken,
+      userId,
+    } = req.body;
+
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).send({ success: false, message: "Missing payment verification details" });
     }
+
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -247,9 +311,34 @@ app.post("/verify-payment", async (req, res) => {
     if (!plan) {
       return res.status(400).send({ success: false, message: "Invalid plan on verified order" });
     }
-    const planStartDate = new Date();
-    const planExpiryDate = new Date(planStartDate);
-    planExpiryDate.setDate(planStartDate.getDate() + plan.durationDays);
+
+    if (!firebaseIdToken) {
+      return res.status(400).send({ success: false, message: "Missing authenticated user details" });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+
+    if (userId && userId !== decodedToken.uid) {
+      return res.status(403).send({ success: false, message: "Authenticated user mismatch" });
+    }
+
+    const userSnapshot = await admin
+      .firestore()
+      .collection("users")
+      .doc(decodedToken.uid)
+      .get();
+
+    const existingUserData = userSnapshot.exists ? userSnapshot.data() : {};
+    const { userPlan, paymentStatus, planExpiryDate: existingPlanExpiryDate } = existingUserData;
+    const { planStartDate, planExpiryDate } = calculatePlanDates(
+      {
+        userPlan,
+        paymentStatus,
+        planExpiryDate: existingPlanExpiryDate,
+      },
+      plan
+    );
+
     res.status(200).send({
       success: true,
       planType,

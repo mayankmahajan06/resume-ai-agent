@@ -125,7 +125,7 @@ export class PaymentService {
             response
           );
 
-          this.verifyPaymentAndActivatePlan(
+          void this.verifyPaymentAndActivatePlan(
             response
           );
 
@@ -169,12 +169,54 @@ export class PaymentService {
      VERIFY PAYMENT
   ===================================== */
 
-  private verifyPaymentAndActivatePlan(
+  private async verifyPaymentAndActivatePlan(
     paymentResponse: any
-  ): void {
+  ): Promise<void> {
+
+    const user =
+      this.auth.currentUser;
+
+    if (!user) {
+      this.snackBar.open(
+        'Please sign in again before completing payment verification.',
+        'Close',
+        {
+          duration: 5000
+        }
+      );
+
+      return;
+    }
+
+    let firebaseIdToken: string;
+
+    try {
+      firebaseIdToken =
+        await user.getIdToken();
+    } catch (error) {
+      console.error(
+        'Failed to get Firebase ID token',
+        error
+      );
+
+      this.snackBar.open(
+        'Payment verification failed. Please sign in again.',
+        'Close',
+        {
+          duration: 5000
+        }
+      );
+
+      return;
+    }
 
     this.pdfService
-      .verifyPayment(paymentResponse)
+      .verifyPayment({
+        ...paymentResponse,
+        userId:
+          user.uid,
+        firebaseIdToken
+      })
       .subscribe({
 
         next:
