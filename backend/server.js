@@ -7,6 +7,7 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const admin = require("firebase-admin");
 const analyzeJD = require("./services/jdAnalyzer");
+const serviceAccount = require("./resumepilot-ai-serviceAccountKey.json");
 
 /*
 Import server-side HTML template builders.
@@ -20,20 +21,10 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const firebaseServiceAccount =
-  process.env.FIREBASE_SERVICE_ACCOUNT_KEY || process.env.FIREBASE_SERVICE_ACCOUNT;
-
 if (!admin.apps.length) {
-  const firebaseConfig = firebaseServiceAccount
-    ? {
-        credential: admin.credential.cert(JSON.parse(firebaseServiceAccount)),
-      }
-    : {
-        credential: admin.credential.applicationDefault(),
-        projectId: process.env.FIREBASE_PROJECT_ID || "resumepilot-ai-app",
-      };
-
-  admin.initializeApp(firebaseConfig);
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
 }
 
 const plans = {
@@ -76,9 +67,7 @@ function calculatePlanDates(existingUserData, plan) {
       : null;
 
   const baseDate =
-    existingExpiryDate && existingExpiryDate > now
-      ? existingExpiryDate
-      : now;
+    existingExpiryDate && existingExpiryDate > now ? existingExpiryDate : now;
 
   const planStartDate = now;
   const planExpiryDate = new Date(baseDate);
@@ -123,7 +112,7 @@ app.get("/generate-pdf", async (req, res) => {
     });
     await page.waitForFunction(
       () => document.body.dataset.resumeReady === "true",
-      { timeout: 15000 }
+      { timeout: 15000 },
     );
     await page.evaluateHandle("document.fonts.ready");
     const pdf = await page.pdf({
@@ -163,7 +152,7 @@ app.get("/generate-premium-pdf", async (req, res) => {
   let browser;
   const theme = latestResumeData.selectedTheme || "indigo";
   const template = latestResumeData.selectedTemplate || "executive-left-rail";
-  console.log('[PDF] theme:', theme, '| template:', template);
+  console.log("[PDF] theme:", theme, "| template:", template);
 
   try {
     browser = await puppeteer.launch({
@@ -187,7 +176,6 @@ app.get("/generate-premium-pdf", async (req, res) => {
        COMPACT GRID — server-side HTML, no Angular
     ----------------------------------------------- */
     if (template === "compact") {
-
       /*
       Merge the theme from the query param into resumeData
       so the builder picks up the correct accent colour.
@@ -204,7 +192,6 @@ app.get("/generate-premium-pdf", async (req, res) => {
 
       // Small buffer for fonts to finish painting
       await new Promise((resolve) => setTimeout(resolve, 300));
-
     } else {
       /* -----------------------------------------------
          OTHER TEMPLATES — still use Angular print route
@@ -216,14 +203,14 @@ app.get("/generate-premium-pdf", async (req, res) => {
         printRoute = "modern-resume-print";
       }
 
-      await page.goto(
-        `http://localhost:4200/${printRoute}?theme=${theme}`,
-        { waitUntil: "networkidle0", timeout: 30000 }
-      );
+      await page.goto(`http://localhost:4200/${printRoute}?theme=${theme}`, {
+        waitUntil: "networkidle0",
+        timeout: 30000,
+      });
 
       await page.waitForFunction(
         () => document.body.dataset.resumeReady === "true",
-        { timeout: 15000 }
+        { timeout: 15000 },
       );
 
       await page.evaluateHandle("document.fonts.ready");
@@ -248,7 +235,6 @@ app.get("/generate-premium-pdf", async (req, res) => {
       "Content-Length": pdf.length,
     });
     res.send(pdf);
-
   } catch (error) {
     console.error("PDF generation failed:", error);
     if (browser) await browser.close();
@@ -264,7 +250,9 @@ app.post("/create-order", async (req, res) => {
     const { planType } = req.body;
     const plan = plans[planType];
     if (!plan) {
-      return res.status(400).send({ success: false, message: "Invalid plan selected" });
+      return res
+        .status(400)
+        .send({ success: false, message: "Invalid plan selected" });
     }
     const options = {
       amount: plan.amount * 100,
@@ -273,7 +261,9 @@ app.post("/create-order", async (req, res) => {
       notes: { planType, planLabel: plan.label },
     };
     const order = await razorpay.orders.create(options);
-    res.status(200).send({ success: true, order, planType, amount: plan.amount });
+    res
+      .status(200)
+      .send({ success: true, order, planType, amount: plan.amount });
   } catch (error) {
     console.error("Order creation failed:", error);
     res.status(500).send({ success: false, message: "Failed to create order" });
@@ -294,7 +284,12 @@ app.post("/verify-payment", async (req, res) => {
     } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).send({ success: false, message: "Missing payment verification details" });
+      return res
+        .status(400)
+        .send({
+          success: false,
+          message: "Missing payment verification details",
+        });
     }
 
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
@@ -303,23 +298,37 @@ app.post("/verify-payment", async (req, res) => {
       .update(payload)
       .digest("hex");
     if (expectedSignature !== razorpay_signature) {
-      return res.status(400).send({ success: false, message: "Payment signature verification failed" });
+      return res
+        .status(400)
+        .send({
+          success: false,
+          message: "Payment signature verification failed",
+        });
     }
     const order = await razorpay.orders.fetch(razorpay_order_id);
     const planType = order.notes?.planType;
     const plan = plans[planType];
     if (!plan) {
-      return res.status(400).send({ success: false, message: "Invalid plan on verified order" });
+      return res
+        .status(400)
+        .send({ success: false, message: "Invalid plan on verified order" });
     }
 
     if (!firebaseIdToken) {
-      return res.status(400).send({ success: false, message: "Missing authenticated user details" });
+      return res
+        .status(400)
+        .send({
+          success: false,
+          message: "Missing authenticated user details",
+        });
     }
 
     const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
 
     if (userId && userId !== decodedToken.uid) {
-      return res.status(403).send({ success: false, message: "Authenticated user mismatch" });
+      return res
+        .status(403)
+        .send({ success: false, message: "Authenticated user mismatch" });
     }
 
     const userSnapshot = await admin
@@ -329,14 +338,18 @@ app.post("/verify-payment", async (req, res) => {
       .get();
 
     const existingUserData = userSnapshot.exists ? userSnapshot.data() : {};
-    const { userPlan, paymentStatus, planExpiryDate: existingPlanExpiryDate } = existingUserData;
+    const {
+      userPlan,
+      paymentStatus,
+      planExpiryDate: existingPlanExpiryDate,
+    } = existingUserData;
     const { planStartDate, planExpiryDate } = calculatePlanDates(
       {
         userPlan,
         paymentStatus,
         planExpiryDate: existingPlanExpiryDate,
       },
-      plan
+      plan,
     );
 
     res.status(200).send({
@@ -350,7 +363,9 @@ app.post("/verify-payment", async (req, res) => {
     });
   } catch (error) {
     console.error("Payment verification failed:", error);
-    res.status(500).send({ success: false, message: "Payment verification failed" });
+    res
+      .status(500)
+      .send({ success: false, message: "Payment verification failed" });
   }
 });
 

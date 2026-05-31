@@ -48,3 +48,5 @@ Thumbs.db
 # Firebase
 .firebase/
 .firebaserc
+
+/backend/resumepilot-ai-serviceAccountKey.json

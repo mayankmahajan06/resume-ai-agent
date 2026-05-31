@@ -299,7 +299,12 @@ export class PaymentService {
           verifiedPayment.planExpiryDate,
 
         paymentId:
-          verifiedPayment.paymentId
+          verifiedPayment.paymentId,
+
+        orderId: verifiedPayment.orderId,
+
+        updatedAt:
+          new Date().toISOString()
 
       },
       {
