@@ -14,6 +14,8 @@ Add a new import here for each new template — no Puppeteer changes needed.
 */
 const { buildCompactGridHTML } = require("./templates/compact-grid.template");
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+
 const app = express();
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -116,7 +118,7 @@ app.get("/generate-pdf", async (req, res) => {
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
-    await page.goto("http://localhost:4200/modern-resume-print", {
+    await page.goto(`${FRONTEND_URL}/modern-resume-print`, {
       waitUntil: "domcontentloaded",
     });
     await page.waitForFunction(
@@ -212,7 +214,7 @@ app.get("/generate-premium-pdf", async (req, res) => {
         printRoute = "modern-resume-print";
       }
 
-      await page.goto(`http://localhost:4200/${printRoute}?theme=${theme}`, {
+      await page.goto(`${FRONTEND_URL}/${printRoute}?theme=${theme}`, {
         waitUntil: "networkidle0",
         timeout: 30000,
       });
@@ -383,6 +385,8 @@ app.post("/analyze-jd", (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

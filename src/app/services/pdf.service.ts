@@ -7,9 +7,6 @@ import { environment } from '../../environments/environment';
 })
 export class PdfService {
 
-  // private baseUrl =
-  //   'http://localhost:3000';
-
   constructor(
     private http: HttpClient
   ) { }
