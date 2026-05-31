@@ -28,6 +28,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { JdAnalysisDialogComponent } from '../jd-analysis-dialog/jd-analysis-dialog.component';
 import { ResumeValidationDialogComponent } from '../resume-validation-dialog/resume-validation-dialog.component';
 import { UpgradeModalComponent } from '../../shared/modals/upgrade-modal/upgrade-modal.component';
+import { AnalyticsService } from '../../services/analytics.service';
 
 /* ========================================
    TEMPLATE DEFINITION
@@ -120,7 +121,8 @@ export class ResumeFormComponent implements OnInit {
     private pdfService: PdfService,
     private auth: Auth,
     private firestore: Firestore,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private analyticsService: AnalyticsService
   ) { }
 
   ngOnInit(): void {
@@ -476,6 +478,14 @@ export class ResumeFormComponent implements OnInit {
         this.pdfService.generatePdf().subscribe({
           next: (response: Blob) => {
             this._triggerDownload(response, latestData.fullName || 'resume');
+            this.analyticsService.track(
+              'pdf_downloaded',
+              {
+                type: 'free',
+                template:
+                  latestData.selectedTemplate || 'modern'
+              }
+            );
             this.isDownloading = false;
             this.downloadSuccessMessage = 'Free PDF downloaded successfully';
             setTimeout(() => { this.downloadSuccessMessage = ''; }, 3000);
@@ -503,6 +513,12 @@ export class ResumeFormComponent implements OnInit {
 
   downloadPremiumPDF(): void {
     if (!this.isPro) {
+      this.analyticsService.track(
+        'upgrade_modal_opened',
+        {
+          feature: 'premium_pdf'
+        }
+      );
       this.showUpgradeModal = true;
       return;
     }
@@ -523,6 +539,14 @@ export class ResumeFormComponent implements OnInit {
         this.pdfService.generatePremiumPdf().subscribe({
           next: (response: Blob) => {
             this._triggerDownload(response, latestData.fullName || 'premium-resume');
+            this.analyticsService.track(
+              'pdf_downloaded',
+              {
+                type: 'premium',
+                template:
+                  latestData.selectedTemplate || 'modern'
+              }
+            );
             this.isPremiumDownloading = false;
             this.downloadSuccessMessage = 'Premium PDF downloaded successfully';
             setTimeout(() => { this.downloadSuccessMessage = ''; }, 2000);

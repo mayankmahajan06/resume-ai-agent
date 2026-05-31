@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { ResumeService } from '../../services/resume.service';
 import { WorkspaceHeaderComponent } from '../../shared/workspace-header/workspace-header.component';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-resume-builder',
@@ -23,7 +24,8 @@ export class ResumeBuilderComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private resumeService: ResumeService
+    private resumeService: ResumeService,
+    private analyticsService: AnalyticsService
   ) { }
 
   saveSuccessMessage = '';
@@ -53,6 +55,10 @@ export class ResumeBuilderComponent implements OnInit {
 
       await this.resumeService
         .saveResume(this.atsScore);
+
+      this.analyticsService.track(
+        'resume_saved'
+      );
 
       this.saveSuccessMessage =
         'Resume changes saved';

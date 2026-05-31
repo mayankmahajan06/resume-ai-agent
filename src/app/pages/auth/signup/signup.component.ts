@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { ResumeService } from '../../../services/resume.service';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-signup',
@@ -31,7 +32,8 @@ export class SignupComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private resumeService: ResumeService
+    private resumeService: ResumeService,
+    private analyticsService: AnalyticsService
   ) { }
 
   signup(): void {
@@ -57,6 +59,12 @@ export class SignupComponent {
     this.authService
       .signup(this.email, this.password)
       .then(() => {
+        this.analyticsService.track(
+          'sign_up',
+          {
+            method: 'email'
+          }
+        );
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
@@ -72,6 +80,12 @@ export class SignupComponent {
     this.authService
       .googleLogin()
       .then(() => {
+      this.analyticsService.track(
+    'sign_up',
+    {
+      method: 'google'
+    }
+  );
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
