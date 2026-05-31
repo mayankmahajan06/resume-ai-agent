@@ -113,7 +113,9 @@ GENERATE FREE PDF (Modern template — unchanged)
 app.get("/generate-pdf", async (req, res) => {
   let browser;
   try {
+    console.log("Chrome Path:", puppeteer.executablePath());
     browser = await puppeteer.launch({
+      executablePath: puppeteer.executablePath(),
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
@@ -166,7 +168,9 @@ app.get("/generate-premium-pdf", async (req, res) => {
   console.log("[PDF] theme:", theme, "| template:", template);
 
   try {
+    console.log("Chrome Path:", puppeteer.executablePath());
     browser = await puppeteer.launch({
+      executablePath: puppeteer.executablePath(),
       headless: true,
       args: [
         "--no-sandbox",
