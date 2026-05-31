@@ -135,6 +135,7 @@ export class ResumeService {
   updateResumeData(
     data: Partial<ResumeData>
   ): void {
+
     const currentData =
       this.resumeDataSubject.value;
 
@@ -145,9 +146,15 @@ export class ResumeService {
 
     this.resumeDataSubject.next(updatedData);
 
+    const dataToStore = {
+      ...updatedData
+    };
+
+    delete dataToStore.jdMatch;
+
     localStorage.setItem(
       'resumeData',
-      JSON.stringify(updatedData)
+      JSON.stringify(dataToStore)
     );
   }
 
@@ -205,7 +212,10 @@ export class ResumeService {
 
   resetResumeData(): void {
     localStorage.removeItem('resumeData');
-    this.resumeDataSubject.next(this.initialData);
+    this.resumeDataSubject.next({
+      ...this.initialData,
+      jdMatch: 0
+    });
   }
 
   private getStoredResumeData(): ResumeData {
@@ -245,7 +255,8 @@ export class ResumeService {
   loadResumeForEditing(resume: any): void {
     const resumeData = {
       ...resume.resumeData,
-      resumeId: resume.id
+      resumeId: resume.id,
+      jdMatch: 0
     };
 
     this.resumeDataSubject.next(resumeData);

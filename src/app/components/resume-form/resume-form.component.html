@@ -124,7 +124,8 @@
           />
           <input
             type="text"
-            placeholder="LinkedIn Profile"
+            placeholder="https://www.linkedin.com/in/your-profile"
+            (blur)="onLinkedInBlur()"
             formControlName="linkedIn"
           />
           <input
@@ -313,7 +314,7 @@
       <div *ngIf="currentStep === 6" class="final-review-dashboard">
         <!-- Header -->
         <div class="review-header">
-          <h3>Final Resume Optimization</h3>
+          <h3>Final Review & Export</h3>
           <p>
             Your resume is almost recruiter-ready. Review the final insights
             before downloading.
@@ -357,20 +358,20 @@
             <div class="track-labels">
               <span class="track-pill free-pill">FREE PLAN TRACK</span>
               <span class="track-pill active-pill" *ngIf="userPlan === 'free'"
-                >ACTIVE PLAN</span
+                >CURRENT PLAN</span
               >
             </div>
 
-            <h4>STANDARD EXPORT</h4>
+            <h4>STANDARD RESUME</h4>
             <p class="track-desc">
-              Perfect for standard applications. Get a sleek resume formatted
-              for instant printing.
+              Perfect for job seekers who need a professional ATS-compatible resume without advanced customization.
             </p>
 
             <ul class="track-features">
-              <li>Modern single-column theme</li>
-              <li>Infinite lifetime edits</li>
-              <li>Clean high-definition text rules</li>
+              <li>ATS-friendly resume format</li>
+              <li>Unlimited resume edits</li>
+              <li>Professional modern template</li>
+              <li>High-quality PDF export</li>
             </ul>
 
             <!-- Free download: always available to everyone -->
@@ -397,37 +398,21 @@
               <!-- Show price only to free users; show "ACTIVE PLAN" to pro users -->
               <span class="track-price" *ngIf="!isPro">₹199 / month</span>
               <span class="track-pill active-pill pro-active-pill" *ngIf="isPro"
-                >ACTIVE PLAN</span
+                >CURRENT PLAN</span
               >
             </div>
 
             <h4>PRO RECRUITER EXPORT</h4>
             <p class="track-desc">
-              Lock in premium layouts, customizable color themes, and our
-              real-time AI ATS keyword alignment score checker.
+              Unlock premium templates, custom themes, recruiter-style layouts, and Job Description Match insights to improve your chances of getting shortlisted.
             </p>
 
             <ul class="track-features pro-features">
-              <li>Premium dual-column layout style</li>
-              <li>Lock in all 5 custom theme colors</li>
-              <li>Live AI-powered Job Description Matcher</li>
+              <li>All premium resume templates</li>
+              <li>5 custom theme colors</li>
+              <li>Job Description Match Analyzer</li>
+              <li>Premium recruiter-style layouts</li>
             </ul>
-
-            <!-- Pro download: opens upgrade modal for free users -->
-            <!-- <button
-              type="button"
-              class="track-download-btn"
-              [class.pro-download-btn]="isPro"
-              [class.unlock-btn]="!isPro"
-              [disabled]="isPremiumDownloading"
-              (click)="downloadPremiumPDF()"
-            >
-              {{ proDownloadLabel }}
-            </button>
-
-            <p class="track-sub">
-              {{ isPro ? 'Priority rendering • Unlimited exports' : 'Razorpay Protected • Refund Guarantee' }}
-            </p> -->
           </div>
         </div>
 
@@ -451,10 +436,10 @@
         ============================================= -->
         <div class="template-chooser">
           <div class="template-chooser-header">
-            <h4>Choose Template Layout</h4>
+            <h4>Choose Resume Template</h4>
             <!-- Show locked count only when user has locked templates -->
             <span class="locked-badge" *ngIf="!isPro">
-              {{ lockedTemplateCount }} PRO OPTIONS LOCKED
+              {{ lockedTemplateCount }} PREMIUM TEMPLATES LOCKED
             </span>
             <span class="unlocked-badge" *ngIf="isPro">
               ALL TEMPLATES UNLOCKED
@@ -508,8 +493,7 @@
               <h4>Job Description Alignment Tracker</h4>
 
               <p>
-                Paste your target job description to match skills and compute
-                index scores.
+                Compare your resume against a job description and discover missing skills.
               </p>
             </div>
           </div>

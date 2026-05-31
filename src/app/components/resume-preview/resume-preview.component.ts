@@ -59,7 +59,8 @@ export class ResumePreviewComponent implements OnInit {
 
   templates = [
     { id: 'modern', name: 'Modern', premium: false },
-    { id: 'premium', name: 'Premium', premium: true }
+    { id: 'executive', name: 'Executive', premium: true },
+    { id: 'compact', name: 'Compact', premium: true }
   ];
   recruiterVisibility = 'Low';
   @Output()
@@ -79,7 +80,7 @@ export class ResumePreviewComponent implements OnInit {
       this.selectedTheme = data.selectedTheme || 'indigo';
       this.selectedTemplate = data.selectedTemplate || 'modern';
       this.calculateATSScore();
-      this.validatePremiumAccess();
+      // this.validatePremiumAccess();
     });
 
     this.loadUserPlanFromFirebase();
@@ -96,7 +97,7 @@ export class ResumePreviewComponent implements OnInit {
   }
 
   get jdMatchLabel(): string {
-    return this.jdMatch > 0 ? this.jdMatch + '%' : 'Not Analyzed';
+    return this.jdMatch > 0 ? this.jdMatch + '%' : 'Run JD Analysis';
   }
 
   get jdMatchClass(): string {
@@ -140,12 +141,26 @@ export class ResumePreviewComponent implements OnInit {
   ======================================== */
 
   selectTemplate(templateId: string): void {
-    if (templateId === 'premium' && this.userPlan === 'free') {
+
+    const premiumTemplates = [
+      'executive',
+      'compact'
+    ];
+
+    if (
+      premiumTemplates.includes(templateId) &&
+      this.userPlan === 'free'
+    ) {
       this.openUpgradeModal();
       return;
     }
+
     this.selectedTemplate = templateId;
-    this.resumeService.updateResumeData({ selectedTemplate: templateId });
+
+    this.resumeService.updateResumeData({
+      selectedTemplate: templateId
+    });
+
   }
 
   /* ========================================
@@ -164,9 +179,23 @@ export class ResumePreviewComponent implements OnInit {
       this.resumeService.updateResumeData({ selectedTheme: 'indigo' });
     }
 
-    if (this.selectedTemplate === 'premium') {
+    const premiumTemplates = [
+      'executive',
+      'compact'
+    ];
+
+    if (
+      premiumTemplates.includes(
+        this.selectedTemplate
+      )
+    ) {
+
       this.selectedTemplate = 'modern';
-      this.resumeService.updateResumeData({ selectedTemplate: 'modern' });
+
+      this.resumeService.updateResumeData({
+        selectedTemplate: 'modern'
+      });
+
     }
   }
 
@@ -220,7 +249,7 @@ export class ResumePreviewComponent implements OnInit {
       summaryText.includes('reduced')
     ) score += 10;
 
-    this.atsScore = Math.min(score, 100);
+    this.atsScore = Math.min(score, 95);
     this.updateRecruiterVisibility();
     this.atsScoreChange.emit(
       this.atsScore

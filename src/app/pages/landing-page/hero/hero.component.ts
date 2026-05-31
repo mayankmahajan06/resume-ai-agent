@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ResumeService } from '../../../services/resume.service';
 
 @Component({
   selector: 'app-hero',
@@ -16,7 +17,8 @@ export class HeroComponent {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private resumeService: ResumeService
   ) {
     this.authService
       .getCurrentUser()
@@ -27,6 +29,7 @@ export class HeroComponent {
 
   goToPrimaryAction() {
     if (this.isLoggedIn) {
+      this.resumeService.createNewResume();
       this.router.navigate(['/resume-builder']);
       return;
     }

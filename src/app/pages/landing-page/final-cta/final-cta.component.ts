@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ResumeService } from '../../../services/resume.service';
 
 @Component({
   selector: 'app-final-cta',
@@ -14,7 +15,8 @@ export class FinalCtaComponent {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private resumeService: ResumeService
   ) {
     this.authService
       .getCurrentUser()
@@ -25,6 +27,7 @@ export class FinalCtaComponent {
 
   goToPrimaryAction(): void {
     if (this.isLoggedIn) {
+      this.resumeService.createNewResume();
       this.router.navigate(['/resume-builder']);
       return;
     }

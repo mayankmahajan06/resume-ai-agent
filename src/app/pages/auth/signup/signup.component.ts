@@ -4,13 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { AuthService } from '../../../services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
+import { ResumeService } from '../../../services/resume.service';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    MatIconModule
   ],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss']
@@ -27,7 +30,8 @@ export class SignupComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private resumeService: ResumeService
   ) { }
 
   signup(): void {
@@ -53,6 +57,7 @@ export class SignupComponent {
     this.authService
       .signup(this.email, this.password)
       .then(() => {
+        this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
@@ -67,6 +72,7 @@ export class SignupComponent {
     this.authService
       .googleLogin()
       .then(() => {
+        this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
@@ -95,5 +101,9 @@ export class SignupComponent {
       default:
         return 'Something went wrong. Please try again.';
     }
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/']);
   }
 }

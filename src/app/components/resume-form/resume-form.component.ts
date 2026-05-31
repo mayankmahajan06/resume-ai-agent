@@ -89,25 +89,26 @@ export class ResumeFormComponent implements OnInit {
       name: 'Compact Grid',
       description: 'High-density formatted layout optimised for rich experiences.',
       pro: true
-    },
-    {
-      id: 'clean',
-      name: 'Clean Light',
-      description: 'Prestige light, spacious spacing with elegant fine lines.',
-      pro: true
-    },
-    {
-      id: 'brand',
-      name: 'Brand Innovator',
-      description: 'Full-bleed modern colored heading block layout system.',
-      pro: true
-    },
-    {
-      id: 'academic',
-      name: 'Academic CV Label',
-      description: 'Traditional scholarly labeled layout with structured rows.',
-      pro: true
     }
+    // ,
+    // {
+    //   id: 'clean',
+    //   name: 'Clean Light',
+    //   description: 'Prestige light, spacious spacing with elegant fine lines.',
+    //   pro: true
+    // },
+    // {
+    //   id: 'brand',
+    //   name: 'Brand Innovator',
+    //   description: 'Full-bleed modern colored heading block layout system.',
+    //   pro: true
+    // },
+    // {
+    //   id: 'academic',
+    //   name: 'Academic CV Label',
+    //   description: 'Traditional scholarly labeled layout with structured rows.',
+    //   pro: true
+    // }
   ];
 
   selectedTemplate = 'modern';
@@ -126,6 +127,15 @@ export class ResumeFormComponent implements OnInit {
     const data = this.resumeService.getResumeData();
 
     this.initializeForm(data);
+
+    /* KEEP TEMPLATE CARD IN SYNC */
+    this.resumeService.resumeData$
+      .subscribe(data => {
+
+        this.selectedTemplate =
+          data.selectedTemplate || 'modern';
+
+      });
 
     /* Live Binding */
     this.resumeForm.valueChanges.subscribe((value) => {
@@ -643,7 +653,7 @@ export class ResumeFormComponent implements OnInit {
 
     /* Write score into shared service — resume-preview reads it automatically */
     dialogRef.afterClosed().subscribe((result) => {
-      if (result?.jdMatch) {
+      if (result) {
         this.resumeService.updateResumeData({ jdMatch: result.jdMatch });
       }
     });
@@ -795,6 +805,31 @@ export class ResumeFormComponent implements OnInit {
         panelClass: 'upgrade-dialog'
       }
     );
+
+  }
+
+  onLinkedInBlur(): void {
+
+    const control =
+      this.resumeForm.get('linkedIn');
+
+    const value =
+      control?.value?.trim();
+
+    if (!value) {
+      return;
+    }
+
+    if (
+      !value.startsWith('http://') &&
+      !value.startsWith('https://')
+    ) {
+
+      control?.setValue(
+        `https://${value}`
+      );
+
+    }
 
   }
 }

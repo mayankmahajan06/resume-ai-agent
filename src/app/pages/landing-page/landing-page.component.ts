@@ -7,13 +7,14 @@ import { FinalCtaComponent } from './final-cta/final-cta.component';
 import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 import { PricingComponent } from './pricing/pricing.component';
 import { StatsComponent } from './stats/stats.component';
+import { TemplatesComponent } from './templates/templates.component';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [[ HeaderComponent, FooterComponent, HeroComponent, FeaturesComponent, HowItWorksComponent, StatsComponent, PricingComponent, FinalCtaComponent ]],
+  imports: [[ HeaderComponent, FooterComponent, HeroComponent, FeaturesComponent, HowItWorksComponent, TemplatesComponent, PricingComponent, FinalCtaComponent ]],
   templateUrl: './landing-page.component.html',
-  styleUrl: './landing-page.component.scss'
+  styleUrls: ['./landing-page.component.scss']
 })
 export class LandingPageComponent {
 

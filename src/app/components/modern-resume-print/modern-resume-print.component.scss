@@ -311,6 +311,20 @@ body {
     max-width: 100%;
   }
 
+  .main-grid {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .left-column {
+    width: 35%;
+  }
+
+  .right-column {
+    width: 65%;
+  }
+
   .print-header,
   .main-grid,
   .left-column,

@@ -1,5 +1,4 @@
 <section id="pricing" class="pricing-section">
-
   <h2>Simple, Transparent Pricing</h2>
 
   <p class="subtitle">
@@ -7,43 +6,29 @@
   </p>
 
   <div class="pricing-grid">
-
     <!-- FREE PLAN -->
 
     <div class="pricing-card">
-
       <h3>Free Plan</h3>
 
       <h4>₹0</h4>
 
       <ul>
-        <li>1 Resume Build</li>
-        <li>1 Standard Resume Template</li>
-        <li>All Theme Colors</li>
+        <li>Unlimited Resume Builds</li>
+        <li>Modern Template Only</li>
+        <li>Default Indigo Theme</li>
         <li>ATS Score Check</li>
-        <li>JD Match Score Check</li>
         <li>Standard PDF Download</li>
       </ul>
 
-      <button
-        type="button"
-        (click)="handleFreePlan()"
-      >
-
-        {{
-          isLoggedIn
-            ? 'My Resumes'
-            : 'Get Started Free'
-        }}
-
+      <button type="button" (click)="handleFreePlan()">
+        {{ isLoggedIn ? "My Resumes" : "Get Started Free" }}
       </button>
-
     </div>
 
     <!-- PRO PLAN -->
 
     <div class="pricing-card">
-
       <h3>Pro Plan</h3>
 
       <h4>
@@ -53,38 +38,31 @@
 
       <ul>
         <li>Unlimited Resume Builds</li>
-        <li>Premium Resume Templates</li>
+        <li>All Resume Templates</li>
+        <li>All Theme Colors</li>
         <li>Premium PDF Download</li>
+        <li>Access to Future AI Features</li>
       </ul>
 
       <button
         type="button"
-        [disabled]="
-          userPlan === 'pro' ||
-          userPlan === 'pro_plus'
-        "
+        [disabled]="userPlan === 'pro' || userPlan === 'pro_plus'"
         (click)="handleProPlan()"
       >
-
         {{
-          userPlan === 'pro'
-            ? 'Current Plan'
-            : userPlan === 'pro_plus'
-              ? 'Included in Pro Plus'
-              : 'Upgrade to Pro'
+          userPlan === "pro"
+            ? "Current Plan"
+            : userPlan === "pro_plus"
+              ? "Included in Pro Plus"
+              : "Upgrade to Pro"
         }}
-
       </button>
-
     </div>
 
     <!-- PRO PLUS -->
 
     <div class="pricing-card active">
-
-      <span class="badge">
-        BEST VALUE
-      </span>
+      <span class="badge"> BEST VALUE </span>
 
       <h3>Pro Plus</h3>
 
@@ -97,28 +75,22 @@
         <li>Includes all Pro features</li>
         <li>3-Month Access</li>
         <li>Lower Cost (₹166/month)</li>
+        <li>Best Value Plan</li>
       </ul>
 
       <button
         type="button"
-        [disabled]="
-          userPlan === 'pro_plus'
-        "
+        [disabled]="userPlan === 'pro_plus'"
         (click)="handleProPlusPlan()"
       >
-
         {{
-          userPlan === 'pro_plus'
-            ? 'Current Plan'
-            : userPlan === 'pro'
-              ? 'Upgrade to Pro Plus'
-              : 'Go Pro Plus'
+          userPlan === "pro_plus"
+            ? "Current Plan"
+            : userPlan === "pro"
+              ? "Upgrade to Pro Plus"
+              : "Go Pro Plus"
         }}
-
       </button>
-
     </div>
-
   </div>
-
 </section>

@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.legal-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+
+  a {
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: 700;
+    color: #4f46e5;
+  }
+}
+
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+}
+
+h1 {
+  font-size: 42px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.last-updated {
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+h2 {
+  margin-top: 36px;
+  margin-bottom: 12px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+p,
+li {
+  color: #475569;
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+ul {
+  padding-left: 20px;
+}

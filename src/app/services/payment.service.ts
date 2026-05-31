@@ -1,7 +1,7 @@
 // src/app/services/payment.service.ts
 
 import { Injectable } from '@angular/core';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../environments/environment';
 
 import { PdfService } from './pdf.service';
@@ -26,7 +26,8 @@ export class PaymentService {
   constructor(
     private pdfService: PdfService,
     private firestore: Firestore,
-    private auth: Auth
+    private auth: Auth,
+    private snackBar: MatSnackBar
   ) { }
 
   /* =====================================
@@ -139,6 +140,27 @@ export class PaymentService {
     const razorpay =
       new Razorpay(options);
 
+    razorpay.on(
+      'payment.failed',
+      (response: any) => {
+
+        console.error(
+          'Payment Failed',
+          response.error
+        );
+
+        this.snackBar.open(
+          'Payment failed. Please try again.',
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top'
+          }
+        );
+      }
+    );
+
     razorpay.open();
 
   }
@@ -166,8 +188,14 @@ export class PaymentService {
               verification
             );
 
-            alert(
-              'Payment successful'
+            this.snackBar.open(
+              'Payment successful! Premium templates unlocked.',
+              'Close',
+              {
+                duration: 4000,
+                horizontalPosition: 'right',
+                verticalPosition: 'top'
+              }
             );
 
             window.location.reload();
@@ -177,9 +205,12 @@ export class PaymentService {
         error:
           (error) => {
 
-            console.error(
-              'Payment verification failed',
-              error
+            this.snackBar.open(
+              'Payment verification failed. Please contact support.',
+              'Close',
+              {
+                duration: 5000
+              }
             );
 
           }

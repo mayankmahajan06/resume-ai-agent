@@ -34,7 +34,13 @@
           <div class="contact-item" *ngIf="resumeData.linkedIn">
             <span class="material-icons icon"> language </span>
 
-            <span> {{ resumeData.linkedIn }} </span>
+            <a
+              [href]="resumeData.linkedIn"
+              target="_blank"
+              class="linkedin-link"
+            >
+              LinkedIn Profile
+            </a>
           </div>
         </div>
       </div>

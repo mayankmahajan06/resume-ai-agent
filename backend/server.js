@@ -21,12 +21,12 @@ const razorpay = new Razorpay({
 
 const plans = {
   pro: {
-    amount: 199,
+    amount: 1,
     durationDays: 30,
     label: "Pro Plan",
   },
   pro_plus: {
-    amount: 499,
+    amount: 2,
     durationDays: 90,
     label: "Pro Plus",
   },

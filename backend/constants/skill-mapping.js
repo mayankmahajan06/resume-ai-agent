@@ -149,8 +149,51 @@ const skillMapping = {
   },
 
   microfrontend: {
-    label: "Microfrontend",
-    aliases: ["microfrontend", "micro frontends", "microfrontend architecture"],
+    label: "Micro Frontends",
+    aliases: [
+      "micro frontend",
+      "micro frontends",
+      "microfrontend",
+      "microfrontend architecture",
+    ],
+  },
+  angularmaterial: {
+    label: "Angular Material",
+    aliases: ["angular material", "material ui", "@angular/material"],
+  },
+
+  azuredevops: {
+    label: "Azure DevOps",
+    aliases: ["azure devops", "azuredevops"],
+  },
+
+  jasmine: {
+    label: "Jasmine",
+    aliases: ["jasmine"],
+  },
+
+  agile: {
+    label: "Agile",
+    aliases: ["agile", "scrum", "kanban"],
+  },
+
+  responsivedesign: {
+    label: "Responsive Design",
+    aliases: ["responsive design", "responsive ui", "responsive web design"],
+  },
+
+  accessibility: {
+    label: "Accessibility",
+    aliases: ["accessibility", "wcag", "a11y"],
+  },
+
+  performanceoptimization: {
+    label: "Performance Optimization",
+    aliases: [
+      "performance optimization",
+      "performance tuning",
+      "web performance",
+    ],
   },
 };
 

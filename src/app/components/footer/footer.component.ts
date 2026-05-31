@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
 
@@ -18,12 +18,13 @@ import { Auth } from '@angular/fire/auth';
   imports: [
     CommonModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    RouterModule
   ],
 
   templateUrl: './footer.component.html',
 
-  styleUrl: './footer.component.scss'
+  styleUrls: ['./footer.component.scss']
 })
 export class FooterComponent {
 
@@ -80,7 +81,7 @@ export class FooterComponent {
     } else {
 
       this.router.navigate([
-        '/login'
+        '/signup'
       ]);
 
     }
