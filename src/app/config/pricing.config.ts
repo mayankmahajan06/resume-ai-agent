@@ -14,7 +14,7 @@ export const PRICING_CONFIG = {
 
     label: 'Pro Plan',
 
-    price: 199,
+    price: 99,
 
     durationMonths: 1
 
@@ -24,7 +24,7 @@ export const PRICING_CONFIG = {
 
     label: 'Pro Plus Plan',
 
-    price: 499,
+    price: 199,
 
     durationMonths: 3
 

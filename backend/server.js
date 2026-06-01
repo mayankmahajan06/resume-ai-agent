@@ -40,12 +40,12 @@ if (!admin.apps.length) {
 
 const plans = {
   pro: {
-    amount: 1,
+    amount: 99,
     durationDays: 30,
     label: "Pro Plan",
   },
   pro_plus: {
-    amount: 2,
+    amount: 199,
     durationDays: 90,
     label: "Pro Plus",
   },

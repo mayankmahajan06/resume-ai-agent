@@ -257,7 +257,7 @@ export class ResumeFormComponent implements OnInit {
     if (this.isPro) {
       return this.isPremiumDownloading ? 'Generating...' : '⬇ Download Premium PDF';
     }
-    return '💳 Unlock Premium for ₹199';
+    return '💳 Unlock Premium for ₹99';
   }
 
   /** Plan pill label — shown as the "active plan" track pill */
