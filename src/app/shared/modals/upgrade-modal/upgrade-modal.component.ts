@@ -71,7 +71,10 @@ export class UpgradeModalComponent {
   ): void {
 
     this.paymentService
-      .startPremiumUpgrade(planType);
+      .startPremiumUpgrade(
+        planType,
+        'upgrade_modal'
+      );
 
   }
 

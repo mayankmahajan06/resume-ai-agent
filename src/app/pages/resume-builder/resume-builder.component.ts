@@ -37,6 +37,9 @@ export class ResumeBuilderComponent implements OnInit {
       behavior: 'smooth'
     });
 
+    this.analyticsService
+      .trackResumeBuilderOpened();
+
   }
 
   goToHome() {
@@ -56,9 +59,10 @@ export class ResumeBuilderComponent implements OnInit {
       await this.resumeService
         .saveResume(this.atsScore);
 
-      this.analyticsService.track(
-        'resume_saved'
-      );
+      this.analyticsService
+        .trackResumeSaved({
+          ats_score: this.atsScore
+        });
 
       this.saveSuccessMessage =
         'Resume changes saved';

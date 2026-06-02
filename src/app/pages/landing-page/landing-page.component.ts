@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { HeroComponent } from './hero/hero.component';
@@ -8,6 +8,7 @@ import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 import { PricingComponent } from './pricing/pricing.component';
 import { StatsComponent } from './stats/stats.component';
 import { TemplatesComponent } from './templates/templates.component';
+import { AnalyticsService } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -16,6 +17,14 @@ import { TemplatesComponent } from './templates/templates.component';
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.scss']
 })
-export class LandingPageComponent {
+export class LandingPageComponent implements OnInit {
 
+  constructor(
+    private analyticsService: AnalyticsService
+  ) { }
+
+  ngOnInit(): void {
+    this.analyticsService
+      .trackLandingPageViewed();
+  }
 }

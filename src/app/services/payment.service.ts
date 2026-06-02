@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../environments/environment';
 
 import { PdfService } from './pdf.service';
+import { AnalyticsService } from './analytics.service';
 
 import {
   Firestore,
@@ -27,7 +28,8 @@ export class PaymentService {
     private pdfService: PdfService,
     private firestore: Firestore,
     private auth: Auth,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private analyticsService: AnalyticsService
   ) { }
 
   /* =====================================
@@ -35,8 +37,15 @@ export class PaymentService {
   ===================================== */
 
   startPremiumUpgrade(
-    planType: 'pro' | 'pro_plus'
+    planType: 'pro' | 'pro_plus',
+    source = 'unknown'
   ): void {
+
+    this.analyticsService
+      .trackUpgradeClicked(
+        planType,
+        source
+      );
 
     const payload = {
       planType
@@ -229,6 +238,13 @@ export class PaymentService {
             await this.saveVerifiedPremiumPlanToFirebase(
               verification
             );
+
+            this.analyticsService
+              .trackPaymentSuccess(
+                verification.planType,
+                verification.paymentId,
+                verification.orderId
+              );
 
             this.snackBar.open(
               'Payment successful! Premium templates unlocked.',

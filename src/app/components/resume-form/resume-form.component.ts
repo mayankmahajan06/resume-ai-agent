@@ -478,13 +478,9 @@ export class ResumeFormComponent implements OnInit {
         this.pdfService.generatePdf().subscribe({
           next: (response: Blob) => {
             this._triggerDownload(response, latestData.fullName || 'resume');
-            this.analyticsService.track(
-              'pdf_downloaded',
-              {
-                type: 'free',
-                template:
-                  latestData.selectedTemplate || 'modern'
-              }
+            this.analyticsService.trackPdfDownloaded(
+              'free',
+              latestData.selectedTemplate || 'modern'
             );
             this.isDownloading = false;
             this.downloadSuccessMessage = 'Free PDF downloaded successfully';
@@ -539,13 +535,9 @@ export class ResumeFormComponent implements OnInit {
         this.pdfService.generatePremiumPdf().subscribe({
           next: (response: Blob) => {
             this._triggerDownload(response, latestData.fullName || 'premium-resume');
-            this.analyticsService.track(
-              'pdf_downloaded',
-              {
-                type: 'premium',
-                template:
-                  latestData.selectedTemplate || 'modern'
-              }
+            this.analyticsService.trackPdfDownloaded(
+              'premium',
+              latestData.selectedTemplate || 'modern'
             );
             this.isPremiumDownloading = false;
             this.downloadSuccessMessage = 'Premium PDF downloaded successfully';
@@ -592,7 +584,10 @@ export class ResumeFormComponent implements OnInit {
   }
 
   startPremiumUpgrade(planType: 'pro' | 'pro_plus'): void {
-    this.paymentService.startPremiumUpgrade(planType);
+    this.paymentService.startPremiumUpgrade(
+      planType,
+      'resume_form'
+    );
   }
 
   /* ========================================

@@ -56,15 +56,14 @@ export class SignupComponent {
 
     this.isLoading = true;
 
+    this.analyticsService
+      .trackSignupStarted('email');
+
     this.authService
       .signup(this.email, this.password)
       .then(() => {
-        this.analyticsService.track(
-          'sign_up',
-          {
-            method: 'email'
-          }
-        );
+        this.analyticsService
+          .trackSignupCompleted('email');
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
@@ -77,15 +76,14 @@ export class SignupComponent {
   }
 
   googleSignup(): void {
+    this.analyticsService
+      .trackSignupStarted('google');
+
     this.authService
       .googleLogin()
       .then(() => {
-      this.analyticsService.track(
-    'sign_up',
-    {
-      method: 'google'
-    }
-  );
+        this.analyticsService
+          .trackSignupCompleted('google');
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })

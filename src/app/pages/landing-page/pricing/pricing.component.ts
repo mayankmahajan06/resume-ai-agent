@@ -104,7 +104,8 @@ export class PricingComponent {
 
     this.paymentService
       .startPremiumUpgrade(
-        'pro'
+        'pro',
+        'landing_pricing'
       );
 
   }
@@ -139,7 +140,8 @@ export class PricingComponent {
 
     this.paymentService
       .startPremiumUpgrade(
-        'pro_plus'
+        'pro_plus',
+        'landing_pricing'
       );
 
   }
