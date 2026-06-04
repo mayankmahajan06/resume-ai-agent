@@ -3,6 +3,10 @@ const skillMapping = {
     label: "Angular",
     aliases: ["angular", "angular2", "angular 2+"],
   },
+  angularjs: {
+    label: "AngularJS",
+    aliases: ["angularjs", "angular.js", "angular 1", "angular1"],
+  },
 
   react: {
     label: "React",

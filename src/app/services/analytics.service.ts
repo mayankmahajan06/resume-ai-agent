@@ -121,6 +121,41 @@ export class AnalyticsService {
     );
   }
 
+  trackResumeImportStarted(): void {
+    this.track(
+      'resume_import_started',
+      {
+        import_type: 'pdf'
+      }
+    );
+  }
+
+  trackResumeImportSuccess(
+    pages?: number,
+    textLength?: number
+  ): void {
+    this.track(
+      'resume_import_success',
+      {
+        import_type: 'pdf',
+        pages,
+        text_length: textLength
+      }
+    );
+  }
+
+  trackResumeImportFailed(
+    reason?: string
+  ): void {
+    this.track(
+      'resume_import_failed',
+      {
+        import_type: 'pdf',
+        reason
+      }
+    );
+  }
+
   private trackFunnelEvent(
     eventName: string,
     eventLabel: string,

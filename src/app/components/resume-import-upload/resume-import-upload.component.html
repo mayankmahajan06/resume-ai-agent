@@ -1,0 +1,23 @@
+<div class="resume-import-card">
+  <div>
+    <h3>Upload Existing Resume</h3>
+    <p>Import a PDF resume and auto-fill the builder fields.</p>
+  </div>
+
+  <input
+    #resumeImportInput
+    type="file"
+    accept="application/pdf,.pdf"
+    class="resume-import-input"
+    (change)="onFileSelected($event)"
+  />
+
+  <button
+    type="button"
+    class="resume-import-btn"
+    [disabled]="isUploading"
+    (click)="resumeImportInput.click()"
+  >
+    {{ isUploading ? "Uploading..." : "Upload Existing Resume" }}
+  </button>
+</div>

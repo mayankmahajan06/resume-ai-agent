@@ -90,6 +90,19 @@
     </div>
   </div>
 
+  <app-resume-import-upload
+    [isUploading]="isImportingResume"
+    (resumeSelected)="onResumeImportSelected($event)"
+  ></app-resume-import-upload>
+
+  <div *ngIf="importSuccessMessage" class="download-toast success">
+    {{ importSuccessMessage }}
+  </div>
+
+  <div *ngIf="importErrorMessage" class="download-toast error">
+    {{ importErrorMessage }}
+  </div>
+
   <!-- MAIN FORM -->
   <div class="form-card">
     <form [formGroup]="resumeForm">

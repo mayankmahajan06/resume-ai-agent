@@ -1,7 +1,7 @@
 // resume-form.component.ts
 // COMPLETE FILE
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -22,13 +22,17 @@ import {
 import {
   ResumeService
 } from '../../services/resume.service';
+import { ResumeData } from '../../services/resume.service';
 import { PdfService } from '../../services/pdf.service';
 import { PaymentService } from '../../services/payment.service';
+import { ResumeImportService } from '../../services/resume-import.service';
 import { MatDialog } from '@angular/material/dialog';
 import { JdAnalysisDialogComponent } from '../jd-analysis-dialog/jd-analysis-dialog.component';
 import { ResumeValidationDialogComponent } from '../resume-validation-dialog/resume-validation-dialog.component';
 import { UpgradeModalComponent } from '../../shared/modals/upgrade-modal/upgrade-modal.component';
 import { AnalyticsService } from '../../services/analytics.service';
+import { Subscription } from 'rxjs';
+import { ResumeImportUploadComponent } from '../resume-import-upload/resume-import-upload.component';
 
 /* ========================================
    TEMPLATE DEFINITION
@@ -47,12 +51,13 @@ export interface ResumeTemplate {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule
+    MatDialogModule,
+    ResumeImportUploadComponent
   ],
   templateUrl: './resume-form.component.html',
   styleUrls: ['./resume-form.component.scss']
 })
-export class ResumeFormComponent implements OnInit {
+export class ResumeFormComponent implements OnInit, OnDestroy {
 
   currentStep = 1;
   totalSteps = 6;
@@ -65,8 +70,12 @@ export class ResumeFormComponent implements OnInit {
   selectedTheme = 'indigo';
   isPremiumDownloading = false;
   isDownloading = false;
+  isImportingResume = false;
   downloadSuccessMessage = '';
   downloadErrorMessage = '';
+  importSuccessMessage = '';
+  importErrorMessage = '';
+  private formChangesSubscription?: Subscription;
 
   /* ========================================
      TEMPLATE LIST — single source of truth
@@ -119,6 +128,7 @@ export class ResumeFormComponent implements OnInit {
     private resumeService: ResumeService,
     private paymentService: PaymentService,
     private pdfService: PdfService,
+    private resumeImportService: ResumeImportService,
     private auth: Auth,
     private firestore: Firestore,
     private dialog: MatDialog,
@@ -139,15 +149,15 @@ export class ResumeFormComponent implements OnInit {
 
       });
 
-    /* Live Binding */
-    this.resumeForm.valueChanges.subscribe((value) => {
-      this.resumeService.updateResumeData(value);
-      this.calculateProfileCompletion(value);
-    });
+    this.bindFormChanges();
 
     /* Initial calculation */
     this.calculateProfileCompletion(this.resumeForm.value);
     this.loadUserPlanFromFirebase();
+  }
+
+  ngOnDestroy(): void {
+    this.formChangesSubscription?.unsubscribe();
   }
 
   initializeForm(data: any): void {
@@ -215,6 +225,130 @@ export class ResumeFormComponent implements OnInit {
 
     });
     this.selectedTemplate = data.selectedTemplate || 'modern';
+  }
+
+  private bindFormChanges(): void {
+    this.formChangesSubscription?.unsubscribe();
+
+    this.formChangesSubscription =
+      this.resumeForm.valueChanges.subscribe((value) => {
+        this.resumeService.updateResumeData(value);
+        this.calculateProfileCompletion(value);
+      });
+  }
+
+  onResumeImportSelected(
+    file: File
+  ): void {
+    if (
+      file.type !== 'application/pdf' &&
+      !file.name.toLowerCase().endsWith('.pdf')
+    ) {
+      this.importErrorMessage =
+        'Please upload a PDF resume.';
+
+      setTimeout(() => { this.importErrorMessage = ''; }, 3000);
+      return;
+    }
+
+    this.isImportingResume = true;
+    this.importSuccessMessage = '';
+    this.importErrorMessage = '';
+
+    this.analyticsService
+      .trackResumeImportStarted();
+
+    this.resumeImportService
+      .importResume(file)
+      .subscribe({
+        next: (response) => {
+          if (!response.success || !response.resumeData) {
+            this.analyticsService
+              .trackResumeImportFailed(response.message || 'Resume import failed');
+
+            this.importErrorMessage =
+              'Unable to import resume. Please try another PDF.';
+
+            this.isImportingResume = false;
+            setTimeout(() => { this.importErrorMessage = ''; }, 4000);
+            return;
+          }
+
+          this.applyImportedResumeData(response.resumeData);
+
+          this.analyticsService
+            .trackResumeImportSuccess(
+              response.metadata?.pages,
+              response.metadata?.textLength
+            );
+
+          this.importSuccessMessage =
+            'Resume imported successfully. Please review the extracted details.';
+
+          setTimeout(() => { this.importSuccessMessage = ''; }, 4000);
+          this.isImportingResume = false;
+        },
+        error: (error) => {
+          const message =
+            error?.error?.message || error?.message || 'Resume import failed';
+
+          this.analyticsService
+            .trackResumeImportFailed(message);
+
+          this.importErrorMessage =
+            'We could not extract this resume. Please try another PDF or enter details manually.'
+          this.isImportingResume = false;
+          setTimeout(() => { this.importErrorMessage = ''; }, 4000);
+        }
+      });
+  }
+
+  private applyImportedResumeData(
+    importedData: ResumeData
+  ): void {
+
+    const freshData: ResumeData = {
+      ...importedData,
+
+      // Don't carry old Firebase resume id
+      resumeId: "",
+
+      // Keep defaults if parser missed them
+      selectedTheme:
+        importedData.selectedTheme || "indigo",
+
+      selectedTemplate:
+        importedData.selectedTemplate || "modern",
+
+      // Always ensure arrays exist
+      experiences:
+        importedData.experiences || [],
+
+      projects:
+        importedData.projects || [],
+
+      certifications:
+        importedData.certifications || [],
+
+      education:
+        importedData.education || []
+    };
+
+    this.resumeService.updateResumeData(
+      freshData
+    );
+
+    this.initializeForm(
+      freshData
+    );
+
+    this.bindFormChanges();
+
+    this.calculateProfileCompletion(
+      this.resumeForm.value
+    );
+
+    this.currentStep = 1;
   }
 
   /* ========================================

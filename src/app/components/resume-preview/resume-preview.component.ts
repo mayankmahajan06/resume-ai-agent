@@ -225,35 +225,84 @@ export class ResumePreviewComponent implements OnInit {
   calculateATSScore(): void {
     let score = 0;
 
-    if (this.resumeData.fullName) score += 10;
-    if (this.resumeData.email) score += 10;
-    if (this.resumeData.phone) score += 10;
-    if (this.resumeData.linkedIn) score += 5;
+    // Contact (25)
+    if (this.resumeData.fullName) score += 5;
+    if (this.resumeData.email) score += 5;
+    if (this.resumeData.phone) score += 5;
+    if (this.resumeData.linkedIn) score += 10;
 
-    if (this.resumeData.summary?.trim().length >= 100) score += 15;
+    // Summary (15)
+    const summary =
+      (this.resumeData.summary || "").trim();
 
-    if (this.skillsArray.length >= 8) score += 15;
-    else if (this.skillsArray.length >= 5) score += 10;
+    if (summary.length >= 50)
+      score += 8;
 
-    if (this.resumeData.experiences?.length >= 2) score += 15;
-    else if (this.resumeData.experiences?.length >= 1) score += 8;
+    if (summary.length >= 120)
+      score += 7;
 
-    if (this.resumeData.projects?.length >= 2) score += 10;
-    if (this.resumeData.education?.length >= 1) score += 10;
+    // Skills (15)
+    if (this.skillsArray.length >= 10)
+      score += 15;
+    else if (this.skillsArray.length >= 6)
+      score += 10;
+    else if (this.skillsArray.length >= 3)
+      score += 5;
 
-    const summaryText = (this.resumeData.summary || '').toLowerCase();
-    if (
-      summaryText.includes('%') ||
-      summaryText.includes('improved') ||
-      summaryText.includes('increased') ||
-      summaryText.includes('reduced')
-    ) score += 10;
+    // Experience (20)
+    if (this.resumeData.experiences?.length >= 3)
+      score += 20;
+    else if (this.resumeData.experiences?.length >= 2)
+      score += 15;
+    else if (this.resumeData.experiences?.length >= 1)
+      score += 8;
+
+    // Projects (10)
+    if (this.resumeData.projects?.length >= 2)
+      score += 10;
+    else if (this.resumeData.projects?.length >= 1)
+      score += 5;
+
+    // Education (10)
+    if (this.resumeData.education?.length >= 1)
+      score += 10;
+
+    // Achievement keywords (10)
+    const summaryText =
+      (
+        (this.resumeData.summary || "") +
+        " " +
+        (this.resumeData.experiences || [])
+          .map(x => x.responsibilities || "")
+          .join(" ")
+      ).toLowerCase();
+
+    const achievementWords = [
+      "%",
+      "improved",
+      "increased",
+      "reduced",
+      "optimized",
+      "led",
+      "developed",
+      "implemented",
+      "designed",
+      "built"
+    ];
+
+    const matches = achievementWords.filter(
+      word => summaryText.includes(word)
+    ).length;
+
+    if (matches >= 4)
+      score += 10;
+    else if (matches >= 2)
+      score += 5;
 
     this.atsScore = Math.min(score, 95);
+
     this.updateRecruiterVisibility();
-    this.atsScoreChange.emit(
-      this.atsScore
-    );
+    this.atsScoreChange.emit(this.atsScore);
   }
 
   /* ========================================

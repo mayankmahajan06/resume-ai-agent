@@ -1,0 +1,66 @@
+.resume-import-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.04);
+
+  h3 {
+    margin: 0 0 4px;
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.resume-import-input {
+  display: none;
+}
+
+.resume-import-btn {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 18px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+}
+
+@media (max-width: 768px) {
+  .resume-import-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .resume-import-btn {
+    width: 100%;
+  }
+}

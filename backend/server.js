@@ -6,7 +6,10 @@ const puppeteer = require("puppeteer");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const admin = require("firebase-admin");
+const multer = require("multer");
+const pdfParse = require("pdf-parse");
 const analyzeJD = require("./services/jdAnalyzer");
+const { parseResumeText } = require("./services/resumeImporter");
 
 /*
 Import server-side HTML template builders.
@@ -17,6 +20,19 @@ const { buildCompactGridHTML } = require("./templates/compact-grid.template");
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
 const app = express();
+const resumeUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter: (req, file, callback) => {
+    const isPdf =
+      file.mimetype === "application/pdf" ||
+      file.originalname.toLowerCase().endsWith(".pdf");
+
+    callback(isPdf ? null : new Error("Only PDF files are supported"), isPdf);
+  },
+});
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -105,6 +121,46 @@ app.post("/save-resume-data", (req, res) => {
 
 app.get("/resume-data", (req, res) => {
   res.send(latestResumeData);
+});
+
+app.post("/api/resume/import", (req, res) => {
+  resumeUpload.single("resume")(req, res, async (uploadError) => {
+    try {
+      if (uploadError) {
+        return res.status(400).send({
+          success: false,
+          message: uploadError.message || "Only PDF files are supported",
+        });
+      }
+
+      if (!req.file) {
+        return res
+          .status(400)
+          .send({ success: false, message: "Please upload a PDF resume" });
+      }
+
+      const parsedPdf = await pdfParse(req.file.buffer);
+      console.log("============== PDF TEXT START ==============");
+      console.log(parsedPdf.text.substring(0, 2000));
+      console.log("============== PDF TEXT END ==============");
+      const resumeData = parseResumeText(parsedPdf.text || "");
+
+      res.status(200).send({
+        success: true,
+        resumeData,
+        metadata: {
+          pages: parsedPdf.numpages,
+          textLength: parsedPdf.text?.length || 0,
+        },
+      });
+    } catch (error) {
+      console.error("Resume import failed:", error);
+      res.status(500).send({
+        success: false,
+        message: error.message || "Resume import failed",
+      });
+    }
+  });
 });
 
 /*
