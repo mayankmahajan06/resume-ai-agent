@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { ResumeService } from '../../services/resume.service';
 
 @Component({
   selector: 'app-workspace-header',
@@ -63,7 +64,8 @@ export class WorkspaceHeaderComponent {
   constructor(
     private authService: AuthService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private resumeService: ResumeService
   ) {
 
     this.loadUser();
@@ -158,7 +160,7 @@ export class WorkspaceHeaderComponent {
   }
 
   navigateToResumeBuilder(): void {
-
+    this.resumeService.createNewResume();
     this.router.navigate(
       ['/resume-builder']
     );

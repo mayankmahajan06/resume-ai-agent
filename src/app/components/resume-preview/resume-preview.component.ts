@@ -223,86 +223,170 @@ export class ResumePreviewComponent implements OnInit {
   }
 
   calculateATSScore(): void {
+
     let score = 0;
 
-    // Contact (25)
-    if (this.resumeData.fullName) score += 5;
-    if (this.resumeData.email) score += 5;
-    if (this.resumeData.phone) score += 5;
-    if (this.resumeData.linkedIn) score += 10;
+    // =========================
+    // Contact Information (20)
+    // =========================
 
-    // Summary (15)
+    if (this.resumeData.fullName?.trim()) {
+      score += 5;
+    }
+
+    if (this.resumeData.email?.trim()) {
+      score += 5;
+    }
+
+    if (this.resumeData.phone?.trim()) {
+      score += 5;
+    }
+
+    if (this.resumeData.linkedIn?.trim()) {
+      score += 5;
+    }
+
+    // =========================
+    // Professional Summary (15)
+    // =========================
+
     const summary =
-      (this.resumeData.summary || "").trim();
+      (this.resumeData.summary || '').trim();
 
-    if (summary.length >= 50)
+    if (summary.length >= 50) {
       score += 8;
+    }
 
-    if (summary.length >= 120)
+    if (summary.length >= 120) {
       score += 7;
+    }
 
+    // =========================
     // Skills (15)
-    if (this.skillsArray.length >= 10)
-      score += 15;
-    else if (this.skillsArray.length >= 6)
-      score += 10;
-    else if (this.skillsArray.length >= 3)
-      score += 5;
+    // =========================
 
+    if (this.skillsArray.length >= 10) {
+      score += 15;
+    } else if (this.skillsArray.length >= 6) {
+      score += 10;
+    } else if (this.skillsArray.length >= 3) {
+      score += 5;
+    }
+
+    // =========================
     // Experience (20)
-    if (this.resumeData.experiences?.length >= 3)
+    // =========================
+
+    const experienceCount =
+      this.resumeData.experiences?.filter(
+        exp =>
+          exp.role?.trim() ||
+          exp.company?.trim()
+      ).length || 0;
+
+    if (experienceCount >= 3) {
       score += 20;
-    else if (this.resumeData.experiences?.length >= 2)
+    } else if (experienceCount >= 2) {
       score += 15;
-    else if (this.resumeData.experiences?.length >= 1)
+    } else if (experienceCount >= 1) {
       score += 8;
+    }
 
+    // =========================
     // Projects (10)
-    if (this.resumeData.projects?.length >= 2)
+    // =========================
+
+    const projectCount =
+      this.resumeData.projects?.filter(
+        project =>
+          project.projectName?.trim()
+      ).length || 0;
+
+    if (projectCount >= 2) {
       score += 10;
-    else if (this.resumeData.projects?.length >= 1)
+    } else if (projectCount >= 1) {
       score += 5;
+    }
 
+    // =========================
     // Education (10)
-    if (this.resumeData.education?.length >= 1)
-      score += 10;
+    // =========================
 
-    // Achievement keywords (10)
-    const summaryText =
+    const educationCount =
+      this.resumeData.education?.filter(
+        edu =>
+          edu.degree?.trim()
+      ).length || 0;
+
+    if (educationCount >= 1) {
+      score += 10;
+    }
+
+    // =========================
+    // Achievement Keywords (10)
+    // =========================
+
+    const keywordText =
       (
-        (this.resumeData.summary || "") +
-        " " +
+        (this.resumeData.summary || '') +
+        ' ' +
         (this.resumeData.experiences || [])
-          .map(x => x.responsibilities || "")
-          .join(" ")
+          .map(exp => exp.responsibilities || '')
+          .join(' ')
       ).toLowerCase();
 
     const achievementWords = [
-      "%",
-      "improved",
-      "increased",
-      "reduced",
-      "optimized",
-      "led",
-      "developed",
-      "implemented",
-      "designed",
-      "built"
+      '%',
+      'improved',
+      'increased',
+      'reduced',
+      'optimized',
+      'led',
+      'developed',
+      'implemented',
+      'designed',
+      'built'
     ];
 
-    const matches = achievementWords.filter(
-      word => summaryText.includes(word)
-    ).length;
+    const matches =
+      achievementWords.filter(
+        word => keywordText.includes(word)
+      ).length;
 
-    if (matches >= 4)
+    if (matches >= 4) {
       score += 10;
-    else if (matches >= 2)
+    } else if (matches >= 2) {
       score += 5;
+    }
 
-    this.atsScore = Math.min(score, 95);
+    // =========================
+    // Prevent unrealistically low
+    // scores for decent resumes
+    // =========================
+
+    const hasRealContent =
+      summary.length > 20 ||
+      this.skillsArray.length > 2 ||
+      experienceCount > 0 ||
+      projectCount > 0;
+
+    if (hasRealContent && score < 35) {
+      score = 35;
+    }
+
+    // =========================
+    // Final Score
+    // =========================
+
+    this.atsScore =
+      Math.min(score, 95);
 
     this.updateRecruiterVisibility();
-    this.atsScoreChange.emit(this.atsScore);
+
+    this.atsScoreChange.emit(
+      this.atsScore
+    );
+
   }
 
   /* ========================================
