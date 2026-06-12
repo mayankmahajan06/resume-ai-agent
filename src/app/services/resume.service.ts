@@ -255,6 +255,10 @@ export class ResumeService {
   loadResumeForEditing(resume: any): void {
     const resumeData = {
       ...resume.resumeData,
+      currentRole:
+        resume.title ||
+        resume.resumeData?.currentRole ||
+        '',
       resumeId: resume.id,
       jdMatch: 0
     };
@@ -281,8 +285,11 @@ export class ResumeService {
       resume.resumeData?.currentRole ||
       'Untitled Resume';
 
+    const duplicateTitle = `${originalTitle} Copy`;
+
     const duplicatedResumeData = {
       ...resume.resumeData,
+      currentRole: duplicateTitle,
       resumeId: '',
       jdMatch: 0
     };
@@ -293,7 +300,7 @@ export class ResumeService {
     );
 
     const docRef = await addDoc(resumesCollection, {
-      title: `${originalTitle} Copy`,
+      title: duplicateTitle,
       resumeData: duplicatedResumeData,
       selectedTheme:
         resume.selectedTheme ||
