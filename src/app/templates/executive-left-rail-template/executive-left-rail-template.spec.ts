@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PremiumTemplateComponent } from './executive-left-rail-template';
+import { ExecutiveLeftRailTemplateComponent } from './executive-left-rail-template';
 
-describe('PremiumTemplateComponent', () => {
-  let component: PremiumTemplateComponent;
-  let fixture: ComponentFixture<PremiumTemplateComponent>;
+describe('ExecutiveLeftRailTemplateComponent', () => {
+  let component: ExecutiveLeftRailTemplateComponent;
+  let fixture: ComponentFixture<ExecutiveLeftRailTemplateComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PremiumTemplateComponent]
+      imports: [ExecutiveLeftRailTemplateComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(PremiumTemplateComponent);
+    fixture = TestBed.createComponent(ExecutiveLeftRailTemplateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

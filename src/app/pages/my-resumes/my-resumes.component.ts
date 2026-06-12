@@ -1,9 +1,6 @@
 import {
   Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-  ViewChild
+  OnInit
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -11,12 +8,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
-
-import { AuthService }
-  from '../../services/auth.service';
-
-import { UserService }
-  from '../../services/user.service';
 
 import { ResumeService }
   from '../../services/resume.service';
@@ -45,6 +36,8 @@ export class MyResumesComponent
   resumes: any[] = [];
 
   loading = true;
+
+  duplicatingResumeIds = new Set<string>();
 
   constructor(
     private resumeService: ResumeService,
@@ -132,6 +125,47 @@ export class MyResumesComponent
       '/resume-builder'
     ]);
 
+  }
+
+  async duplicateResume(
+    resume: any
+  ): Promise<void> {
+
+    if (
+      !resume?.id ||
+      this.duplicatingResumeIds.has(resume.id)
+    ) {
+      return;
+    }
+
+    this.duplicatingResumeIds.add(resume.id);
+
+    try {
+
+      await this.resumeService
+        .duplicateResume(resume);
+
+    } catch (error) {
+
+      console.error(
+        'Duplicate resume failed',
+        error
+      );
+
+    } finally {
+
+      this.duplicatingResumeIds
+        .delete(resume.id);
+
+    }
+
+  }
+
+  isDuplicating(
+    resumeId: string
+  ): boolean {
+    return this.duplicatingResumeIds
+      .has(resumeId);
   }
 
   async deleteResume(

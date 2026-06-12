@@ -267,11 +267,52 @@ export class ResumeService {
     );
   }
 
+  async duplicateResume(resume: any): Promise<string> {
+
+    const user = this.auth.currentUser;
+
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    const originalTitle =
+      resume.title ||
+      resume.resumeData?.targetRole ||
+      resume.resumeData?.currentRole ||
+      'Untitled Resume';
+
+    const duplicatedResumeData = {
+      ...resume.resumeData,
+      resumeId: '',
+      jdMatch: 0
+    };
+
+    const resumesCollection = collection(
+      this.firestore,
+      `users/${user.uid}/resumes`
+    );
+
+    const docRef = await addDoc(resumesCollection, {
+      title: `${originalTitle} Copy`,
+      resumeData: duplicatedResumeData,
+      selectedTheme:
+        resume.selectedTheme ||
+        duplicatedResumeData.selectedTheme ||
+        'indigo',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    return docRef.id;
+  }
+
   async deleteResume(resumeId: string): Promise<void> {
 
     const user = this.auth.currentUser;
 
-    if (!user) return;
+    if (!user) {
+      throw new Error('User not logged in');
+    }
 
     const resumeDocRef = doc(
       this.firestore,

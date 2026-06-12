@@ -19,12 +19,16 @@
 
         <h1>My Resumes</h1>
 
-        <p>Manage, edit, and organize your ATS-friendly resumes.</p>
+        <p>
+          Manage, edit, and organize your ATS-friendly resumes. Perform live AI
+          optimizations.
+        </p>
       </div>
 
       <div class="hero-right">
         <button class="primary-btn" (click)="createNewResume()">
-          + Create Resume
+          <mat-icon>add</mat-icon>
+          Create Resume
         </button>
       </div>
     </div>
@@ -55,58 +59,129 @@
         <div>
           <h2>Resume Library</h2>
 
-          <p>Continue editing your saved resumes.</p>
+          <p>
+            Continue editing your saved resumes or recalculate your
+            compatibility score.
+          </p>
         </div>
+
+        <span class="resume-count">
+          {{ resumes.length }} {{ resumes.length === 1 ? "Resume" : "Resumes" }}
+        </span>
       </div>
 
       <!-- GRID -->
 
       <div class="resumes-grid">
-        <div class="resume-card" *ngFor="let resume of resumes">
+        <article
+          class="resume-card"
+          *ngFor="let resume of resumes"
+          [ngClass]="(resume.selectedTheme || 'indigo') + '-card'"
+        >
           <div class="resume-content">
-            <h3>
-              {{ resume.title || "Untitled Resume" }}
-            </h3>
+            <div class="card-title-row">
+              <div>
+                <h3>
+                  {{
+                    resume.title ||
+                      resume.resumeData?.targetRole ||
+                      resume.resumeData?.currentRole ||
+                      "Untitled Resume"
+                  }}
+                </h3>
 
-            <div class="resume-meta">
-              <span class="template-chip">
-                {{ resume.resumeData?.selectedTemplate || "modern" }}
-              </span>
+                <div class="resume-meta">
+                  <span class="theme-chip">
+                    {{ resume.selectedTheme || "indigo" }}
+                  </span>
 
-              <span class="theme-chip">
-                {{ resume.selectedTheme || "indigo" }}
-              </span>
+                  <span class="template-chip">
+                    {{ resume.resumeData?.selectedTemplate || "modern" }}
+                  </span>
+                </div>
+              </div>
 
-              <span
-                class="score-chip"
-                [class.high-score]="(resume.resumeData?.atsScore || 0) >= 80"
-                [class.medium-score]="
-                  (resume.resumeData?.atsScore || 0) >= 60 &&
-                  (resume.resumeData?.atsScore || 0) < 80
-                "
-                [class.low-score]="(resume.resumeData?.atsScore || 0) < 60"
-              >
-                ATS:
-                {{ resume.resumeData?.atsScore || 0 }}%
+              <span class="ai-icon" aria-hidden="true">
+                <mat-icon>auto_awesome</mat-icon>
               </span>
             </div>
 
-            <p class="updated-at">
-              Updated
-              {{ resume.updatedAt?.toDate() | date: "mediumDate" }}
-            </p>
+            <div
+              class="score-panel"
+              [class.high-score]="(resume.resumeData?.atsScore || 0) >= 80"
+              [class.medium-score]="
+                (resume.resumeData?.atsScore || 0) >= 60 &&
+                (resume.resumeData?.atsScore || 0) < 80
+              "
+              [class.low-score]="(resume.resumeData?.atsScore || 0) < 60"
+            >
+              <div class="score-heading">
+                <span>ATS Score</span>
+
+                <strong>
+                  <mat-icon>
+                    {{
+                      (resume.resumeData?.atsScore || 0) >= 80
+                        ? "check_circle"
+                        : "shield"
+                    }}
+                  </mat-icon>
+                  {{ resume.resumeData?.atsScore || 0 }}%
+                </strong>
+              </div>
+
+              <div class="score-track">
+                <span
+                  [style.width.%]="resume.resumeData?.atsScore || 0"
+                ></span>
+              </div>
+
+              <div class="score-footer">
+                <span>
+                  Updated
+                  {{ resume.updatedAt?.toDate() | date: "mediumDate" }}
+                </span>
+
+                <strong>
+                  {{
+                    (resume.resumeData?.atsScore || 0) >= 80
+                      ? "Highly Optimized"
+                      : (resume.resumeData?.atsScore || 0) >= 60
+                        ? "Needs Polish"
+                        : "Critically Low"
+                  }}
+                </strong>
+              </div>
+            </div>
           </div>
 
           <div class="resume-actions">
-            <button class="edit-btn" (click)="editResume(resume)">
-              Edit Resume
+            <button class="edit-btn" (click)="editResume(resume)" title="Edit resume">
+              <mat-icon>edit</mat-icon>
+              Edit
             </button>
 
-            <button class="delete-btn" (click)="deleteResume(resume.id)">
-              Delete
+            <button
+              class="secondary-btn"
+              aria-label="Duplicate resume"
+              title="Duplicate resume"
+              [disabled]="isDuplicating(resume.id)"
+              (click)="duplicateResume(resume)"
+            >
+              <mat-icon>
+                {{ isDuplicating(resume.id) ? "hourglass_top" : "content_copy" }}
+              </mat-icon>
+            </button>
+
+            <button
+              class="delete-btn"
+              aria-label="Delete resume" title="Delete resume"
+              (click)="deleteResume(resume.id)"
+            >
+              <mat-icon>delete_outline</mat-icon>
             </button>
           </div>
-        </div>
+        </article>
       </div>
     </div>
   </div>
