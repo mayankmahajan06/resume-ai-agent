@@ -153,6 +153,7 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
 
     /* Initial calculation */
     this.calculateProfileCompletion(this.resumeForm.value);
+    this.trackCurrentStepViewed();
     this.loadUserPlanFromFirebase();
   }
 
@@ -412,6 +413,26 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
 
   selectTemplate(template: any): void {
     this.selectedTemplate = template.id;
+
+    if (this.isTemplateLocked(template)) {
+      this.analyticsService
+        .trackPremiumFeatureAttempted(
+          'premium_template',
+          'template_selector',
+          this.userPlan
+        );
+    }
+
+    this.analyticsService
+      .track(
+        'resume_template_selected',
+        {
+          template: template.id,
+          is_locked: this.isTemplateLocked(template),
+          user_plan: this.userPlan
+        }
+      );
+
     this.resumeService
       .updateResumeData({
         selectedTemplate:
@@ -572,6 +593,7 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
   nextStep(): void {
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
+      this.trackCurrentStepViewed();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -579,19 +601,32 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
   prevStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
+      this.trackCurrentStepViewed();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   startFreshResume(): void {
+    this.analyticsService
+      .track(
+        'resume_started_fresh',
+        {
+          previous_step: this.currentStep,
+          profile_completion: this.profileCompletion
+        }
+      );
+
     this.resumeService.resetResumeData();
     const freshData = this.resumeService.getResumeData();
     this.initializeForm(freshData);
     this.currentStep = 1;
+    this.calculateProfileCompletion(this.resumeForm.value);
+    this.trackCurrentStepViewed();
   }
 
   goToStep(step: number): void {
     this.currentStep = step;
+    this.trackCurrentStepViewed();
   }
 
   /* ========================================
@@ -607,6 +642,12 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
       ...this.resumeService.getResumeData()
     };
 
+    this.analyticsService
+      .trackPdfDownloadStarted(
+        'free',
+        latestData.selectedTemplate || 'modern'
+      );
+
     this.pdfService.saveResumeData(latestData).subscribe({
       next: () => {
         this.pdfService.generatePdf().subscribe({
@@ -621,6 +662,13 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
             setTimeout(() => { this.downloadSuccessMessage = ''; }, 3000);
           },
           error: (error) => {
+            this.analyticsService
+              .trackPdfDownloadFailed(
+                'free',
+                latestData.selectedTemplate || 'modern',
+                error?.message || 'PDF generation failed'
+              );
+
             console.error(error);
             this.isDownloading = false;
             this.downloadErrorMessage = 'Failed to generate PDF. Please try again.';
@@ -629,6 +677,13 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
         });
       },
       error: (error) => {
+        this.analyticsService
+          .trackPdfDownloadFailed(
+            'free',
+            latestData.selectedTemplate || 'modern',
+            error?.message || 'Saving resume data failed'
+          );
+
         console.error(error);
         this.isDownloading = false;
         this.downloadErrorMessage = 'Failed to generate PDF. Please try again.';
@@ -643,12 +698,19 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
 
   downloadPremiumPDF(): void {
     if (!this.isPro) {
-      this.analyticsService.track(
-        'upgrade_modal_opened',
-        {
-          feature: 'premium_pdf'
-        }
-      );
+      this.analyticsService
+        .trackPremiumFeatureAttempted(
+          'premium_pdf',
+          'premium_download_button',
+          this.userPlan
+        );
+
+      this.analyticsService
+        .trackUpgradeModalOpened(
+          'premium_pdf',
+          'premium_download_button'
+        );
+
       this.showUpgradeModal = true;
       return;
     }
@@ -664,6 +726,12 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
       ...this.resumeService.getResumeData()
     };
 
+    this.analyticsService
+      .trackPdfDownloadStarted(
+        'premium',
+        latestData.selectedTemplate || 'modern'
+      );
+
     this.pdfService.saveResumeData(latestData).subscribe({
       next: () => {
         this.pdfService.generatePremiumPdf().subscribe({
@@ -678,6 +746,13 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
             setTimeout(() => { this.downloadSuccessMessage = ''; }, 2000);
           },
           error: (error) => {
+            this.analyticsService
+              .trackPdfDownloadFailed(
+                'premium',
+                latestData.selectedTemplate || 'modern',
+                error?.message || 'Premium PDF generation failed'
+              );
+
             console.error(error);
             this.isPremiumDownloading = false;
             this.downloadErrorMessage = 'Failed to generate premium PDF. Please try again.';
@@ -686,6 +761,13 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
         });
       },
       error: (error) => {
+        this.analyticsService
+          .trackPdfDownloadFailed(
+            'premium',
+            latestData.selectedTemplate || 'modern',
+            error?.message || 'Saving resume data failed'
+          );
+
         console.error(error);
         this.isPremiumDownloading = false;
         this.downloadErrorMessage = 'Failed to generate premium PDF. Please try again.';
@@ -760,6 +842,19 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
 
   openJDModal(): void {
     if (!this.isPro) {
+      this.analyticsService
+        .trackPremiumFeatureAttempted(
+          'jd_match_analyzer',
+          'jd_analyzer_button',
+          this.userPlan
+        );
+
+      this.analyticsService
+        .trackUpgradeModalOpened(
+          'jd_match_analyzer',
+          'jd_analyzer_button'
+        );
+
       this.showUpgradeModal = true;
       return;
     }
@@ -887,7 +982,17 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
 
     if (!this.isPro) {
 
-      this.openUpgradeModal();
+      this.analyticsService
+        .trackPremiumFeatureAttempted(
+          'premium_template_export',
+          'main_download_cta',
+          this.userPlan
+        );
+
+      this.openUpgradeModal(
+        'premium_template_export',
+        'main_download_cta'
+      );
 
       return;
 
@@ -945,11 +1050,29 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.openUpgradeModal();
+    this.analyticsService
+      .trackPremiumFeatureAttempted(
+        'jd_match_analyzer',
+        'jd_tracker_card',
+        this.userPlan
+      );
+
+    this.openUpgradeModal(
+      'jd_match_analyzer',
+      'jd_tracker_card'
+    );
 
   }
 
-  openUpgradeModal(): void {
+  openUpgradeModal(
+    feature = 'premium_feature',
+    source = 'resume_form'
+  ): void {
+    this.analyticsService
+      .trackUpgradeModalOpened(
+        feature,
+        source
+      );
 
     this.dialog.open(
       UpgradeModalComponent,
@@ -959,6 +1082,14 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
       }
     );
 
+  }
+
+  private trackCurrentStepViewed(): void {
+    this.analyticsService
+      .trackResumeStepViewed(
+        this.currentStep,
+        this.profileCompletion
+      );
   }
 
   onLinkedInBlur(): void {

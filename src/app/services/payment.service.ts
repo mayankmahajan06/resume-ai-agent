@@ -47,6 +47,12 @@ export class PaymentService {
         source
       );
 
+    this.analyticsService
+      .trackPaymentOrderCreateStarted(
+        planType,
+        source
+      );
+
     const payload = {
       planType
     };
@@ -68,17 +74,37 @@ export class PaymentService {
       .then(data => {
 
         if (data.success) {
+          this.analyticsService
+            .trackPaymentOrderCreateSuccess(
+              planType,
+              data.order?.id,
+              data.order?.amount
+            );
 
           this.openRazorpayPopup(
             data.order,
             planType
           );
 
+          return;
         }
+
+        this.analyticsService
+          .trackPaymentFailed(
+            'create_order',
+            planType,
+            data.message || 'Order creation was not successful'
+          );
 
       })
 
       .catch(error => {
+        this.analyticsService
+          .trackPaymentFailed(
+            'create_order',
+            planType,
+            error?.message || 'Create order request failed'
+          );
 
         console.error(
           'Create order failed',
@@ -135,10 +161,23 @@ export class PaymentService {
           );
 
           void this.verifyPaymentAndActivatePlan(
-            response
+            response,
+            planType
           );
 
         },
+
+      modal: {
+        ondismiss: () => {
+          this.analyticsService
+            .trackPaymentFailed(
+              'dismissed',
+              planType,
+              'Razorpay checkout dismissed',
+              order.id
+            );
+        }
+      },
 
       theme: {
         color: '#4f46e5'
@@ -152,6 +191,13 @@ export class PaymentService {
     razorpay.on(
       'payment.failed',
       (response: any) => {
+        this.analyticsService
+          .trackPaymentFailed(
+            'razorpay',
+            planType,
+            response.error?.description || response.error?.reason,
+            order.id
+          );
 
         console.error(
           'Payment Failed',
@@ -172,6 +218,13 @@ export class PaymentService {
 
     razorpay.open();
 
+    this.analyticsService
+      .trackPaymentPopupOpened(
+        planType,
+        order.id,
+        order.amount
+      );
+
   }
 
   /* =====================================
@@ -179,13 +232,28 @@ export class PaymentService {
   ===================================== */
 
   private async verifyPaymentAndActivatePlan(
-    paymentResponse: any
+    paymentResponse: any,
+    planType: 'pro' | 'pro_plus'
   ): Promise<void> {
+    this.analyticsService
+      .trackPaymentVerificationStarted(
+        planType,
+        paymentResponse?.razorpay_payment_id,
+        paymentResponse?.razorpay_order_id
+      );
 
     const user =
       this.auth.currentUser;
 
     if (!user) {
+      this.analyticsService
+        .trackPaymentFailed(
+          'verification',
+          planType,
+          'No authenticated user',
+          paymentResponse?.razorpay_order_id
+        );
+
       this.snackBar.open(
         'Please sign in again before completing payment verification.',
         'Close',
@@ -203,6 +271,14 @@ export class PaymentService {
       firebaseIdToken =
         await user.getIdToken();
     } catch (error) {
+      this.analyticsService
+        .trackPaymentFailed(
+          'auth_token',
+          planType,
+          error instanceof Error ? error.message : 'Failed to get Firebase ID token',
+          paymentResponse?.razorpay_order_id
+        );
+
       console.error(
         'Failed to get Firebase ID token',
         error
@@ -232,12 +308,40 @@ export class PaymentService {
           async (verification: any) => {
 
             if (!verification.success) {
+              this.analyticsService
+                .trackPaymentFailed(
+                  'verification',
+                  planType,
+                  verification.message || 'Payment verification was not successful',
+                  paymentResponse?.razorpay_order_id
+                );
+
               return;
             }
 
-            await this.saveVerifiedPremiumPlanToFirebase(
-              verification
-            );
+            try {
+              await this.saveVerifiedPremiumPlanToFirebase(
+                verification
+              );
+            } catch (error) {
+              this.analyticsService
+                .trackPaymentFailed(
+                  'activation',
+                  planType,
+                  error instanceof Error ? error.message : 'Failed to save premium plan',
+                  verification.orderId || paymentResponse?.razorpay_order_id
+                );
+
+              this.snackBar.open(
+                'Payment verified, but plan activation failed. Please contact support.',
+                'Close',
+                {
+                  duration: 5000
+                }
+              );
+
+              return;
+            }
 
             this.analyticsService
               .trackPaymentSuccess(
@@ -262,6 +366,13 @@ export class PaymentService {
 
         error:
           (error) => {
+            this.analyticsService
+              .trackPaymentFailed(
+                'verification',
+                planType,
+                error?.error?.message || error?.message || 'Payment verification failed',
+                paymentResponse?.razorpay_order_id
+              );
 
             this.snackBar.open(
               'Payment verification failed. Please contact support.',

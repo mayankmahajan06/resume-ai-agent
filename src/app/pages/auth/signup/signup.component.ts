@@ -68,6 +68,12 @@ export class SignupComponent {
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
+        this.analyticsService
+          .trackSignupFailed(
+            'email',
+            error.code
+          );
+
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       })
       .finally(() => {
@@ -88,6 +94,12 @@ export class SignupComponent {
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
+        this.analyticsService
+          .trackSignupFailed(
+            'google',
+            error.code
+          );
+
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       });
   }

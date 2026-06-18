@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { ResumeService } from '../../../services/resume.service';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,8 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private resumeService: ResumeService
+    private resumeService: ResumeService,
+    private analyticsService: AnalyticsService
   ) {}
 
   login(): void {
@@ -42,13 +44,25 @@ export class LoginComponent {
 
     this.isLoading = true;
 
+    this.analyticsService
+      .trackLoginStarted('email');
+
     this.authService
       .login(this.email, this.password)
       .then(() => {
+        this.analyticsService
+          .trackLoginCompleted('email');
+
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
+        this.analyticsService
+          .trackLoginFailed(
+            'email',
+            error.code
+          );
+
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       })
       .finally(() => {
@@ -57,13 +71,25 @@ export class LoginComponent {
   }
 
   googleLogin(): void {
+    this.analyticsService
+      .trackLoginStarted('google');
+
     this.authService
       .googleLogin()
       .then(() => {
+        this.analyticsService
+          .trackLoginCompleted('google');
+
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
+        this.analyticsService
+          .trackLoginFailed(
+            'google',
+            error.code
+          );
+
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       });
   }

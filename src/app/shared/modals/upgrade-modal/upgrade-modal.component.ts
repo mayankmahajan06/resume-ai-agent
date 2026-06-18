@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -15,6 +15,7 @@ import {
   getDoc
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
+import { AnalyticsService } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-upgrade-modal',
@@ -33,7 +34,7 @@ import { Auth } from '@angular/fire/auth';
   ]
 })
 
-export class UpgradeModalComponent {
+export class UpgradeModalComponent implements OnInit {
 
   showUpgradeModal = false;
   userPlan: 'free' | 'pro' | 'pro_plus' = 'free';
@@ -44,9 +45,15 @@ export class UpgradeModalComponent {
     private dialogRef:
       MatDialogRef<UpgradeModalComponent>,
     private paymentService:
-      PaymentService
+      PaymentService,
+    private analyticsService:
+      AnalyticsService
 
   ) { }
+
+  ngOnInit(): void {
+    void this.loadUserPlanFromFirebase();
+  }
 
   /*
   ========================================
@@ -55,6 +62,13 @@ export class UpgradeModalComponent {
   */
 
   close(): void {
+    this.analyticsService
+      .track(
+        'upgrade_modal_closed',
+        {
+          user_plan: this.userPlan
+        }
+      );
 
     this.dialogRef.close();
 
@@ -69,6 +83,13 @@ export class UpgradeModalComponent {
   startPremiumUpgrade(
     planType: 'pro' | 'pro_plus'
   ): void {
+    this.analyticsService
+      .trackPricingPlanSelected(
+        planType,
+        'upgrade_modal',
+        true,
+        this.userPlan
+      );
 
     this.paymentService
       .startPremiumUpgrade(
