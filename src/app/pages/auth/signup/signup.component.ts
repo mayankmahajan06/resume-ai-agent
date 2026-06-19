@@ -60,7 +60,11 @@ export class SignupComponent {
       .trackSignupStarted('email');
 
     this.authService
-      .signup(this.email, this.password)
+      .signup(
+        this.email,
+        this.password,
+        this.fullName
+      )
       .then(() => {
         this.analyticsService
           .trackSignupCompleted('email');
@@ -87,9 +91,15 @@ export class SignupComponent {
 
     this.authService
       .googleLogin()
-      .then(() => {
-        this.analyticsService
-          .trackSignupCompleted('google');
+      .then((credential) => {
+        if (this.authService.isNewAuthUser(credential)) {
+          this.analyticsService
+            .trackSignupCompleted('google');
+        } else {
+          this.analyticsService
+            .trackLoginCompleted('google');
+        }
+
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
