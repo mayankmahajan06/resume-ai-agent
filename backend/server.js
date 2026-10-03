@@ -18,6 +18,8 @@ Add a new import here for each new template — no Puppeteer changes needed.
 const { buildCompactGridHTML } = require("./templates/compact-grid.template");
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const INTERNAL_RENDER_TOKEN = process.env.INTERNAL_RENDER_TOKEN || crypto.randomBytes(32).toString('hex');
 
 const app = express();
 const resumeUpload = multer({
@@ -67,7 +69,6 @@ const plans = {
   },
 };
 
-let latestResumeData = {};
 
 function parseExistingExpiryDate(planExpiryDate) {
   if (!planExpiryDate) return null;
@@ -197,8 +198,6 @@ async function requireActivePremium(req, res, next) {
     const hasNotExpired = expiryDate && expiryDate > new Date();
 
     if (!isPremiumPlan || !isActive || !hasNotExpired) {
-      // Normalize an expired subscription so Firestore no longer reports it
-      // as an active premium plan.
       if (isPremiumPlan || isActive) {
         await userRef.set(
           {
@@ -234,14 +233,75 @@ app.get("/", (req, res) => {
   res.send("Resume PDF Server Running");
 });
 
-app.post("/save-resume-data", (req, res) => {
-  latestResumeData = req.body;
-  console.log("Latest Resume Saved:", latestResumeData);
-  res.send({ message: "Resume data saved successfully" });
+async function requireResumeDataAuth(req, res, next) {
+  const renderToken = req.headers["x-internal-render-token"];
+  const renderUserId = req.headers["x-render-user-id"];
+
+  if (
+    renderToken &&
+    renderUserId &&
+    renderToken === INTERNAL_RENDER_TOKEN &&
+    typeof renderUserId === "string" &&
+    renderUserId.length > 0
+  ) {
+    req.user = { uid: renderUserId };
+    return next();
+  }
+
+  return requireAuth(req, res, next);
+}
+
+app.post("/save-resume-data", requireAuth, async (req, res) => {
+  try {
+    await admin
+      .firestore()
+      .collection("users")
+      .doc(req.user.uid)
+      .collection("privateData")
+      .doc("currentResume")
+      .set(
+        {
+          resumeData: req.body || {},
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
+
+    res.send({ message: "Resume data saved successfully" });
+  } catch (error) {
+    console.error("Saving resume data failed:", error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to save resume data",
+    });
+  }
 });
 
-app.get("/resume-data", (req, res) => {
-  res.send(latestResumeData);
+app.get("/resume-data", requireResumeDataAuth, async (req, res) => {
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("users")
+      .doc(req.user.uid)
+      .collection("privateData")
+      .doc("currentResume")
+      .get();
+
+    if (!snapshot.exists) {
+      return res.status(404).send({
+        success: false,
+        message: "No resume data found",
+      });
+    }
+
+    res.send(snapshot.data().resumeData || {});
+  } catch (error) {
+    console.error("Loading resume data failed:", error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to load resume data",
+    });
+  }
 });
 
 app.post("/api/resume/import", requireAuth, (req, res) => {
@@ -285,9 +345,9 @@ app.post("/api/resume/import", requireAuth, (req, res) => {
 });
 
 /*
-GENERATE FREE PDF (Modern template — unchanged)
+GENERATE FREE PDF (Modern template)
 */
-app.get("/generate-pdf", async (req, res) => {
+app.get("/generate-pdf", requireAuth, async (req, res) => {
   let browser;
   try {
     console.log("Chrome Path:", puppeteer.executablePath());
@@ -296,6 +356,23 @@ app.get("/generate-pdf", async (req, res) => {
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      if (request.url().startsWith(BACKEND_URL + "/resume-data")) {
+        request.continue({
+          headers: {
+            ...request.headers(),
+            "x-internal-render-token": INTERNAL_RENDER_TOKEN,
+            "x-render-user-id": req.user.uid,
+          },
+        });
+        return;
+      }
+
+      request.continue();
+    });
+
     await page.goto(`${FRONTEND_URL}/modern-resume-print`, {
       waitUntil: "domcontentloaded",
     });
@@ -329,19 +406,30 @@ GENERATE PREMIUM PDF
 
 Architecture:
 - compact-grid → server-side HTML builder (no Angular route needed)
-- executive-left-rail, others → still use Angular print route (migrate later)
-
-To add a new template:
-  1. Create server/templates/your-template.template.js
-  2. Import it at the top of this file
-  3. Add an `if (template === 'your-template')` block below
-  Done. No Puppeteer changes, no print component, no CSS fights.
+- executive-left-rail, others → still use Angular print route
 */
 app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
   let browser;
-  const theme = latestResumeData.selectedTheme || "indigo";
-  const template = latestResumeData.selectedTemplate || "executive-left-rail";
-  console.log("[PDF] theme:", theme, "| template:", template);
+
+  const resumeSnapshot = await admin
+    .firestore()
+    .collection("users")
+    .doc(req.user.uid)
+    .collection("privateData")
+    .doc("currentResume")
+    .get();
+
+  if (!resumeSnapshot.exists) {
+    return res.status(404).send({
+      success: false,
+      message: "No resume data found. Please save your resume first.",
+    });
+  }
+
+  const resumeData = resumeSnapshot.data()?.resumeData || {};
+  const theme = resumeData.selectedTheme || "indigo";
+  const template = resumeData.selectedTemplate || "executive-left-rail";
+  console.log("[PDF] user:", req.user.uid, "| theme:", theme, "| template:", template);
 
   try {
     console.log("Chrome Path:", puppeteer.executablePath());
@@ -356,37 +444,34 @@ app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
 
     const page = await browser.newPage();
 
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      if (request.url().startsWith(BACKEND_URL + "/resume-data")) {
+        request.continue({
+          headers: {
+            ...request.headers(),
+            "x-internal-render-token": INTERNAL_RENDER_TOKEN,
+            "x-render-user-id": req.user.uid,
+          },
+        });
+        return;
+      }
+
+      request.continue();
+    });
+
     await page.setViewport({
       width: 794,
       height: 1123,
       deviceScaleFactor: 1,
     });
 
-    /* -----------------------------------------------
-       COMPACT GRID — server-side HTML, no Angular
-    ----------------------------------------------- */
     if (template === "compact") {
-      /*
-      Merge the theme from the query param into resumeData
-      so the builder picks up the correct accent colour.
-      */
+      const html = buildCompactGridHTML(resumeData);
 
-      const html = buildCompactGridHTML(latestResumeData);
-
-      /*
-      setContent() injects the complete HTML directly —
-      no routing, no Angular bootstrap, no waitForFunction.
-      networkidle0 just waits for any web fonts to load.
-      */
       await page.setContent(html, { waitUntil: "networkidle0" });
-
-      // Small buffer for fonts to finish painting
       await new Promise((resolve) => setTimeout(resolve, 300));
     } else {
-      /* -----------------------------------------------
-         OTHER TEMPLATES — still use Angular print route
-         (migrate these one by one as you build them out)
-      ----------------------------------------------- */
       let printRoute = "executive-left-rail-resume-print";
 
       if (template === "modern") {
@@ -407,9 +492,6 @@ app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
-    /* -----------------------------------------------
-       GENERATE PDF — same for all templates
-    ----------------------------------------------- */
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
