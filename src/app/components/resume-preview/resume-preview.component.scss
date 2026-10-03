@@ -70,34 +70,34 @@
     font-weight: 700;
   }
 
-  /* JD match dynamic states */
+  /* JD match dynamic states
+     Keep the card consistent with the purple hero card.
+     Only the score text/border changes with the match quality. */
   &.jd-excellent {
-    border-color: #6ee7b7;
-    background: #f0fdf4;
+    border: 1px solid rgba(110, 231, 183, 0.45);
     strong {
-      color: #047857;
+      color: #bbf7d0;
     }
   }
 
   &.jd-good {
-    border-color: #93c5fd;
-    background: #eff6ff;
+    border: 1px solid rgba(147, 197, 253, 0.45);
     strong {
-      color: #1d4ed8;
+      color: #bfdbfe;
     }
   }
 
   &.jd-average {
-    border-color: #fcd34d;
-    background: #fffbeb;
+    border: 1px solid rgba(252, 211, 77, 0.45);
     strong {
-      color: #b45309;
+      color: #fde68a;
     }
   }
 
   &.jd-none {
+    border: 1px solid rgba(255, 255, 255, 0.08);
     strong {
-      color: #9ca3af;
+      color: rgba(255, 255, 255, 0.75);
     }
   }
 }
