@@ -110,6 +110,46 @@ app.use(cors());
 app.use(express.json());
 
 /*
+AUTHENTICATION MIDDLEWARE
+
+All protected API requests must send:
+Authorization: Bearer <Firebase ID token>
+*/
+async function requireAuth(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || "";
+
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).send({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const idToken = authHeader.substring("Bearer ".length).trim();
+
+    if (!idToken) {
+      return res.status(401).send({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    console.error("Authentication failed:", error);
+
+    return res.status(401).send({
+      success: false,
+      message: "Invalid or expired authentication token",
+    });
+  }
+}
+
+/*
 PREMIUM ACCESS MIDDLEWARE
 
 The frontend can hide premium features, but the backend must also enforce
@@ -139,7 +179,7 @@ async function requireActivePremium(req, res, next) {
       });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = req.user || await admin.auth().verifyIdToken(idToken);
     const userRef = admin.firestore().collection("users").doc(decodedToken.uid);
     const userSnapshot = await userRef.get();
 
@@ -204,7 +244,7 @@ app.get("/resume-data", (req, res) => {
   res.send(latestResumeData);
 });
 
-app.post("/api/resume/import", (req, res) => {
+app.post("/api/resume/import", requireAuth, (req, res) => {
   resumeUpload.single("resume")(req, res, async (uploadError) => {
     try {
       if (uploadError) {
@@ -395,7 +435,7 @@ app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
 /*
 CREATE RAZORPAY ORDER
 */
-app.post("/create-order", async (req, res) => {
+app.post("/create-order", requireAuth, async (req, res) => {
   try {
     const { planType } = req.body;
     const plan = plans[planType];
@@ -423,14 +463,12 @@ app.post("/create-order", async (req, res) => {
 /*
 VERIFY RAZORPAY PAYMENT
 */
-app.post("/verify-payment", async (req, res) => {
+app.post("/verify-payment", requireAuth, async (req, res) => {
   try {
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      firebaseIdToken,
-      userId,
     } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -445,55 +483,53 @@ app.post("/verify-payment", async (req, res) => {
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(payload)
       .digest("hex");
+
     if (expectedSignature !== razorpay_signature) {
       return res.status(400).send({
         success: false,
         message: "Payment signature verification failed",
       });
     }
+
     const order = await razorpay.orders.fetch(razorpay_order_id);
     const planType = order.notes?.planType;
     const plan = plans[planType];
-    if (!plan) {
-      return res
-        .status(400)
-        .send({ success: false, message: "Invalid plan on verified order" });
-    }
 
-    if (!firebaseIdToken) {
+    if (!plan) {
       return res.status(400).send({
         success: false,
-        message: "Missing authenticated user details",
+        message: "Invalid plan on verified order",
       });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(firebaseIdToken);
+    const uid = req.user.uid;
+    const userRef = admin.firestore().collection("users").doc(uid);
+    const userSnapshot = await userRef.get();
+    const existingUserData = userSnapshot.exists
+      ? userSnapshot.data()
+      : {};
 
-    if (userId && userId !== decodedToken.uid) {
-      return res
-        .status(403)
-        .send({ success: false, message: "Authenticated user mismatch" });
-    }
-
-    const userSnapshot = await admin
-      .firestore()
-      .collection("users")
-      .doc(decodedToken.uid)
-      .get();
-
-    const existingUserData = userSnapshot.exists ? userSnapshot.data() : {};
     const {
-      userPlan,
-      paymentStatus,
-      planExpiryDate: existingPlanExpiryDate,
-    } = existingUserData;
-    const { planStartDate, planExpiryDate } = calculatePlanDates(
-      {
-        userPlan,
-        paymentStatus,
-        planExpiryDate: existingPlanExpiryDate,
-      },
+      planStartDate,
+      planExpiryDate
+    } = calculatePlanDates(
+      existingUserData,
       plan,
+    );
+
+    await userRef.set(
+      {
+        userPlan: planType,
+        paymentStatus: "active",
+        planStartDate: planStartDate.toISOString(),
+        planExpiryDate: planExpiryDate.toISOString(),
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        merge: true,
+      },
     );
 
     res.status(200).send({
@@ -507,9 +543,10 @@ app.post("/verify-payment", async (req, res) => {
     });
   } catch (error) {
     console.error("Payment verification failed:", error);
-    res
-      .status(500)
-      .send({ success: false, message: "Payment verification failed" });
+    res.status(500).send({
+      success: false,
+      message: "Payment verification failed",
+    });
   }
 });
 
