@@ -1,0 +1,62 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      // A user may read only their own profile/subscription document.
+      allow read: if isOwner(uid);
+
+      // Client may create only a basic/free user profile.
+      // Subscription authority fields cannot be created with premium values.
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.userPlan == 'free'
+        && request.resource.data.paymentStatus == 'inactive';
+
+      // Client may update only profile/login fields.
+      // userPlan, paymentStatus, expiry dates, payment/order IDs, etc.
+      // can only be changed by the trusted backend (Admin SDK).
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'uid',
+          'email',
+          'fullName',
+          'photoURL',
+          'authProvider',
+          'lastLoginAt',
+          'updatedAt'
+        ]);
+
+      allow delete: if false;
+
+      match /resumes/{resumeId} {
+        // Users can access only their own resumes.
+        allow read: if isOwner(uid);
+
+        // A resume belongs to the authenticated user by path.
+        allow create: if isOwner(uid)
+          && request.resource.data.resumeData is map;
+
+        allow update: if isOwner(uid)
+          && request.resource.data.resumeData is map;
+
+        allow delete: if isOwner(uid);
+      }
+
+      // Current resume data is written/read by the backend API.
+      // Do not allow direct browser access to this privateData area.
+      match /privateData/{documentId} {
+        allow read, write: if false;
+      }
+    }
+  }
+}
