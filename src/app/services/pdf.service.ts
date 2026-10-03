@@ -13,7 +13,7 @@ export class PdfService {
   constructor(
     private http: HttpClient,
     private auth: Auth
-  ) { }
+  ) {}
 
   private async getAuthHeaders(): Promise<HttpHeaders> {
     const user = this.auth.currentUser;
@@ -72,29 +72,29 @@ export class PdfService {
   getResumeData() {
     const user = this.auth.currentUser;
 
-    // Print pages are rendered by Puppeteer on the backend.
-    // Puppeteer has no Firebase session, so it intentionally calls
-    // /resume-data without a browser auth header. The backend request
-    // interceptor injects the internal render credentials server-side.
+    // Browser: send Firebase auth.
+    // Puppeteer print page: there is no Firebase session, so the backend
+    // request interceptor adds the internal render credentials server-side.
     if (!user) {
       return this.http.get(
-        \`${environment.apiBaseUrl}/resume-data\`
+        `${environment.apiBaseUrl}/resume-data`
       );
     }
 
     return from(user.getIdToken()).pipe(
       switchMap(token =>
         this.http.get(
-          \`${environment.apiBaseUrl}/resume-data\`,
+          `${environment.apiBaseUrl}/resume-data`,
           {
             headers: new HttpHeaders({
-              Authorization: \`Bearer ${token}\`
+              Authorization: `Bearer ${token}`
             })
           }
         )
       )
     );
   }
+
   analyzeJD(
     resumeData: any,
     jobDescription: string
