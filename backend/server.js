@@ -233,6 +233,59 @@ app.get("/", (req, res) => {
   res.send("Resume PDF Server Running");
 });
 
+
+function setupPrintPageResumeData(page, resumeData) {
+  page.on("console", (message) => {
+    console.log("[PDF page console]", message.type(), message.text());
+  });
+
+  page.on("pageerror", (error) => {
+    console.error("[PDF page error]", error);
+  });
+
+  page.on("requestfailed", (request) => {
+    console.error(
+      "[PDF request failed]",
+      request.method(),
+      request.url(),
+      request.failure()?.errorText || "unknown",
+    );
+  });
+
+  page.on("request", async (request) => {
+    try {
+      const requestUrl = new URL(request.url());
+
+      if (
+        request.method() === "GET" &&
+        requestUrl.pathname === "/resume-data"
+      ) {
+        console.log("[PDF] Serving resume data directly to print page");
+
+        await request.respond({
+          status: 200,
+          contentType: "application/json",
+          headers: {
+            "Access-Control-Allow-Origin": FRONTEND_URL,
+          },
+          body: JSON.stringify(resumeData),
+        });
+
+        return;
+      }
+
+      await request.continue();
+    } catch (error) {
+      console.error("[PDF] Request interception failed:", error);
+      try {
+        await request.continue();
+      } catch (_) {
+        // Request may already have been handled.
+      }
+    }
+  });
+}
+
 async function requireResumeDataAuth(req, res, next) {
   const renderToken = req.headers["x-internal-render-token"];
   const renderUserId = req.headers["x-render-user-id"];
@@ -349,45 +402,58 @@ GENERATE FREE PDF (Modern template)
 */
 app.get("/generate-pdf", requireAuth, async (req, res) => {
   let browser;
+
+  const resumeSnapshot = await admin
+    .firestore()
+    .collection("users")
+    .doc(req.user.uid)
+    .collection("privateData")
+    .doc("currentResume")
+    .get();
+
+  if (!resumeSnapshot.exists) {
+    return res.status(404).send({
+      success: false,
+      message: "No resume data found. Please save your resume first.",
+    });
+  }
+
+  const resumeData = resumeSnapshot.data()?.resumeData || {};
+
   try {
+    console.log("[PDF] user:", req.user.uid, "| template: modern");
     console.log("Chrome Path:", puppeteer.executablePath());
+
     browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
+
     const page = await browser.newPage();
 
-    await page.setRequestInterception(true);
-    page.on("request", (request) => {
-      if (request.url().startsWith(BACKEND_URL + "/resume-data")) {
-        request.continue({
-          headers: {
-            ...request.headers(),
-            "x-internal-render-token": INTERNAL_RENDER_TOKEN,
-            "x-render-user-id": req.user.uid,
-          },
-        });
-        return;
-      }
-
-      request.continue();
-    });
+    setupPrintPageResumeData(page, resumeData);
 
     await page.goto(`${FRONTEND_URL}/modern-resume-print`, {
       waitUntil: "domcontentloaded",
+      timeout: 30000,
     });
+
     await page.waitForFunction(
       () => document.body.dataset.resumeReady === "true",
       { timeout: 15000 },
     );
+
     await page.evaluateHandle("document.fonts.ready");
+
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
+
     await browser.close();
+
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": "attachment; filename=resume.pdf",
@@ -399,7 +465,7 @@ app.get("/generate-pdf", requireAuth, async (req, res) => {
     if (browser) await browser.close();
     res.status(500).send("PDF generation failed");
   }
-});
+});;
 
 /*
 GENERATE PREMIUM PDF
@@ -444,21 +510,7 @@ app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
 
     const page = await browser.newPage();
 
-    await page.setRequestInterception(true);
-    page.on("request", (request) => {
-      if (request.url().startsWith(BACKEND_URL + "/resume-data")) {
-        request.continue({
-          headers: {
-            ...request.headers(),
-            "x-internal-render-token": INTERNAL_RENDER_TOKEN,
-            "x-render-user-id": req.user.uid,
-          },
-        });
-        return;
-      }
-
-      request.continue();
-    });
+    setupPrintPageResumeData(page, resumeData);
 
     await page.setViewport({
       width: 794,
