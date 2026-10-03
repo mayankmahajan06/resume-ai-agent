@@ -109,6 +109,87 @@ function calculatePlanDates(existingUserData, plan) {
 app.use(cors());
 app.use(express.json());
 
+/*
+PREMIUM ACCESS MIDDLEWARE
+
+The frontend can hide premium features, but the backend must also enforce
+subscription expiry so a user cannot bypass the plan by calling the API
+directly.
+
+The Firebase ID token is sent as:
+Authorization: Bearer <token>
+*/
+async function requireActivePremium(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || "";
+
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).send({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const idToken = authHeader.substring("Bearer ".length).trim();
+
+    if (!idToken) {
+      return res.status(401).send({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const userRef = admin.firestore().collection("users").doc(decodedToken.uid);
+    const userSnapshot = await userRef.get();
+
+    if (!userSnapshot.exists) {
+      return res.status(403).send({
+        success: false,
+        message: "No active subscription found",
+      });
+    }
+
+    const userData = userSnapshot.data() || {};
+    const expiryDate = parseExistingExpiryDate(userData.planExpiryDate);
+    const isPremiumPlan = ["pro", "pro_plus"].includes(userData.userPlan);
+    const isActive = userData.paymentStatus === "active";
+    const hasNotExpired = expiryDate && expiryDate > new Date();
+
+    if (!isPremiumPlan || !isActive || !hasNotExpired) {
+      // Normalize an expired subscription so Firestore no longer reports it
+      // as an active premium plan.
+      if (isPremiumPlan || isActive) {
+        await userRef.set(
+          {
+            userPlan: "free",
+            paymentStatus: "inactive",
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true },
+        );
+      }
+
+      return res.status(403).send({
+        success: false,
+        message: "Your premium plan has expired. Please choose a plan to continue.",
+        expired: true,
+      });
+    }
+
+    req.user = decodedToken;
+    req.userData = userData;
+    next();
+  } catch (error) {
+    console.error("Premium access check failed:", error);
+
+    return res.status(401).send({
+      success: false,
+      message: "Authentication or subscription verification failed",
+    });
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Resume PDF Server Running");
 });
@@ -216,7 +297,7 @@ To add a new template:
   3. Add an `if (template === 'your-template')` block below
   Done. No Puppeteer changes, no print component, no CSS fights.
 */
-app.get("/generate-premium-pdf", async (req, res) => {
+app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
   let browser;
   const theme = latestResumeData.selectedTheme || "indigo";
   const template = latestResumeData.selectedTemplate || "executive-left-rail";
@@ -432,7 +513,7 @@ app.post("/verify-payment", async (req, res) => {
   }
 });
 
-app.post("/analyze-jd", (req, res) => {
+app.post("/analyze-jd", requireActivePremium, (req, res) => {
   try {
     const { resumeData, jobDescription } = req.body;
     const analysis = analyzeJD(resumeData, jobDescription);
