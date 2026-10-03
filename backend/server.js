@@ -234,7 +234,9 @@ app.get("/", (req, res) => {
 });
 
 
-function setupPrintPageResumeData(page, resumeData) {
+async function setupPrintPageResumeData(page, resumeData) {
+  await page.setRequestInterception(true);
+
   page.on("console", (message) => {
     console.log("[PDF page console]", message.type(), message.text());
   });
@@ -431,7 +433,7 @@ app.get("/generate-pdf", requireAuth, async (req, res) => {
 
     const page = await browser.newPage();
 
-    setupPrintPageResumeData(page, resumeData);
+    await setupPrintPageResumeData(page, resumeData);
 
     await page.goto(`${FRONTEND_URL}/modern-resume-print`, {
       waitUntil: "domcontentloaded",
@@ -510,7 +512,7 @@ app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
 
     const page = await browser.newPage();
 
-    setupPrintPageResumeData(page, resumeData);
+    await setupPrintPageResumeData(page, resumeData);
 
     await page.setViewport({
       width: 794,
