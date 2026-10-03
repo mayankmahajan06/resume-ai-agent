@@ -18,9 +18,10 @@
       <!-- JD Match score — updates live from service stream -->
       <div
         class="mini-score"
+        [class.jd-excellent]="jdMatchClass === 'jd-excellent'"
         [class.jd-good]="jdMatchClass === 'jd-good'"
-        [class.jd-medium]="jdMatchClass === 'jd-medium'"
-        [class.jd-low]="jdMatchClass === 'jd-low'"
+        [class.jd-average]="jdMatchClass === 'jd-average'"
+        [class.jd-none]="jdMatchClass === 'jd-none'"
       >
         <span>JD Match</span>
         <strong>{{ jdMatchLabel }}</strong>
