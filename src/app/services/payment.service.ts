@@ -20,7 +20,6 @@ export class PaymentService {
 
   constructor(
     private pdfService: PdfService,
-    private firestore: Firestore,
     private auth: Auth,
     private snackBar: MatSnackBar,
     private analyticsService: AnalyticsService
@@ -51,17 +50,31 @@ export class PaymentService {
       planType
     };
 
-    fetch(
+    const user = this.auth.currentUser;
+
+    if (!user) {
+      this.analyticsService.trackPaymentFailed(
+        'create_order',
+        planType,
+        'No authenticated user'
+      );
+      this.snackBar.open('Please sign in before upgrading.', 'Close', { duration: 5000 });
+      return;
+    }
+
+    user.getIdToken()
+      .then(token => fetch(
           `${environment.apiBaseUrl}/create-order`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${await this.auth.currentUser!.getIdToken()}`
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(payload)
           }
         )
+      )
       .then(response => response.json())
 
       .then(data => {
@@ -249,36 +262,6 @@ export class PaymentService {
 
       this.snackBar.open(
         'Please sign in again before completing payment verification.',
-        'Close',
-        {
-          duration: 5000
-        }
-      );
-
-      return;
-    }
-
-    let firebaseIdToken: string;
-
-    try {
-      firebaseIdToken =
-        await user.getIdToken();
-    } catch (error) {
-      this.analyticsService
-        .trackPaymentFailed(
-          'auth_token',
-          planType,
-          error instanceof Error ? error.message : 'Failed to get Firebase ID token',
-          paymentResponse?.razorpay_order_id
-        );
-
-      console.error(
-        'Failed to get Firebase ID token',
-        error
-      );
-
-      this.snackBar.open(
-        'Payment verification failed. Please sign in again.',
         'Close',
         {
           duration: 5000
