@@ -70,16 +70,31 @@ export class PdfService {
   }
 
   getResumeData() {
-    return from(this.getAuthHeaders()).pipe(
-      switchMap(headers =>
+    const user = this.auth.currentUser;
+
+    // Print pages are rendered by Puppeteer on the backend.
+    // Puppeteer has no Firebase session, so it intentionally calls
+    // /resume-data without a browser auth header. The backend request
+    // interceptor injects the internal render credentials server-side.
+    if (!user) {
+      return this.http.get(
+        \`${environment.apiBaseUrl}/resume-data\`
+      );
+    }
+
+    return from(user.getIdToken()).pipe(
+      switchMap(token =>
         this.http.get(
-          `${environment.apiBaseUrl}/resume-data`,
-          { headers }
+          \`${environment.apiBaseUrl}/resume-data\`,
+          {
+            headers: new HttpHeaders({
+              Authorization: \`Bearer ${token}\`
+            })
+          }
         )
       )
     );
   }
-
   analyzeJD(
     resumeData: any,
     jobDescription: string
