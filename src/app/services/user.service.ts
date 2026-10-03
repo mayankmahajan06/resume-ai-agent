@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import {
   Firestore,
   doc,
-  getDoc
+  getDoc,
+  setDoc
 } from '@angular/fire/firestore';
 
 import {
@@ -31,8 +32,7 @@ export class UserService {
 
   async loadUserPlan(): Promise<void> {
 
-    // Always start from the safest state. This prevents a stale premium
-    // value from remaining in memory when the user has no active plan.
+    // Always start from the safest state.
     this.userPlan = 'free';
 
     const user =
@@ -55,10 +55,14 @@ export class UserService {
     const data: any =
       snapshot.data();
 
-    if (
-      data.paymentStatus !== 'active' ||
-      !['pro', 'pro_plus'].includes(data.userPlan)
-    ) {
+    const isPremiumPlan =
+      data.userPlan === 'pro' ||
+      data.userPlan === 'pro_plus';
+
+    const isActive =
+      data.paymentStatus === 'active';
+
+    if (!isPremiumPlan || !isActive) {
       return;
     }
 
@@ -68,14 +72,33 @@ export class UserService {
     const today =
       new Date();
 
+    // Invalid or expired subscription
     if (
-      !Number.isNaN(expiryDate.getTime()) &&
-      expiryDate > today
+      Number.isNaN(expiryDate.getTime()) ||
+      expiryDate <= today
     ) {
-      this.userPlan =
-        data.userPlan;
+
+      // Keep payment history, but mark the subscription inactive.
+      await setDoc(
+        userRef,
+        {
+          userPlan: 'free',
+          paymentStatus: 'inactive',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          merge: true
+        }
+      );
+
+      this.userPlan = 'free';
+
+      return;
     }
 
+    // Subscription is still active.
+    this.userPlan =
+      data.userPlan;
   }
 
   /*
