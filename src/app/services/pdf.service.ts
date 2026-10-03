@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { Auth } from '@angular/fire/auth';
+import { from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +11,23 @@ import { environment } from '../../environments/environment';
 export class PdfService {
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private auth: Auth
   ) { }
+
+  private async getAuthHeaders(): Promise<HttpHeaders> {
+    const user = this.auth.currentUser;
+
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    const token = await user.getIdToken();
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  }
 
   saveResumeData(data: any) {
     return this.http.post(
@@ -28,11 +46,16 @@ export class PdfService {
   }
 
   generatePremiumPdf() {
-    return this.http.get(
-      `${environment.apiBaseUrl}/generate-premium-pdf`,
-      {
-        responseType: 'blob'
-      }
+    return from(this.getAuthHeaders()).pipe(
+      switchMap(headers =>
+        this.http.get(
+          `${environment.apiBaseUrl}/generate-premium-pdf`,
+          {
+            headers,
+            responseType: 'blob'
+          }
+        )
+      )
     );
   }
 
@@ -46,21 +69,29 @@ export class PdfService {
     resumeData: any,
     jobDescription: string
   ) {
-
-    return this.http.post(
-      `${environment.apiBaseUrl}/analyze-jd`,
-      {
-        resumeData,
-        jobDescription
-      }
+    return from(this.getAuthHeaders()).pipe(
+      switchMap(headers =>
+        this.http.post(
+          `${environment.apiBaseUrl}/analyze-jd`,
+          {
+            resumeData,
+            jobDescription
+          },
+          { headers }
+        )
+      )
     );
-
   }
 
   verifyPayment(paymentResponse: any) {
-    return this.http.post(
-      `${environment.apiBaseUrl}/verify-payment`,
-      paymentResponse
+    return from(this.getAuthHeaders()).pipe(
+      switchMap(headers =>
+        this.http.post(
+          `${environment.apiBaseUrl}/verify-payment`,
+          paymentResponse,
+          { headers }
+        )
+      )
     );
   }
 }
