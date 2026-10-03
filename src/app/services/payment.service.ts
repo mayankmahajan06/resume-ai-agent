@@ -8,12 +8,6 @@ import { PdfService } from './pdf.service';
 import { AnalyticsService } from './analytics.service';
 
 import {
-  Firestore,
-  doc,
-  setDoc
-} from '@angular/fire/firestore';
-
-import {
   Auth
 } from '@angular/fire/auth';
 
@@ -58,17 +52,16 @@ export class PaymentService {
     };
 
     fetch(
-      `${environment.apiBaseUrl}/create-order`,
-      {
-        method: 'POST',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify(payload)
-      }
-    )
+          `${environment.apiBaseUrl}/create-order`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${await this.auth.currentUser!.getIdToken()}`
+            },
+            body: JSON.stringify(payload)
+          }
+        )
       .then(response => response.json())
 
       .then(data => {
@@ -295,13 +288,7 @@ export class PaymentService {
       return;
     }
 
-    this.pdfService
-      .verifyPayment({
-        ...paymentResponse,
-        userId:
-          user.uid,
-        firebaseIdToken
-      })
+    this.pdfService.verifyPayment(paymentResponse)
       .subscribe({
 
         next:
@@ -315,30 +302,6 @@ export class PaymentService {
                   verification.message || 'Payment verification was not successful',
                   paymentResponse?.razorpay_order_id
                 );
-
-              return;
-            }
-
-            try {
-              await this.saveVerifiedPremiumPlanToFirebase(
-                verification
-              );
-            } catch (error) {
-              this.analyticsService
-                .trackPaymentFailed(
-                  'activation',
-                  planType,
-                  error instanceof Error ? error.message : 'Failed to save premium plan',
-                  verification.orderId || paymentResponse?.razorpay_order_id
-                );
-
-              this.snackBar.open(
-                'Payment verified, but plan activation failed. Please contact support.',
-                'Close',
-                {
-                  duration: 5000
-                }
-              );
 
               return;
             }
@@ -385,59 +348,6 @@ export class PaymentService {
           }
 
       });
-
-  }
-
-  /* =====================================
-     SAVE PLAN TO FIREBASE
-  ===================================== */
-
-  private async saveVerifiedPremiumPlanToFirebase(
-    verifiedPayment: any
-  ): Promise<void> {
-
-    const user =
-      this.auth.currentUser;
-
-    if (!user) {
-      return;
-    }
-
-    const userRef =
-      doc(
-        this.firestore,
-        `users/${user.uid}`
-      );
-
-    await setDoc(
-      userRef,
-      {
-
-        userPlan:
-          verifiedPayment.planType,
-
-        paymentStatus:
-          verifiedPayment.paymentStatus,
-
-        planStartDate:
-          verifiedPayment.planStartDate,
-
-        planExpiryDate:
-          verifiedPayment.planExpiryDate,
-
-        paymentId:
-          verifiedPayment.paymentId,
-
-        orderId: verifiedPayment.orderId,
-
-        updatedAt:
-          new Date().toISOString()
-
-      },
-      {
-        merge: true
-      }
-    );
 
   }
 
