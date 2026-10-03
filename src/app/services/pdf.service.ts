@@ -30,18 +30,28 @@ export class PdfService {
   }
 
   saveResumeData(data: any) {
-    return this.http.post(
-      `${environment.apiBaseUrl}/save-resume-data`,
-      data
+    return from(this.getAuthHeaders()).pipe(
+      switchMap(headers =>
+        this.http.post(
+          `${environment.apiBaseUrl}/save-resume-data`,
+          data,
+          { headers }
+        )
+      )
     );
   }
 
   generatePdf() {
-    return this.http.get(
-      `${environment.apiBaseUrl}/generate-pdf`,
-      {
-        responseType: 'blob'
-      }
+    return from(this.getAuthHeaders()).pipe(
+      switchMap(headers =>
+        this.http.get(
+          `${environment.apiBaseUrl}/generate-pdf`,
+          {
+            headers,
+            responseType: 'blob'
+          }
+        )
+      )
     );
   }
 
@@ -60,8 +70,13 @@ export class PdfService {
   }
 
   getResumeData() {
-    return this.http.get(
-      `${environment.apiBaseUrl}/resume-data`
+    return from(this.getAuthHeaders()).pipe(
+      switchMap(headers =>
+        this.http.get(
+          `${environment.apiBaseUrl}/resume-data`,
+          { headers }
+        )
+      )
     );
   }
 
