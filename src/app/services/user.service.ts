@@ -31,6 +31,10 @@ export class UserService {
 
   async loadUserPlan(): Promise<void> {
 
+    // Always start from the safest state. This prevents a stale premium
+    // value from remaining in memory when the user has no active plan.
+    this.userPlan = 'free';
+
     const user =
       this.auth.currentUser;
 
@@ -44,36 +48,32 @@ export class UserService {
     const snapshot =
       await getDoc(userRef);
 
-    if (snapshot.exists()) {
+    if (!snapshot.exists()) {
+      return;
+    }
 
-      const data: any =
-        snapshot.data();
+    const data: any =
+      snapshot.data();
 
-      if (
-        data.paymentStatus === 'active' &&
-        data.userPlan
-      ) {
+    if (
+      data.paymentStatus !== 'active' ||
+      !['pro', 'pro_plus'].includes(data.userPlan)
+    ) {
+      return;
+    }
 
-        const expiryDate =
-          new Date(data.planExpiryDate);
+    const expiryDate =
+      new Date(data.planExpiryDate);
 
-        const today =
-          new Date();
+    const today =
+      new Date();
 
-        if (expiryDate > today) {
-
-          this.userPlan =
-            data.userPlan;
-
-        } else {
-
-          this.userPlan =
-            'free';
-
-        }
-
-      }
-
+    if (
+      !Number.isNaN(expiryDate.getTime()) &&
+      expiryDate > today
+    ) {
+      this.userPlan =
+        data.userPlan;
     }
 
   }
