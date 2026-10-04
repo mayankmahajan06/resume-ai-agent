@@ -43,6 +43,86 @@ const razorpay = new Razorpay({
 
 const isProduction = process.env.NODE_ENV === "production";
 
+const allowedOrigins = new Set([
+  FRONTEND_URL,
+  "https://resumepilot.co.in",
+  "https://resumepilot-ai-app.web.app",
+  "http://localhost:4200",
+]);
+
+const rateLimitBuckets = new Map();
+
+function rateLimit({
+  windowMs,
+  max,
+  keyGenerator,
+  message = "Too many requests. Please try again later.",
+}) {
+  return (req, res, next) => {
+    const key = keyGenerator(req);
+    const now = Date.now();
+    const existing = rateLimitBuckets.get(key);
+
+    if (!existing || now >= existing.resetAt) {
+      rateLimitBuckets.set(key, {
+        count: 1,
+        resetAt: now + windowMs,
+      });
+      return next();
+    }
+
+    existing.count += 1;
+
+    if (existing.count > max) {
+      res.set("Retry-After", String(Math.ceil((existing.resetAt - now) / 1000)));
+      return res.status(429).send({
+        success: false,
+        message,
+      });
+    }
+
+    next();
+  };
+}
+
+const authenticatedRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  keyGenerator: (req) => `uid:${req.user?.uid || "unknown"}`,
+});
+
+const aiRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => `ai:${req.user?.uid || "unknown"}`,
+  message: "AI request limit reached. Please try again in a minute.",
+});
+
+const pdfRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => `pdf:${req.user?.uid || "unknown"}`,
+  message: "PDF generation limit reached. Please try again later.",
+});
+
+const importRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => `import:${req.user?.uid || "unknown"}`,
+  message: "Resume import limit reached. Please try again later.",
+});
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, bucket] of rateLimitBuckets) {
+    if (now >= bucket.resetAt) {
+      rateLimitBuckets.delete(key);
+    }
+  }
+}, 10 * 60 * 1000).unref();
+
+
+
 let serviceAccount;
 
 if (isProduction) {
@@ -307,7 +387,7 @@ async function requireResumeDataAuth(req, res, next) {
   return requireAuth(req, res, next);
 }
 
-app.post("/save-resume-data", requireAuth, async (req, res) => {
+app.post("/save-resume-data", requireAuth, authenticatedRateLimit, async (req, res) => {
   try {
     await admin
       .firestore()
@@ -333,7 +413,7 @@ app.post("/save-resume-data", requireAuth, async (req, res) => {
   }
 });
 
-app.get("/resume-data", requireResumeDataAuth, async (req, res) => {
+app.get("/resume-data", requireResumeDataAuth, authenticatedRateLimit, async (req, res) => {
   try {
     const snapshot = await admin
       .firestore()
@@ -360,7 +440,7 @@ app.get("/resume-data", requireResumeDataAuth, async (req, res) => {
   }
 });
 
-app.post("/api/resume/import", requireAuth, (req, res) => {
+app.post("/api/resume/import", requireAuth, importRateLimit, (req, res) => {
   resumeUpload.single("resume")(req, res, async (uploadError) => {
     try {
       if (uploadError) {
@@ -442,7 +522,7 @@ app.post("/api/resume/import", requireAuth, (req, res) => {
 /*
 GENERATE FREE PDF (Modern template)
 */
-app.get("/generate-pdf", requireAuth, async (req, res) => {
+app.get("/generate-pdf", requireAuth, pdfRateLimit, async (req, res) => {
   let browser;
 
   const resumeSnapshot = await admin
@@ -516,7 +596,7 @@ Architecture:
 - compact-grid → server-side HTML builder (no Angular route needed)
 - executive-left-rail, others → still use Angular print route
 */
-app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
+app.get("/generate-premium-pdf", requireActivePremium, pdfRateLimit, async (req, res) => {
   let browser;
 
   const resumeSnapshot = await admin
@@ -611,7 +691,7 @@ app.get("/generate-premium-pdf", requireActivePremium, async (req, res) => {
 /*
 CREATE RAZORPAY ORDER
 */
-app.post("/create-order", requireAuth, async (req, res) => {
+app.post("/create-order", requireAuth, authenticatedRateLimit, async (req, res) => {
   try {
     const { planType } = req.body;
     const plan = plans[planType];
@@ -643,7 +723,7 @@ app.post("/create-order", requireAuth, async (req, res) => {
 /*
 VERIFY RAZORPAY PAYMENT
 */
-app.post("/verify-payment", requireAuth, async (req, res) => {
+app.post("/verify-payment", requireAuth, authenticatedRateLimit, async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -799,7 +879,7 @@ app.post("/verify-payment", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/analyze-jd", requireActivePremium, (req, res) => {
+app.post("/analyze-jd", requireActivePremium, aiRateLimit, (req, res) => {
   try {
     const { resumeData, jobDescription } = req.body;
     const analysis = analyzeJD(resumeData, jobDescription);
