@@ -101,10 +101,34 @@ function cleanLine(line = "") {
 }
 
 function splitLines(text = "") {
-  return normalizeText(text)
+  const rawLines = normalizeText(text)
     .split("\n")
     .map(cleanLine)
     .filter(Boolean);
+
+  const lines = [];
+
+  for (let i = 0; i < rawLines.length; i++) {
+    const current = rawLines[i];
+    const next = rawLines[i + 1] || "";
+
+    // PDF text extraction often splits date ranges such as:
+    // "2025-01 -" + "Current"
+    // "2021-08 -" + "2024-12"
+    // Merge those before structural parsing.
+    if (
+      /(?:19|20)\d{2}[-/]\d{1,2}\s*[-–—]\s*$/.test(current) &&
+      /^(?:Present|Current|Now|(?:19|20)\d{2}[-/]\d{1,2})$/i.test(next)
+    ) {
+      lines.push(current + " " + next);
+      i++;
+      continue;
+    }
+
+    lines.push(current);
+  }
+
+  return lines;
 }
 
 function cleanBullet(line = "") {
