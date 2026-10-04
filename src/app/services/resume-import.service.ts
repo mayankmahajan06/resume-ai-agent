@@ -37,7 +37,7 @@ export class ResumeImportService {
       file
     );
 
-    return from(this.auth.currentUser?.getIdToken() || Promise.reject(
+    return from(this.auth.currentUser?.getIdToken(true) || Promise.reject(
       new Error('User not logged in')
     )).pipe(
       switchMap(token =>
