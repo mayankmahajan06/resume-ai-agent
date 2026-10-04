@@ -58,27 +58,78 @@ function buildLines(items = []) {
 function findItemColumnSplit(items, pageWidth) {
   if (items.length < 12) return null;
 
-  const starts = [
-    ...new Set(items.map((item) => Math.round(item.x))),
-  ].sort((a, b) => a - b);
+  /*
+   * Resume PDFs often have an indented main column. Looking only at the
+   * largest gap between item start positions is unreliable because a main
+   * column may start at x=199 while role/bullet text starts at x=289.
+   *
+   * Instead, build a horizontal occupancy map from the actual text boxes and
+   * find a real empty vertical gutter between two populated regions.
+   */
+  const binSize = 4;
+  const binCount = Math.ceil(pageWidth / binSize);
+  const occupied = new Array(binCount).fill(false);
 
-  if (starts.length < 6) return null;
+  for (const item of items) {
+    const startBin = Math.max(0, Math.floor(item.x / binSize));
+    const endBin = Math.min(
+      binCount - 1,
+      Math.ceil((item.x + item.width) / binSize),
+    );
 
-  let best = null;
+    for (let i = startBin; i <= endBin; i++) {
+      occupied[i] = true;
+    }
+  }
 
-  for (let i = 1; i < starts.length; i++) {
-    const gap = starts[i] - starts[i - 1];
+  const gaps = [];
+  let gapStart = -1;
 
-    if (gap < Math.max(40, pageWidth * 0.1)) continue;
+  for (let i = 0; i <= binCount; i++) {
+    const empty = i < binCount ? !occupied[i] : false;
 
-    const split = (starts[i - 1] + starts[i]) / 2;
-    const left = items.filter((item) => item.x <= split);
-    const right = items.filter((item) => item.x > split);
+    if (empty && gapStart === -1) {
+      gapStart = i;
+    }
+
+    if (!empty && gapStart !== -1) {
+      const gapEnd = i;
+      const gapWidth = (gapEnd - gapStart) * binSize;
+
+      if (gapWidth >= 18) {
+        const leftX = gapStart * binSize;
+        const rightX = gapEnd * binSize;
+
+        if (
+          leftX > pageWidth * 0.08 &&
+          rightX < pageWidth * 0.92
+        ) {
+          gaps.push({
+            gapWidth,
+            split: (leftX + rightX) / 2,
+          });
+        }
+      }
+
+      gapStart = -1;
+    }
+  }
+
+  if (!gaps.length) return null;
+
+  gaps.sort((a, b) => b.gapWidth - a.gapWidth);
+
+  for (const gap of gaps) {
+    const left = items.filter((item) => item.x < gap.split);
+    const right = items.filter((item) => item.x >= gap.split);
 
     if (left.length < 8 || right.length < 8) continue;
 
-    const leftY = new Set(left.map((item) => Math.round(item.y)));
-    const rightY = new Set(right.map((item) => Math.round(item.y)));
+    const leftLines = buildLines(left);
+    const rightLines = buildLines(right);
+
+    const leftY = new Set(leftLines.map((line) => Math.round(line.y)));
+    const rightY = new Set(rightLines.map((line) => Math.round(line.y)));
 
     let overlap = 0;
 
@@ -91,22 +142,18 @@ function findItemColumnSplit(items, pageWidth) {
     const overlapRatio =
       overlap / Math.min(leftY.size, rightY.size);
 
-    if (overlapRatio < 0.2) continue;
+    if (overlapRatio < 0.08) continue;
 
-    const candidate = {
-      split,
-      gap,
+    return {
+      split: gap.split,
+      gap: gap.gapWidth,
       left,
       right,
       overlapRatio,
     };
-
-    if (!best || candidate.gap > best.gap) {
-      best = candidate;
-    }
   }
 
-  return best;
+  return null;
 }
 
 function isDateLikeLine(text = "") {
