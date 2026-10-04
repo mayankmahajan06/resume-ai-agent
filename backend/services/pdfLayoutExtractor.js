@@ -157,8 +157,18 @@ function findItemColumnSplit(items, pageWidth) {
 }
 
 function isDateLikeLine(text = "") {
-  return /(?:19|20)\\d{2}[-/]\\d{1,2}\\s*(?:-|–|—|to)\\s*(?:(?:19|20)\\d{2}[-/]\\d{1,2}|Present|Current|Now)\\b/i.test(
-    cleanText(text),
+  const value = cleanText(text);
+
+  return (
+    /(?:19|20)\\d{2}[-/]\\d{1,2}\\s*(?:-|–|—|to)\\s*(?:(?:19|20)\\d{2}[-/]\\d{1,2}|Present|Current|Now)\\b/i.test(
+      value,
+    ) ||
+    /\\d{1,2}[-/]\\d{4}\\s*(?:-|–|—|to)\\s*(?:\\d{1,2}[-/]\\d{4}|Present|Current|Now)\\b/i.test(
+      value,
+    ) ||
+    /(?:19|20)\\d{2}\\s*(?:-|–|—|to)\\s*(?:(?:19|20)\\d{2}|Present|Current|Now)\\b/i.test(
+      value,
+    )
   );
 }
 
