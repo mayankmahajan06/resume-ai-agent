@@ -6,8 +6,6 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { ResumeService } from '../../../services/resume.service';
-import { AnalyticsService } from '../../../services/analytics.service';
-
 @Component({
   selector: 'app-signup',
   standalone: true,
@@ -32,8 +30,7 @@ export class SignupComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private resumeService: ResumeService,
-    private analyticsService: AnalyticsService
+    private resumeService: ResumeService
   ) { }
 
   signup(): void {
@@ -56,8 +53,7 @@ export class SignupComponent {
 
     this.isLoading = true;
 
-    this.analyticsService
-      .trackSignupStarted('email');
+    
 
     this.authService
       .signup(
@@ -66,17 +62,12 @@ export class SignupComponent {
         this.fullName
       )
       .then(() => {
-        this.analyticsService
-          .trackSignupCompleted('email');
+        
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
-        this.analyticsService
-          .trackSignupFailed(
-            'email',
-            error.code
-          );
+        
 
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       })
@@ -86,29 +77,22 @@ export class SignupComponent {
   }
 
   googleSignup(): void {
-    this.analyticsService
-      .trackSignupStarted('google');
+    
 
     this.authService
       .googleLogin()
       .then((credential) => {
         if (this.authService.isNewAuthUser(credential)) {
-          this.analyticsService
-            .trackSignupCompleted('google');
+          
         } else {
-          this.analyticsService
-            .trackLoginCompleted('google');
+          
         }
 
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
-        this.analyticsService
-          .trackSignupFailed(
-            'google',
-            error.code
-          );
+        
 
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       });
