@@ -269,45 +269,72 @@ function looksLikeContact(line = "") {
 function looksLikeName(line = "") {
   const value = cleanLine(line);
 
-  if (!value || value.length < 2 || value.length > 50) return false;
+  if (!value || value.length < 2 || value.length > 35) return false;
   if (looksLikeContact(value) || /[0-9,:;|]/.test(value)) return false;
   if (isStopHeading(value) || looksLikeRole(value)) return false;
 
-  return /^[A-Za-z][A-Za-z.'-]*(?:\s+[A-Za-z][A-Za-z.'-]*){0,3}$/.test(value);
+  /*
+   * A person's name should look like a short name, not a sentence.
+   * This prevents summary fragments such as
+   * "evolving industry trends. Mayank" from being selected.
+   */
+  if (/[.!?]/.test(value)) return false;
+
+  const words = value.split(/\s+/);
+
+  if (words.length < 1 || words.length > 4) return false;
+  if (words.some((word) => word.length > 18)) return false;
+
+  return words.every((word) =>
+    /^[A-Za-z][A-Za-z'-]*$/.test(word)
+  );
 }
 
 function extractName(lines = []) {
-  const top = lines.slice(0, 30);
+  const top = lines.slice(0, 40);
   const candidates = [];
 
   for (let i = 0; i < top.length; i++) {
     const current = top[i];
 
-    if (looksLikeName(current)) {
-      let score = i < 8 ? 30 : 0;
-      if (current.split(/\s+/).length >= 2) score += 30;
-      if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3}$/.test(current)) score += 10;
+    if (!looksLikeName(current)) continue;
 
-      const nearby = top.slice(i + 1, i + 5).join(" ");
-      if (/@/.test(nearby)) score += 15;
-      if (/\b(phone|mobile|contact|email|address)\b/i.test(nearby)) score += 10;
+    const words = current.split(/\s+/);
 
-      candidates.push({ value: current, score });
+    let score = 0;
+
+    // Strong preference for names near the beginning.
+    if (i < 10) score += 30;
+
+    // Two/three-word names are more likely than arbitrary single words.
+    if (words.length === 2) score += 35;
+    else if (words.length === 3) score += 25;
+    else if (words.length === 1) score += 5;
+
+    // Conventional title-case name.
+    if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2}$/.test(current)) {
+      score += 30;
     }
 
-    if (i + 1 < top.length && looksLikeName(current) && looksLikeName(top[i + 1])) {
-      const combined = current + " " + top[i + 1];
+    /*
+     * A real name is commonly followed by contact information.
+     * Do not use generic nearby prose as evidence.
+     */
+    const nearby = top.slice(i + 1, i + 8).join(" ");
 
-      if (combined.split(/\s+/).length <= 4) {
-        candidates.push({
-          value: combined,
-          score: 85 + (i < 8 ? 10 : 0),
-        });
-      }
+    if (/@[A-Za-z0-9.-]+\./.test(nearby)) score += 25;
+    if (/\b(phone|mobile|contact|email|e-mail|address|linkedin)\b/i.test(nearby)) {
+      score += 20;
     }
+
+    candidates.push({ value: current, score, index: i });
   }
 
-  candidates.sort((a, b) => b.score - a.score);
+  candidates.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.index - b.index;
+  });
+
   return candidates[0]?.value || "";
 }
 
