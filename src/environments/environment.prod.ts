@@ -2,7 +2,7 @@ export const environment = {
   production: true,
 
   firebase: {
-    apiKey: "AIzaSyDNEbBWHGLKH3BFgnjR9qlOeBnrjFyb344",
+    apiKey: "AIzaSyDNEbBWHGLKH3BFgnj9RqlOeBnrjFyb344",
     authDomain: "resumepilot-ai-app.firebaseapp.com",
     projectId: "resumepilot-ai-app",
     storageBucket: "resumepilot-ai-app.firebasestorage.app",
