@@ -486,11 +486,17 @@ function parseExperience(lines = []) {
     }
 
     const responsibilities = [];
+    const consumedHeaderLines = new Set(
+      [role, company]
+        .map((value) => cleanLine(value))
+        .filter(Boolean),
+    );
 
     for (let j = i + 1; j < lines.length; j++) {
       const current = cleanLine(lines[j]);
 
       if (!current) continue;
+      if (consumedHeaderLines.has(current)) continue;
       if (isDateRange(current)) break;
       if (isStopHeading(current)) break;
       if (/^key highlights:?$/i.test(current)) continue;
