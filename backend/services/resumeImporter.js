@@ -412,41 +412,77 @@ function parseExperience(lines = []) {
     let role = "";
     let company = "";
 
-    // Some resumes keep role, company and dates on the same line:
-    // "Engineer III, S&P Global 01/2025 - Present".
-    const beforeDate = currentLine
-      .replace(duration, "")
-      .replace(/[-–—|]+\s*$/, "")
-      .trim();
+    const isUsableCompanyLine = (value = "") => {
+      const line = cleanBullet(value);
 
-    if (beforeDate && !isDateRange(beforeDate) && looksLikeRole(beforeDate)) {
-      const parts = beforeDate.split(",").map((part) => cleanLine(part)).filter(Boolean);
+      return (
+        Boolean(line) &&
+        !isDateRange(line) &&
+        !isStopHeading(line) &&
+        !looksLikeContact(line) &&
+        !/^[•●▪◦‣⁃∙·*-]\s*/u.test(value) &&
+        line.length <= 100
+      );
+    };
 
-      role = parts[0] || beforeDate;
-      company = parts.slice(1).join(", ");
-    }
+    /*
+     * Common visual layout:
+     *
+     * 2025-01 - Present     Engineer III
+     *                      S&P Global, Hyderabad
+     *
+     * The date can therefore appear BEFORE the role/company in PDF text
+     * order. Look on both sides of the date instead of assuming the two
+     * previous lines contain the role/company.
+     */
+    if (looksLikeRole(previous)) {
+      role = previous;
 
-    if (previous && previous2) {
-      if (looksLikeRole(previous2) && !looksLikeRole(previous)) {
-        role = previous2;
-        company = previous;
-      } else if (looksLikeRole(previous) && !looksLikeRole(previous2)) {
-        role = previous;
-        company = previous2;
-      } else {
-        role = previous2;
-        company = previous;
+      if (isUsableCompanyLine(lines[i + 1])) {
+        company = cleanBullet(lines[i + 1]);
       }
-    } else if (previous) {
-      role = looksLikeRole(previous) ? previous : "";
-      company = role ? "" : previous;
+    } else if (looksLikeRole(previous2)) {
+      role = previous2;
+
+      if (isUsableCompanyLine(previous)) {
+        company = previous;
+      } else if (isUsableCompanyLine(lines[i + 1])) {
+        company = cleanBullet(lines[i + 1]);
+      }
+    } else if (looksLikeRole(lines[i + 1])) {
+      role = cleanBullet(lines[i + 1]);
+
+      if (isUsableCompanyLine(lines[i + 2])) {
+        company = cleanBullet(lines[i + 2]);
+      }
+    } else if (looksLikeRole(lines[i + 2])) {
+      role = cleanBullet(lines[i + 2]);
+
+      if (isUsableCompanyLine(lines[i + 1])) {
+        company = cleanBullet(lines[i + 1]);
+      }
     }
 
-    const combined = role.match(/^(.+?)\s+(?:-|–|—|\|)\s+(.+)$/);
+    /*
+     * Older/simple layouts often have:
+     * Role
+     * Company
+     * Date
+     *
+     * If we have a role but no company, check the line immediately before
+     * the role as a final fallback.
+     */
+    if (role && !company) {
+      const candidates = [previous, previous2];
 
-    if (combined) {
-      role = combined[1].trim();
-      company = combined[2].trim();
+      company =
+        candidates
+          .map(cleanBullet)
+          .find(
+            (value) =>
+              isUsableCompanyLine(value) &&
+              value.toLowerCase() !== role.toLowerCase(),
+          ) || "";
     }
 
     const responsibilities = [];
