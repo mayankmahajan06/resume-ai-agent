@@ -122,10 +122,6 @@ function splitLines(text = "") {
     const current = rawLines[i];
     const next = rawLines[i + 1] || "";
 
-    // PDF text extraction often splits date ranges such as:
-    // "2025-01 -" + "Current"
-    // "2021-08 -" + "2024-12"
-    // Merge those before structural parsing.
     if (
       /(?:19|20)\d{2}[-/]\d{1,2}\s*[-–—]\s*$/.test(current) &&
       /^(?:Present|Current|Now|(?:19|20)\d{2}[-/]\d{1,2})$/i.test(next)
@@ -144,7 +140,7 @@ function splitLines(text = "") {
 function cleanBullet(line = "") {
   return cleanLine(line)
     .replace(/^(?:[•●▪◦‣⁃∙·*]|)\s*/u, "")
-    .replace(/^\-\s+/, "")
+    .replace(/^-\s+/, "")
     .trim();
 }
 
@@ -191,7 +187,11 @@ function groupSections(lines = []) {
 }
 
 function extractEmail(text = "") {
-  const match = normalizeText(text).match(
+  const normalized = normalizeText(text)
+    // Some PDF fonts split the TLD across text items, e.g. gmail.c + om.
+    .replace(/([A-Z0-9._%+-]+@[A-Z0-9.-]+)\s+([A-Z]{2,})\b/gi, "$1$2");
+
+  const match = normalized.match(
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
   );
 
@@ -217,7 +217,10 @@ function extractPhone(text = "") {
 }
 
 function extractLinkedIn(text = "") {
-  const match = normalizeText(text).match(
+  const normalized = normalizeText(text)
+    .replace(/(linkedin\.com)\s*\n\s*/gi, "$1/");
+
+  const match = normalized.match(
     /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/[^\s<]+/i,
   );
 
@@ -261,7 +264,7 @@ function looksLikeContact(line = "") {
     /@/.test(line) ||
     /https?:\/\//i.test(line) ||
     /linkedin\.com|github\.com/i.test(line) ||
-    /^(phone|mobile|contact|email|e-mail|address|location)$/i.test(line) ||
+    /^(phone|mobile|contact|email|e-mail|address|location|linkedin)$/i.test(line) ||
     /^\+?\d[\d\s().-]{8,}\d$/.test(line)
   );
 }
@@ -272,12 +275,6 @@ function looksLikeName(line = "") {
   if (!value || value.length < 2 || value.length > 35) return false;
   if (looksLikeContact(value) || /[0-9,:;|]/.test(value)) return false;
   if (isStopHeading(value) || looksLikeRole(value)) return false;
-
-  /*
-   * A person's name should look like a short name, not a sentence.
-   * This prevents summary fragments such as
-   * "evolving industry trends. Mayank" from being selected.
-   */
   if (/[.!?]/.test(value)) return false;
 
   const words = value.split(/\s+/);
@@ -285,9 +282,7 @@ function looksLikeName(line = "") {
   if (words.length < 1 || words.length > 4) return false;
   if (words.some((word) => word.length > 18)) return false;
 
-  return words.every((word) =>
-    /^[A-Za-z][A-Za-z'-]*$/.test(word)
-  );
+  return words.every((word) => /^[A-Za-z][A-Za-z'-]*$/.test(word));
 }
 
 function extractName(lines = []) {
@@ -299,27 +294,36 @@ function extractName(lines = []) {
 
     if (!looksLikeName(current)) continue;
 
-    const words = current.split(/\s+/);
+    // PDF layouts sometimes put first and last name on separate lines.
+    const next = top[i + 1] || "";
 
+    if (looksLikeName(next)) {
+      const combined = cleanLine(current + " " + next);
+
+      if (combined.length <= 35) {
+        candidates.push({
+          value: combined,
+          score: 120 - i,
+          index: i,
+        });
+        i++;
+        continue;
+      }
+    }
+
+    const words = current.split(/\s+/);
     let score = 0;
 
-    // Strong preference for names near the beginning.
     if (i < 10) score += 30;
 
-    // Two/three-word names are more likely than arbitrary single words.
     if (words.length === 2) score += 35;
     else if (words.length === 3) score += 25;
     else if (words.length === 1) score += 5;
 
-    // Conventional title-case name.
     if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2}$/.test(current)) {
       score += 30;
     }
 
-    /*
-     * A real name is commonly followed by contact information.
-     * Do not use generic nearby prose as evidence.
-     */
     const nearby = top.slice(i + 1, i + 8).join(" ");
 
     if (/@[A-Za-z0-9.-]+\./.test(nearby)) score += 25;
@@ -643,6 +647,22 @@ function extractSummary(lines = []) {
   return candidates[0] || "";
 }
 
+function extractHeaderRole(headerLines = []) {
+  for (const line of headerLines) {
+    const value = cleanBullet(line);
+
+    if (!value || looksLikeContact(value) || isStopHeading(value)) continue;
+
+    // The first role-like header line is much safer than taking a role-like
+    // sentence from the professional summary.
+    if (looksLikeRole(value) && value.length <= 70) {
+      return value;
+    }
+  }
+
+  return "";
+}
+
 function parseResumeText(text = "") {
   const normalizedText = normalizeText(text);
   const lines = splitLines(normalizedText);
@@ -653,6 +673,7 @@ function parseResumeText(text = "") {
     : lines;
 
   const experiences = parseExperience(experienceLines);
+  const headerRole = extractHeaderRole(sections.header || []);
 
   return {
     fullName: extractName(lines),
@@ -660,7 +681,7 @@ function parseResumeText(text = "") {
     phone: extractPhone(normalizedText),
     location: extractLocation(lines),
     linkedIn: extractLinkedIn(normalizedText),
-    currentRole: experiences[0]?.role || "",
+    currentRole: headerRole || experiences[0]?.role || "",
     targetRole: "",
     summary:
       sections.summary?.length
@@ -671,10 +692,7 @@ function parseResumeText(text = "") {
     resumeId: "",
     jdMatch: 0,
     atsScore: 0,
-    skills: extractSkillsFromResume(
-      normalizedText,
-      sections.skills || [],
-    ),
+    skills: extractSkillsFromResume(normalizedText, sections.skills || []),
     experiences,
     projects: parseProjects(sections.projects || []),
     certifications: parseCertifications(sections.certifications || []),
