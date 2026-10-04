@@ -5,10 +5,6 @@ import { provideHttpClient } from '@angular/common/http';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
-import {
-  provideAnalytics,
-  getAnalytics
-} from '@angular/fire/analytics';
 
 import {
   provideFirestore,
@@ -36,9 +32,6 @@ export const appConfig: ApplicationConfig = {
 
     provideFirestore(() =>
       getFirestore()
-    ),
-    provideAnalytics(() =>
-      getAnalytics()
     )
   ]
 };
