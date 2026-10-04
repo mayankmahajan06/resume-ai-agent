@@ -449,17 +449,6 @@ function parseExperience(lines = []) {
       company = combined[2].trim();
     }
 
-    // Some PDFs place role and company on one line, e.g.
-    // "Engineer III, S&P Global" before the date.
-    if (!company && role.includes(",")) {
-      const parts = role.split(",").map((part) => cleanLine(part)).filter(Boolean);
-
-      if (parts.length >= 2 && looksLikeRole(parts[0])) {
-        role = parts[0];
-        company = parts.slice(1).join(", ");
-      }
-    }
-
     const responsibilities = [];
 
     for (let j = i + 1; j < lines.length; j++) {
@@ -698,15 +687,20 @@ function parseResumeText(text = "") {
   const sections = groupSections(lines);
 
   /*
-   * Do not restrict experience parsing to sections.experience.
+   * For sidebar-style resumes, the left column can contain many unrelated
+   * lines before the main-column experience section. If we scan the entire
+   * flattened document, those sidebar lines can accidentally become the
+   * "role" and "company" immediately before an experience date.
    *
-   * In two-column resumes the "Experience" heading can be physically placed
-   * in the sidebar while the actual jobs are in the main column. Once the PDF
-   * is flattened, those lines can belong to different structural sections.
-   * Date ranges are a stronger signal, so parse experiences from the complete
-   * ordered document.
+   * When an explicit Experience heading exists, parse only that section.
+   * Fall back to the complete document only for resumes without a section
+   * heading.
    */
-  const experiences = parseExperience(lines);
+  const experienceLines = sections.experience?.length
+    ? sections.experience
+    : lines;
+
+  const experiences = parseExperience(experienceLines);
   const headerRole = extractHeaderRole(sections.header || []);
 
   return {
