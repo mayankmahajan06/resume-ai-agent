@@ -405,11 +405,26 @@ function parseExperience(lines = []) {
 
     if (!duration) continue;
 
+    const currentLine = cleanBullet(lines[i] || "");
     const previous = cleanBullet(lines[i - 1] || "");
     const previous2 = cleanBullet(lines[i - 2] || "");
 
     let role = "";
     let company = "";
+
+    // Some resumes keep role, company and dates on the same line:
+    // "Engineer III, S&P Global 01/2025 - Present".
+    const beforeDate = currentLine
+      .replace(duration, "")
+      .replace(/[-–—|]+\s*$/, "")
+      .trim();
+
+    if (beforeDate && !isDateRange(beforeDate) && looksLikeRole(beforeDate)) {
+      const parts = beforeDate.split(",").map((part) => cleanLine(part)).filter(Boolean);
+
+      role = parts[0] || beforeDate;
+      company = parts.slice(1).join(", ");
+    }
 
     if (previous && previous2) {
       if (looksLikeRole(previous2) && !looksLikeRole(previous)) {
@@ -682,11 +697,16 @@ function parseResumeText(text = "") {
   const lines = splitLines(normalizedText);
   const sections = groupSections(lines);
 
-  const experienceLines = sections.experience?.length
-    ? sections.experience
-    : lines;
-
-  const experiences = parseExperience(experienceLines);
+  /*
+   * Do not restrict experience parsing to sections.experience.
+   *
+   * In two-column resumes the "Experience" heading can be physically placed
+   * in the sidebar while the actual jobs are in the main column. Once the PDF
+   * is flattened, those lines can belong to different structural sections.
+   * Date ranges are a stronger signal, so parse experiences from the complete
+   * ordered document.
+   */
+  const experiences = parseExperience(lines);
   const headerRole = extractHeaderRole(sections.header || []);
 
   return {
