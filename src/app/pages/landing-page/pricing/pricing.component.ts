@@ -7,8 +7,6 @@ import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 
 import { PaymentService } from '../../../services/payment.service';
-import { AnalyticsService } from '../../../services/analytics.service';
-
 @Component({
   selector: 'app-pricing',
   standalone: true,
@@ -29,8 +27,7 @@ export class PricingComponent {
     private router: Router,
     private authService: AuthService,
     private userService: UserService,
-    private paymentService: PaymentService,
-    private analyticsService: AnalyticsService
+    private paymentService: PaymentService
   ) {
 
     this.authService
@@ -49,11 +46,7 @@ export class PricingComponent {
 
         }
 
-        this.analyticsService
-          .trackPricingViewed(
-            this.userPlan,
-            this.isLoggedIn
-          );
+        
 
       });
 
@@ -64,13 +57,7 @@ export class PricingComponent {
   ===================================== */
 
   handleFreePlan(): void {
-    this.analyticsService
-      .trackPricingPlanSelected(
-        'free',
-        'landing_pricing',
-        this.isLoggedIn,
-        this.userPlan
-      );
+    
 
     if (this.isLoggedIn) {
 
@@ -93,13 +80,7 @@ export class PricingComponent {
   ===================================== */
 
   handleProPlan(): void {
-    this.analyticsService
-      .trackPricingPlanSelected(
-        'pro',
-        'landing_pricing',
-        this.isLoggedIn,
-        this.userPlan
-      );
+    
 
     if (!this.isLoggedIn) {
 
@@ -137,13 +118,7 @@ export class PricingComponent {
   ===================================== */
 
   handleProPlusPlan(): void {
-    this.analyticsService
-      .trackPricingPlanSelected(
-        'pro_plus',
-        'landing_pricing',
-        this.isLoggedIn,
-        this.userPlan
-      );
+    
 
     if (!this.isLoggedIn) {
 
