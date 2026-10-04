@@ -584,7 +584,11 @@ app.post("/create-order", requireAuth, async (req, res) => {
       amount: plan.amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
-      notes: { planType, planLabel: plan.label },
+      notes: {
+        planType,
+        planLabel: plan.label,
+        firebaseUid: req.user.uid,
+      },
     };
     const order = await razorpay.orders.create(options);
     res
@@ -614,6 +618,10 @@ app.post("/verify-payment", requireAuth, async (req, res) => {
       });
     }
 
+    /*
+    Verify the Razorpay signature first so the order/payment IDs cannot be
+    trusted until Razorpay has cryptographically confirmed the checkout data.
+    */
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -638,6 +646,50 @@ app.post("/verify-payment", requireAuth, async (req, res) => {
       });
     }
 
+    /*
+    Orders created after this hardening include the Firebase UID in their
+    private Razorpay notes. If present, make sure the order belongs to the
+    authenticated user.
+    */
+    if (order.notes?.firebaseUid && order.notes.firebaseUid !== req.user.uid) {
+      return res.status(403).send({
+        success: false,
+        message: "Payment order does not belong to this user",
+      });
+    }
+
+    const expectedAmount = plan.amount * 100;
+
+    if (order.amount !== expectedAmount || order.currency !== "INR") {
+      return res.status(400).send({
+        success: false,
+        message: "Payment order amount or currency is invalid",
+      });
+    }
+
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+    if (payment.order_id !== razorpay_order_id) {
+      return res.status(400).send({
+        success: false,
+        message: "Payment does not belong to the verified order",
+      });
+    }
+
+    if (payment.amount !== expectedAmount || payment.currency !== "INR") {
+      return res.status(400).send({
+        success: false,
+        message: "Payment amount or currency is invalid",
+      });
+    }
+
+    if (payment.status !== "captured") {
+      return res.status(400).send({
+        success: false,
+        message: "Payment has not been captured",
+      });
+    }
+
     const uid = req.user.uid;
     const userRef = admin.firestore().collection("users").doc(uid);
     const userSnapshot = await userRef.get();
@@ -645,9 +697,30 @@ app.post("/verify-payment", requireAuth, async (req, res) => {
       ? userSnapshot.data()
       : {};
 
+    /*
+    Idempotency: a previously processed payment must not extend the user's
+    subscription again if the frontend retries the verification request.
+    */
+    if (
+      existingUserData.paymentId === razorpay_payment_id &&
+      existingUserData.orderId === razorpay_order_id &&
+      existingUserData.paymentStatus === "active"
+    ) {
+      return res.status(200).send({
+        success: true,
+        planType: existingUserData.userPlan || planType,
+        paymentStatus: "active",
+        planStartDate: existingUserData.planStartDate,
+        planExpiryDate: existingUserData.planExpiryDate,
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        alreadyProcessed: true,
+      });
+    }
+
     const {
       planStartDate,
-      planExpiryDate
+      planExpiryDate,
     } = calculatePlanDates(
       existingUserData,
       plan,
