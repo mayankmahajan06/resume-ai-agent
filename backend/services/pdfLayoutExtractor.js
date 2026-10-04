@@ -2,29 +2,23 @@
  * Layout-aware PDF text extraction for resume imports.
  *
  * pdf-parse v1 exposes PDF.js page objects through its pagerender callback.
- * We use the text item's x/y coordinates to rebuild lines and detect
- * obvious two-column pages. Single-column pages fall back to normal
- * top-to-bottom ordering automatically.
+ * We use text item x/y coordinates to rebuild lines without merging text
+ * from separate columns that happens to share the same vertical position.
  */
 
 function cleanText(value = "") {
   return String(value).replace(/\s+/g, " ").trim();
 }
 
-function groupIntoLines(items) {
-  const sorted = items
-    .filter((item) => cleanText(item.str))
-    .map((item) => ({
-      text: cleanText(item.str),
-      x: Number(item.transform?.[4] || 0),
-      y: Number(item.transform?.[5] || 0),
-      width: Number(item.width || 0),
-    }))
-    .sort((a, b) => {
-      if (Math.abs(a.y - b.y) > 3) return b.y - a.y;
-      return a.x - b.x;
-    });
+function sortItems(items = []) {
+  return [...items].sort((a, b) => {
+    if (Math.abs(a.y - b.y) > 3) return b.y - a.y;
+    return a.x - b.x;
+  });
+}
 
+function buildLines(items = []) {
+  const sorted = sortItems(items);
   const lines = [];
 
   for (const item of sorted) {
@@ -39,7 +33,7 @@ function groupIntoLines(items) {
   }
 
   return lines.map((line) => {
-    const parts = line.items.sort((a, b) => a.x - b.x);
+    const parts = [...line.items].sort((a, b) => a.x - b.x);
     let text = "";
     let lastEnd = null;
 
@@ -61,14 +55,14 @@ function groupIntoLines(items) {
   });
 }
 
-function findColumnSplit(lines, pageWidth) {
-  if (lines.length < 8) return null;
+function findItemColumnSplit(items, pageWidth) {
+  if (items.length < 12) return null;
 
-  const starts = [...new Set(lines.map((line) => Math.round(line.x)))].sort(
-    (a, b) => a - b,
-  );
+  const starts = [
+    ...new Set(items.map((item) => Math.round(item.x))),
+  ].sort((a, b) => a - b);
 
-  if (starts.length < 4) return null;
+  if (starts.length < 6) return null;
 
   let best = null;
 
@@ -78,29 +72,34 @@ function findColumnSplit(lines, pageWidth) {
     if (gap < Math.max(40, pageWidth * 0.1)) continue;
 
     const split = (starts[i - 1] + starts[i]) / 2;
-    const left = lines.filter((line) => line.x <= split);
-    const right = lines.filter((line) => line.x > split);
+    const left = items.filter((item) => item.x <= split);
+    const right = items.filter((item) => item.x > split);
 
-    if (left.length < 4 || right.length < 4) continue;
+    if (left.length < 8 || right.length < 8) continue;
 
-    /*
-     * Require meaningful vertical overlap between the two groups.
-     * This prevents a single-column resume with a few centred headings
-     * from being mistaken for a two-column layout.
-     */
+    const leftY = new Set(left.map((item) => Math.round(item.y)));
+    const rightY = new Set(right.map((item) => Math.round(item.y)));
+
     let overlap = 0;
 
-    for (const leftLine of left) {
-      if (right.some((rightLine) => Math.abs(leftLine.y - rightLine.y) <= 4)) {
+    for (const y of leftY) {
+      if ([...rightY].some((otherY) => Math.abs(y - otherY) <= 4)) {
         overlap++;
       }
     }
 
-    const overlapRatio = overlap / Math.min(left.length, right.length);
+    const overlapRatio =
+      overlap / Math.min(leftY.size, rightY.size);
 
-    if (overlapRatio < 0.35) continue;
+    if (overlapRatio < 0.2) continue;
 
-    const candidate = { split, gap, left, right, overlapRatio };
+    const candidate = {
+      split,
+      gap,
+      left,
+      right,
+      overlapRatio,
+    };
 
     if (!best || candidate.gap > best.gap) {
       best = candidate;
@@ -110,41 +109,22 @@ function findColumnSplit(lines, pageWidth) {
   return best;
 }
 
-function orderPageLines(lines, pageWidth) {
-  if (!lines.length) return [];
-
-  const split = findColumnSplit(lines, pageWidth);
+function groupIntoLines(items, pageWidth) {
+  const split = findItemColumnSplit(items, pageWidth);
 
   if (!split) {
-    return lines
-      .sort((a, b) => {
-        if (Math.abs(a.y - b.y) > 3) return b.y - a.y;
-        return a.x - b.x;
-      })
-      .map((line) => line.text)
-      .filter(Boolean);
+    return buildLines(items);
   }
 
-  const left = split.left.sort((a, b) => {
-    if (Math.abs(a.y - b.y) > 3) return b.y - a.y;
-    return a.x - b.x;
-  });
-
-  const right = split.right.sort((a, b) => {
-    if (Math.abs(a.y - b.y) > 3) return b.y - a.y;
-    return a.x - b.x;
-  });
-
   /*
-   * For the common sidebar layout, the left column contains identity,
-   * contact and skills while the right contains summary/experience.
-   * Putting the left column first gives the parser a clean header.
-   *
-   * If the main column is on the left, the parser still works because
-   * experience/education are detected structurally from date/degree
-   * signals rather than depending on section order.
+   * Build each column independently. This is the important part:
+   * Address on the left and a responsibility bullet on the right can have
+   * almost identical Y coordinates, but they are still separate lines.
    */
-  return [...left, ...right].map((line) => line.text).filter(Boolean);
+  const leftLines = buildLines(split.left);
+  const rightLines = buildLines(split.right);
+
+  return [...leftLines, ...rightLines];
 }
 
 async function renderResumePage(pageData) {
@@ -154,9 +134,19 @@ async function renderResumePage(pageData) {
   });
 
   const viewport = pageData.getViewport({ scale: 1 });
-  const lines = groupIntoLines(textContent.items || []);
+  const lines = groupIntoLines(
+    (textContent.items || [])
+      .filter((item) => cleanText(item.str))
+      .map((item) => ({
+        text: cleanText(item.str),
+        x: Number(item.transform?.[4] || 0),
+        y: Number(item.transform?.[5] || 0),
+        width: Number(item.width || 0),
+      })),
+    viewport.width || 600,
+  );
 
-  return orderPageLines(lines, viewport.width || 600).join("\n");
+  return lines.map((line) => line.text).filter(Boolean).join("\n");
 }
 
 async function extractResumeTextFromPdf(buffer) {
