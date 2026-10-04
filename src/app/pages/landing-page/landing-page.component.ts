@@ -8,8 +8,6 @@ import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 import { PricingComponent } from './pricing/pricing.component';
 import { StatsComponent } from './stats/stats.component';
 import { TemplatesComponent } from './templates/templates.component';
-import { AnalyticsService } from '../../services/analytics.service';
-
 @Component({
   selector: 'app-landing-page',
   standalone: true,
@@ -20,11 +18,9 @@ import { AnalyticsService } from '../../services/analytics.service';
 export class LandingPageComponent implements OnInit {
 
   constructor(
-    private analyticsService: AnalyticsService
-  ) { }
+) { }
 
   ngOnInit(): void {
-    this.analyticsService
-      .trackLandingPageViewed();
+    
   }
 }
