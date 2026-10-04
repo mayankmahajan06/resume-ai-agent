@@ -297,7 +297,8 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
             .trackResumeImportFailed(message);
 
           this.importErrorMessage =
-            'We could not extract this resume. Please try another PDF or enter details manually.'
+            message ||
+            'Resume import failed. Please try again.';
           this.isImportingResume = false;
           setTimeout(() => { this.importErrorMessage = ''; }, 4000);
         }
