@@ -648,7 +648,11 @@ function parseResumeText(text = "") {
   const lines = splitLines(normalizedText);
   const sections = groupSections(lines);
 
-  const experiences = parseExperience(lines);
+  const experienceLines = sections.experience?.length
+    ? sections.experience
+    : lines;
+
+  const experiences = parseExperience(experienceLines);
 
   return {
     fullName: extractName(lines),
@@ -656,10 +660,7 @@ function parseResumeText(text = "") {
     phone: extractPhone(normalizedText),
     location: extractLocation(lines),
     linkedIn: extractLinkedIn(normalizedText),
-    currentRole:
-      experiences[0]?.role ||
-      lines.find((line) => looksLikeRole(line) && line.length < 80) ||
-      "",
+    currentRole: experiences[0]?.role || "",
     targetRole: "",
     summary:
       sections.summary?.length
