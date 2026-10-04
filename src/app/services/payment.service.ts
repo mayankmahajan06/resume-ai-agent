@@ -5,8 +5,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../environments/environment';
 
 import { PdfService } from './pdf.service';
-import { AnalyticsService } from './analytics.service';
-
 import {
   Auth
 } from '@angular/fire/auth';
@@ -21,8 +19,7 @@ export class PaymentService {
   constructor(
     private pdfService: PdfService,
     private auth: Auth,
-    private snackBar: MatSnackBar,
-    private analyticsService: AnalyticsService
+    private snackBar: MatSnackBar
   ) { }
 
   /* =====================================
@@ -34,17 +31,9 @@ export class PaymentService {
     source = 'unknown'
   ): void {
 
-    this.analyticsService
-      .trackUpgradeClicked(
-        planType,
-        source
-      );
+    
 
-    this.analyticsService
-      .trackPaymentOrderCreateStarted(
-        planType,
-        source
-      );
+    
 
     const payload = {
       planType
@@ -53,11 +42,7 @@ export class PaymentService {
     const user = this.auth.currentUser;
 
     if (!user) {
-      this.analyticsService.trackPaymentFailed(
-        'create_order',
-        planType,
-        'No authenticated user'
-      );
+      
       this.snackBar.open('Please sign in before upgrading.', 'Close', { duration: 5000 });
       return;
     }
@@ -80,12 +65,7 @@ export class PaymentService {
       .then(data => {
 
         if (data.success) {
-          this.analyticsService
-            .trackPaymentOrderCreateSuccess(
-              planType,
-              data.order?.id,
-              data.order?.amount
-            );
+          
 
           this.openRazorpayPopup(
             data.order,
@@ -95,22 +75,12 @@ export class PaymentService {
           return;
         }
 
-        this.analyticsService
-          .trackPaymentFailed(
-            'create_order',
-            planType,
-            data.message || 'Order creation was not successful'
-          );
+        
 
       })
 
       .catch(error => {
-        this.analyticsService
-          .trackPaymentFailed(
-            'create_order',
-            planType,
-            error?.message || 'Create order request failed'
-          );
+        
 
         console.error(
           'Create order failed',
@@ -175,13 +145,7 @@ export class PaymentService {
 
       modal: {
         ondismiss: () => {
-          this.analyticsService
-            .trackPaymentFailed(
-              'dismissed',
-              planType,
-              'Razorpay checkout dismissed',
-              order.id
-            );
+          
         }
       },
 
@@ -197,13 +161,7 @@ export class PaymentService {
     razorpay.on(
       'payment.failed',
       (response: any) => {
-        this.analyticsService
-          .trackPaymentFailed(
-            'razorpay',
-            planType,
-            response.error?.description || response.error?.reason,
-            order.id
-          );
+        
 
         console.error(
           'Payment Failed',
@@ -224,12 +182,7 @@ export class PaymentService {
 
     razorpay.open();
 
-    this.analyticsService
-      .trackPaymentPopupOpened(
-        planType,
-        order.id,
-        order.amount
-      );
+    
 
   }
 
@@ -241,24 +194,13 @@ export class PaymentService {
     paymentResponse: any,
     planType: 'pro' | 'pro_plus'
   ): Promise<void> {
-    this.analyticsService
-      .trackPaymentVerificationStarted(
-        planType,
-        paymentResponse?.razorpay_payment_id,
-        paymentResponse?.razorpay_order_id
-      );
+    
 
     const user =
       this.auth.currentUser;
 
     if (!user) {
-      this.analyticsService
-        .trackPaymentFailed(
-          'verification',
-          planType,
-          'No authenticated user',
-          paymentResponse?.razorpay_order_id
-        );
+      
 
       this.snackBar.open(
         'Please sign in again before completing payment verification.',
@@ -278,23 +220,12 @@ export class PaymentService {
           async (verification: any) => {
 
             if (!verification.success) {
-              this.analyticsService
-                .trackPaymentFailed(
-                  'verification',
-                  planType,
-                  verification.message || 'Payment verification was not successful',
-                  paymentResponse?.razorpay_order_id
-                );
+              
 
               return;
             }
 
-            this.analyticsService
-              .trackPaymentSuccess(
-                verification.planType,
-                verification.paymentId,
-                verification.orderId
-              );
+            
 
             this.snackBar.open(
               'Payment successful! Premium templates unlocked.',
@@ -312,13 +243,7 @@ export class PaymentService {
 
         error:
           (error) => {
-            this.analyticsService
-              .trackPaymentFailed(
-                'verification',
-                planType,
-                error?.error?.message || error?.message || 'Payment verification failed',
-                paymentResponse?.razorpay_order_id
-              );
+            
 
             this.snackBar.open(
               'Payment verification failed. Please contact support.',
