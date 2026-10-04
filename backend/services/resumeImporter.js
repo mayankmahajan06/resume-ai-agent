@@ -40,6 +40,7 @@ const SECTION_ALIASES = {
     "academic qualifications",
     "academics",
     "educational qualifications",
+    "education & certification",
   ],
   experience: [
     "experience",
@@ -57,6 +58,7 @@ const SECTION_ALIASES = {
     "academic projects",
     "key projects",
     "personal projects",
+    "personal project",
   ],
   certifications: [
     "certifications",
@@ -355,6 +357,7 @@ function extractDateRange(line = "") {
       "i",
     ),
     /\b\d{4}[-/]\d{1,2}\s*(?:-|–|—|to)\s*(?:\d{4}[-/]\d{1,2}|Present|Current|Now)\b/i,
+    /\b\d{1,2}[-/]\d{4}\s*(?:-|–|—|to)\s*(?:\d{1,2}[-/]\d{4}|Present|Current|Now)\b/i,
     /\b(?:19|20)\d{2}\s*(?:-|–|—|to)\s*(?:(?:19|20)\d{2}|Present|Current|Now)\b/i,
   ];
 
@@ -429,6 +432,17 @@ function parseExperience(lines = []) {
     if (combined) {
       role = combined[1].trim();
       company = combined[2].trim();
+    }
+
+    // Some PDFs place role and company on one line, e.g.
+    // "Engineer III, S&P Global" before the date.
+    if (!company && role.includes(",")) {
+      const parts = role.split(",").map((part) => cleanLine(part)).filter(Boolean);
+
+      if (parts.length >= 2 && looksLikeRole(parts[0])) {
+        role = parts[0];
+        company = parts.slice(1).join(", ");
+      }
     }
 
     const responsibilities = [];
@@ -695,7 +709,13 @@ function parseResumeText(text = "") {
     skills: extractSkillsFromResume(normalizedText, sections.skills || []),
     experiences,
     projects: parseProjects(sections.projects || []),
-    certifications: parseCertifications(sections.certifications || []),
+    certifications: parseCertifications(
+      sections.certifications?.length
+        ? sections.certifications
+        : lines.filter((line) =>
+            /\b(?:certified|certification|certificate)\b/i.test(line),
+          ),
+    ),
     education: parseEducation(
       sections.education?.length ? sections.education : lines,
     ),
