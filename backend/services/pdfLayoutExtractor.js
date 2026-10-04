@@ -109,6 +109,32 @@ function findItemColumnSplit(items, pageWidth) {
   return best;
 }
 
+function isDateLikeLine(text = "") {
+  return /(?:19|20)\\d{2}[-/]\\d{1,2}\\s*(?:-|–|—|to)\\s*(?:(?:19|20)\\d{2}[-/]\\d{1,2}|Present|Current|Now)\\b/i.test(
+    cleanText(text),
+  );
+}
+
+function isDateColumn(lines = []) {
+  if (!lines.length) return false;
+
+  const dateCount = lines.filter((line) => isDateLikeLine(line.text)).length;
+
+  // A narrow left column containing mostly job dates is part of the main
+  // experience layout, not a sidebar. Those dates must stay beside the
+  // corresponding role/bullets when the text is flattened.
+  return dateCount >= 2 && dateCount / lines.length >= 0.45;
+}
+
+function interleaveColumns(leftLines = [], rightLines = []) {
+  const all = [...leftLines, ...rightLines].sort((a, b) => {
+    if (Math.abs(a.y - b.y) > 3) return b.y - a.y;
+    return a.x - b.x;
+  });
+
+  return all;
+}
+
 function groupIntoLines(items, pageWidth) {
   const split = findItemColumnSplit(items, pageWidth);
 
@@ -116,13 +142,23 @@ function groupIntoLines(items, pageWidth) {
     return buildLines(items);
   }
 
-  /*
-   * Build each column independently. This is the important part:
-   * Address on the left and a responsibility bullet on the right can have
-   * almost identical Y coordinates, but they are still separate lines.
-   */
   const leftLines = buildLines(split.left);
   const rightLines = buildLines(split.right);
+
+  /*
+   * Two common resume layouts need different reading orders:
+   *
+   * 1. Sidebar + main content:
+   *    name/contact/skills on the left, summary/experience on the right.
+   *    Keep the sidebar together first.
+   *
+   * 2. Date rail + main content:
+   *    dates on the left and role/company/bullets on the right.
+   *    Interleave by Y so "2025-01 - Present" stays with "Engineer III".
+   */
+  if (isDateColumn(leftLines)) {
+    return interleaveColumns(leftLines, rightLines);
+  }
 
   return [...leftLines, ...rightLines];
 }
