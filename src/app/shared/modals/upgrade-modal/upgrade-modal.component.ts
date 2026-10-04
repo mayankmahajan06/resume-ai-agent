@@ -15,8 +15,6 @@ import {
   getDoc
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { AnalyticsService } from '../../../services/analytics.service';
-
 @Component({
   selector: 'app-upgrade-modal',
   standalone: true,
@@ -45,10 +43,7 @@ export class UpgradeModalComponent implements OnInit {
     private dialogRef:
       MatDialogRef<UpgradeModalComponent>,
     private paymentService:
-      PaymentService,
-    private analyticsService:
-      AnalyticsService
-
+      PaymentService
   ) { }
 
   ngOnInit(): void {
@@ -62,13 +57,7 @@ export class UpgradeModalComponent implements OnInit {
   */
 
   close(): void {
-    this.analyticsService
-      .track(
-        'upgrade_modal_closed',
-        {
-          user_plan: this.userPlan
-        }
-      );
+    
 
     this.dialogRef.close();
 
@@ -83,13 +72,7 @@ export class UpgradeModalComponent implements OnInit {
   startPremiumUpgrade(
     planType: 'pro' | 'pro_plus'
   ): void {
-    this.analyticsService
-      .trackPricingPlanSelected(
-        planType,
-        'upgrade_modal',
-        true,
-        this.userPlan
-      );
+    
 
     this.paymentService
       .startPremiumUpgrade(
