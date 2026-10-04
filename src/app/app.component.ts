@@ -5,9 +5,6 @@ import {
   RouterOutlet
 } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
-
-import { AnalyticsService } from './services/analytics.service';
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -21,8 +18,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private routeSubscription?: Subscription;
 
   constructor(
-    private router: Router,
-    private analyticsService: AnalyticsService
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -35,10 +31,7 @@ export class AppComponent implements OnInit, OnDestroy {
           )
         )
         .subscribe((event) => {
-          this.analyticsService
-            .trackPageViewed(
-              event.urlAfterRedirects
-            );
+          
         });
   }
 
