@@ -112,6 +112,107 @@ const importRateLimit = rateLimit({
   message: "Resume import limit reached. Please try again later.",
 });
 
+/*
+AI USAGE QUOTA
+
+Rate limiting protects the API from bursts. This quota protects our AI
+budget over a longer period by limiting the number of successful AI
+requests a premium user can start in a calendar month.
+
+The limit is enforced server-side and stored in Firestore so concurrent
+requests cannot bypass the quota.
+*/
+const aiMonthlyQuotas = {
+  pro: 50,
+  pro_plus: 150,
+};
+
+async function consumeAiQuota(uid, planType) {
+  const monthlyLimit = aiMonthlyQuotas[planType];
+
+  if (!monthlyLimit) {
+    return {
+      allowed: false,
+      reason: "AI features require an active premium plan.",
+    };
+  }
+
+  const now = new Date();
+  const period = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  const usageRef = admin
+    .firestore()
+    .collection("users")
+    .doc(uid)
+    .collection("usage")
+    .doc("ai");
+
+  const result = await admin.firestore().runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(usageRef);
+    const current = snapshot.exists ? snapshot.data() || {} : {};
+
+    const used = current.period === period ? Number(current.count || 0) : 0;
+
+    if (used >= monthlyLimit) {
+      return {
+        allowed: false,
+        used,
+        limit: monthlyLimit,
+        period,
+      };
+    }
+
+    const nextCount = used + 1;
+
+    transaction.set(
+      usageRef,
+      {
+        period,
+        count: nextCount,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true },
+    );
+
+    return {
+      allowed: true,
+      used: nextCount,
+      limit: monthlyLimit,
+      period,
+    };
+  });
+
+  return result;
+}
+
+async function requireAiQuota(req, res, next) {
+  try {
+    const planType = req.userData?.userPlan;
+    const quota = await consumeAiQuota(req.user.uid, planType);
+
+    if (!quota.allowed) {
+      return res.status(429).send({
+        success: false,
+        message: quota.reason || "Monthly AI usage limit reached. Please try again next month.",
+        quota: {
+          used: quota.used ?? 0,
+          limit: quota.limit ?? 0,
+          period: quota.period,
+        },
+      });
+    }
+
+    req.aiQuota = quota;
+    next();
+  } catch (error) {
+    console.error("AI quota check failed:", error);
+
+    return res.status(503).send({
+      success: false,
+      message: "AI service is temporarily unavailable. Please try again later.",
+    });
+  }
+}
+
 setInterval(() => {
   const now = Date.now();
   for (const [key, bucket] of rateLimitBuckets) {
@@ -889,7 +990,7 @@ app.post("/verify-payment", requireAuth, authenticatedRateLimit, async (req, res
   }
 });
 
-app.post("/analyze-jd", requireActivePremium, aiRateLimit, (req, res) => {
+app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
   try {
     const { resumeData, jobDescription } = req.body;
     const analysis = analyzeJD(resumeData, jobDescription);
