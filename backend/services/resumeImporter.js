@@ -12,6 +12,16 @@ const generalSkills = require("../constants/general-skill-mapping");
  */
 
 const SECTION_ALIASES = {
+  summary: [
+    "summary",
+    "professional summary",
+    "career summary",
+    "profile",
+    "professional profile",
+    "about me",
+    "objective",
+    "career objective",
+  ],
   skills: [
     "skills",
     "technical skills",
@@ -624,7 +634,10 @@ function parseResumeText(text = "") {
       lines.find((line) => looksLikeRole(line) && line.length < 80) ||
       "",
     targetRole: "",
-    summary: extractSummary(lines),
+    summary:
+      sections.summary?.length
+        ? sections.summary.join(" ").trim()
+        : extractSummary(lines),
     selectedTheme: "indigo",
     selectedTemplate: "modern",
     resumeId: "",
