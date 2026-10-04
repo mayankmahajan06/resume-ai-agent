@@ -83,7 +83,24 @@ function findColumnSplit(lines, pageWidth) {
 
     if (left.length < 4 || right.length < 4) continue;
 
-    const candidate = { split, gap, left, right };
+    /*
+     * Require meaningful vertical overlap between the two groups.
+     * This prevents a single-column resume with a few centred headings
+     * from being mistaken for a two-column layout.
+     */
+    let overlap = 0;
+
+    for (const leftLine of left) {
+      if (right.some((rightLine) => Math.abs(leftLine.y - rightLine.y) <= 4)) {
+        overlap++;
+      }
+    }
+
+    const overlapRatio = overlap / Math.min(left.length, right.length);
+
+    if (overlapRatio < 0.35) continue;
+
+    const candidate = { split, gap, left, right, overlapRatio };
 
     if (!best || candidate.gap > best.gap) {
       best = candidate;
