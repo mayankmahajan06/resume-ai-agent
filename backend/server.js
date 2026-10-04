@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const admin = require("firebase-admin");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
+const { extractResumeTextFromPdf } = require("./services/pdfLayoutExtractor");
 const analyzeJD = require("./services/jdAnalyzer");
 const { parseResumeText } = require("./services/resumeImporter");
 
@@ -375,18 +376,57 @@ app.post("/api/resume/import", requireAuth, (req, res) => {
           .send({ success: false, message: "Please upload a PDF resume" });
       }
 
-      const parsedPdf = await pdfParse(req.file.buffer);
-      console.log("============== PDF TEXT START ==============");
-      console.log(parsedPdf.text.substring(0, 2000));
-      console.log("============== PDF TEXT END ==============");
-      const resumeData = parseResumeText(parsedPdf.text || "");
+      /*
+       * Use the layout-aware renderer first. It reconstructs PDF text
+       * using x/y coordinates so two-column resumes are not fed to the
+       * parser in the PDF's arbitrary internal object order.
+       *
+       * Fall back to the original pdf-parse text if the custom renderer
+       * cannot extract useful text. A bad layout heuristic must never make
+       * a valid PDF fail to import.
+       */
+      let extracted;
 
+      try {
+        extracted = await extractResumeTextFromPdf(req.file.buffer);
+      } catch (layoutError) {
+        console.error("Layout-aware PDF extraction failed:", layoutError);
+        const fallback = await pdfParse(req.file.buffer);
+
+        extracted = {
+          text: fallback.text || "",
+          pages: fallback.numpages || 0,
+          textLength: fallback.text?.length || 0,
+        };
+      }
+
+      const rawText = extracted.text || "";
+
+      if (!rawText.trim()) {
+        return res.status(422).send({
+          success: false,
+          message:
+            "We could not read text from this PDF. Please upload a text-based PDF.",
+        });
+      }
+
+      console.log("============== RESUME TEXT START ==============");
+      console.log(rawText.substring(0, 3000));
+      console.log("============== RESUME TEXT END ==============");
+
+      const resumeData = parseResumeText(rawText);
+
+      /*
+       * Import is intentionally successful when the PDF was readable even
+       * if some optional fields could not be detected. The form is designed
+       * for user review/editing after import.
+       */
       res.status(200).send({
         success: true,
         resumeData,
         metadata: {
-          pages: parsedPdf.numpages,
-          textLength: parsedPdf.text?.length || 0,
+          pages: extracted.pages,
+          textLength: extracted.textLength,
         },
       });
     } catch (error) {
