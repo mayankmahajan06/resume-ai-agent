@@ -75,6 +75,40 @@
   line-height: 1.6;
 }
 
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 52px;
+  padding: 0 22px;
+  border: 1px solid #dbe2ea;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    border-color: #a5b4fc;
+    background: #eef2ff;
+    color: #4338ca;
+  }
+}
+
+.cover-letter-btn {
+  margin-right: 10px;
+}
+
 .primary-btn {
   display: inline-flex;
   align-items: center;
