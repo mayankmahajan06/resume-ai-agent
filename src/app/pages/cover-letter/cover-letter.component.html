@@ -1,0 +1,212 @@
+<section class="cover-letter-page">
+  <app-workspace-header
+    subtitle="Create a tailored cover letter for your next application"
+    [showMyResumesButton]="true"
+    [showResumeBuilderButton]="true"
+  ></app-workspace-header>
+
+  <div class="page-container">
+    <div class="page-hero">
+      <div>
+        <span class="page-badge">AI COVER LETTER GENERATOR</span>
+        <h1>Turn your resume into a tailored cover letter.</h1>
+        <p>
+          Upload your resume PDF, add the job details, and generate a
+          recruiter-friendly cover letter you can edit before downloading.
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="checkingPlan" class="state-card">
+      Checking your plan...
+    </div>
+
+    <div *ngIf="!checkingPlan && !isPremium" class="locked-card">
+      <div class="locked-icon">
+        <mat-icon>lock</mat-icon>
+      </div>
+
+      <div>
+        <h2>Cover Letter Generator is a Pro feature</h2>
+        <p>
+          Upgrade to Pro or Pro Plus to generate tailored cover letters from
+          your resume and job description.
+        </p>
+        <button class="primary-btn" type="button" (click)="goToPricing()">
+          View Pro Plans
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!checkingPlan && isPremium" class="generator-layout">
+      <div class="form-card">
+        <div class="card-heading">
+          <div>
+            <span class="step-label">STEP 1</span>
+            <h2>Tell us about the job</h2>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Resume PDF</span>
+          <input
+            type="file"
+            accept=".pdf,application/pdf"
+            (change)="onFileSelected($event)"
+          />
+          <small *ngIf="selectedFile">
+            {{ selectedFile.name }}
+          </small>
+        </label>
+
+        <div class="two-column">
+          <label class="field">
+            <span>Job Title</span>
+            <input
+              type="text"
+              maxlength="150"
+              [(ngModel)]="jobTitle"
+              placeholder="e.g. Senior Frontend Developer"
+            />
+          </label>
+
+          <label class="field">
+            <span>Company Name</span>
+            <input
+              type="text"
+              maxlength="150"
+              [(ngModel)]="companyName"
+              placeholder="e.g. Acme Technologies"
+            />
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Job Description</span>
+          <textarea
+            rows="11"
+            maxlength="15000"
+            [(ngModel)]="jobDescription"
+            placeholder="Paste the job description here..."
+          ></textarea>
+          <small>{{ jobDescription.length }}/15,000</small>
+        </label>
+
+        <div class="field">
+          <span>Tone</span>
+
+          <div class="tone-options">
+            <button
+              type="button"
+              [class.selected]="tone === 'Professional'"
+              (click)="tone = 'Professional'"
+            >
+              Professional
+            </button>
+
+            <button
+              type="button"
+              [class.selected]="tone === 'Confident'"
+              (click)="tone = 'Confident'"
+            >
+              Confident
+            </button>
+
+            <button
+              type="button"
+              [class.selected]="tone === 'Concise'"
+              (click)="tone = 'Concise'"
+            >
+              Concise
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="generate-btn"
+          type="button"
+          [disabled]="!canGenerate()"
+          (click)="generate()"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          {{ loading ? 'Generating...' : 'Generate Cover Letter' }}
+        </button>
+
+        <p class="hint">
+          Your resume is processed on the backend only to generate this cover
+          letter. It is not saved as a resume version.
+        </p>
+      </div>
+
+      <div class="editor-card">
+        <div class="card-heading editor-heading">
+          <div>
+            <span class="step-label">STEP 2</span>
+            <h2>Edit your cover letter</h2>
+          </div>
+
+          <span *ngIf="generatedContent" class="editable-badge">
+            Editable
+          </span>
+        </div>
+
+        <textarea
+          class="letter-editor"
+          [(ngModel)]="generatedContent"
+          [disabled]="!generatedContent"
+          placeholder="Your generated cover letter will appear here..."
+        ></textarea>
+
+        <div class="template-section" *ngIf="generatedContent">
+          <div>
+            <span class="step-label">STEP 3</span>
+            <h3>Choose a PDF template</h3>
+          </div>
+
+          <div class="template-options">
+            <button
+              type="button"
+              [class.selected]="selectedTemplate === 'classic'"
+              (click)="selectedTemplate = 'classic'"
+            >
+              <strong>Classic</strong>
+              <small>Traditional & clean</small>
+            </button>
+
+            <button
+              type="button"
+              [class.selected]="selectedTemplate === 'modern'"
+              (click)="selectedTemplate = 'modern'"
+            >
+              <strong>Modern</strong>
+              <small>Contemporary & polished</small>
+            </button>
+
+            <button
+              type="button"
+              [class.selected]="selectedTemplate === 'minimal'"
+              (click)="selectedTemplate = 'minimal'"
+            >
+              <strong>Minimal</strong>
+              <small>Simple & focused</small>
+            </button>
+          </div>
+
+          <button
+            class="download-btn"
+            type="button"
+            [disabled]="downloading || !generatedContent.trim()"
+            (click)="downloadPdf()"
+          >
+            <mat-icon>picture_as_pdf</mat-icon>
+            {{ downloading ? 'Preparing PDF...' : 'Download PDF' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-card">
+      {{ errorMessage }}
+    </div>
+  </div>
+</section>
