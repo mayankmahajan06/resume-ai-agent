@@ -12,6 +12,7 @@ const { extractResumeTextFromPdf } = require("./services/pdfLayoutExtractor");
 const analyzeJD = require("./services/jdAnalyzer");
 const { parseResumeText } = require("./services/resumeImporter");
 const { generateCoverLetter } = require("./services/coverLetterGenerator");
+const { buildCoverLetterPdfHTML } = require("./services/coverLetterPdf");
 
 /*
 Import server-side HTML template builders.
@@ -1153,6 +1154,63 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
       });
     }
   });
+});
+
+app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async (req, res) => {
+  let browser;
+
+  try {
+    const content = String(req.body?.content || "").trim();
+    const template = String(req.body?.template || "classic").trim();
+
+    if (!content || content.length > 20000) {
+      return res.status(400).send({
+        success: false,
+        message: "Cover letter content is required and must be 20,000 characters or fewer",
+      });
+    }
+
+    if (!["classic", "modern", "minimal"].includes(template)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid cover letter template",
+      });
+    }
+
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+
+    const page = await browser.newPage();
+    const html = buildCoverLetterPdfHTML(content, template);
+
+    await page.setContent(html, {
+      waitUntil: "networkidle0",
+    });
+
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      preferCSSPageSize: true,
+      margin: { top: "0", right: "0", bottom: "0", left: "0" },
+    });
+
+    await browser.close();
+
+    return res.status(200).send(pdf);
+  } catch (error) {
+    console.error("Cover letter PDF generation failed:", error);
+
+    if (browser) {
+      await browser.close();
+    }
+
+    return res.status(500).send({
+      success: false,
+      message: "Cover letter PDF generation failed. Please try again later.",
+    });
+  }
 });
 
 app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
