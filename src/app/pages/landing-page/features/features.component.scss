@@ -19,7 +19,7 @@ h2 {
   max-width: 1200px;
   margin: auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 28px;
 }
 
@@ -68,8 +68,22 @@ h2 {
   }
 }
 
-.voice-card {
+.voice-card,
+.cover-letter-card {
   position: relative;
+}
+
+.premium-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.4px;
 }
 
 .coming-soon-badge {
