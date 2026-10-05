@@ -1072,16 +1072,41 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
         });
       }
 
-      const quota = await consumeAiQuota(req.user.uid, req.userData?.userPlan);
+      const currentPlan = req.userData?.userPlan;
+      const monthlyLimit = aiMonthlyQuotas[currentPlan];
 
-      if (!quota.allowed) {
+      if (!monthlyLimit) {
+        return res.status(403).send({
+          success: false,
+          message: "AI features require an active premium plan.",
+        });
+      }
+
+      const usageRef = admin
+        .firestore()
+        .collection("users")
+        .doc(req.user.uid)
+        .collection("usage")
+        .doc("ai");
+
+      const now = new Date();
+      const period =
+        String(now.getUTCFullYear()) +
+        "-" +
+        String(now.getUTCMonth() + 1).padStart(2, "0");
+
+      const usageSnapshot = await usageRef.get();
+      const usageData = usageSnapshot.exists ? usageSnapshot.data() || {} : {};
+      const used = usageData.period === period ? Number(usageData.count || 0) : 0;
+
+      if (used >= monthlyLimit) {
         return res.status(429).send({
           success: false,
-          message: quota.reason || "Monthly AI usage limit reached. Please try again next month.",
+          message: "Monthly AI usage limit reached. Please try again next month.",
           quota: {
-            used: quota.used ?? 0,
-            limit: quota.limit ?? 0,
-            period: quota.period,
+            used,
+            limit: monthlyLimit,
+            period,
           },
         });
       }
@@ -1092,6 +1117,27 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
         companyName,
         jobDescription,
         tone,
+      });
+
+      await admin.firestore().runTransaction(async (transaction) => {
+        const latestSnapshot = await transaction.get(usageRef);
+        const latestData = latestSnapshot.exists ? latestSnapshot.data() || {} : {};
+        const latestUsed =
+          latestData.period === period ? Number(latestData.count || 0) : 0;
+
+        if (latestUsed >= monthlyLimit) {
+          throw new Error("AI usage limit reached");
+        }
+
+        transaction.set(
+          usageRef,
+          {
+            period,
+            count: latestUsed + 1,
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true },
+        );
       });
 
       return res.status(200).send({
