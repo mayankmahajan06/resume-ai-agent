@@ -13,6 +13,7 @@ import { MyResumesComponent } from './pages/my-resumes/my-resumes.component';
 import { CompactGridResumePrintComponent } from './components/compact-grid-resume-print/compact-grid-resume-print.component';
 import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy.component';
 import { TermsComponent } from './pages/terms/terms.component';
+import { CoverLetterComponent } from './pages/cover-letter/cover-letter.component';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,11 @@ export const routes: Routes = [
   {
     path: 'my-resumes',
     component: MyResumesComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'cover-letter',
+    component: CoverLetterComponent,
     canActivate: [authGuard]
   },
   {
