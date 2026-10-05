@@ -112,6 +112,12 @@ export class MyResumesComponent
     ]);
   }
 
+  goToCoverLetter(): void {
+    this.router.navigate([
+      '/cover-letter'
+    ]);
+  }
+
   editResume(
     resume: any
   ): void {
