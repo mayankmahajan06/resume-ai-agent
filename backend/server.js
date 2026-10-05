@@ -11,6 +11,7 @@ const pdfParse = require("pdf-parse");
 const { extractResumeTextFromPdf } = require("./services/pdfLayoutExtractor");
 const analyzeJD = require("./services/jdAnalyzer");
 const { parseResumeText } = require("./services/resumeImporter");
+const { generateCoverLetter } = require("./services/coverLetterGenerator");
 
 /*
 Import server-side HTML template builders.
@@ -988,6 +989,124 @@ app.post("/verify-payment", requireAuth, authenticatedRateLimit, async (req, res
       message: "Payment verification failed",
     });
   }
+});
+
+app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res) => {
+  resumeUpload.single("resume")(req, res, async (uploadError) => {
+    try {
+      if (uploadError) {
+        return res.status(400).send({
+          success: false,
+          message: uploadError.message || "Only PDF files are supported",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).send({
+          success: false,
+          message: "Please upload a PDF resume",
+        });
+      }
+
+      const jobTitle = String(req.body?.jobTitle || "").trim();
+      const companyName = String(req.body?.companyName || "").trim();
+      const jobDescription = String(req.body?.jobDescription || "").trim();
+      const tone = String(req.body?.tone || "Professional").trim();
+
+      if (!jobTitle || jobTitle.length > 150) {
+        return res.status(400).send({
+          success: false,
+          message: "Job title is required and must be 150 characters or fewer",
+        });
+      }
+
+      if (!companyName || companyName.length > 150) {
+        return res.status(400).send({
+          success: false,
+          message: "Company name is required and must be 150 characters or fewer",
+        });
+      }
+
+      if (!jobDescription || jobDescription.length > 15000) {
+        return res.status(400).send({
+          success: false,
+          message: "Job description is required and must be 15,000 characters or fewer",
+        });
+      }
+
+      if (!["Professional", "Confident", "Concise"].includes(tone)) {
+        return res.status(400).send({
+          success: false,
+          message: "Invalid cover letter tone",
+        });
+      }
+
+      let extracted;
+
+      try {
+        extracted = await extractResumeTextFromPdf(req.file.buffer);
+      } catch (layoutError) {
+        console.error("Cover letter PDF extraction failed:", layoutError);
+        const fallback = await pdfParse(req.file.buffer);
+
+        extracted = {
+          text: fallback.text || "",
+          pages: fallback.numpages || 0,
+          textLength: fallback.text?.length || 0,
+        };
+      }
+
+      const resumeText = extracted.text || "";
+
+      if (!resumeText.trim()) {
+        return res.status(422).send({
+          success: false,
+          message: "We could not read text from this PDF. Please upload a text-based PDF.",
+        });
+      }
+
+      if (resumeText.length > 40000) {
+        return res.status(422).send({
+          success: false,
+          message: "This resume contains too much text to process. Please upload a shorter resume.",
+        });
+      }
+
+      const quota = await consumeAiQuota(req.user.uid, req.userData?.userPlan);
+
+      if (!quota.allowed) {
+        return res.status(429).send({
+          success: false,
+          message: quota.reason || "Monthly AI usage limit reached. Please try again next month.",
+          quota: {
+            used: quota.used ?? 0,
+            limit: quota.limit ?? 0,
+            period: quota.period,
+          },
+        });
+      }
+
+      const content = await generateCoverLetter({
+        resumeText,
+        jobTitle,
+        companyName,
+        jobDescription,
+        tone,
+      });
+
+      return res.status(200).send({
+        success: true,
+        content,
+      });
+    } catch (error) {
+      console.error("Cover letter generation failed:", error);
+
+      return res.status(500).send({
+        success: false,
+        message: "Cover letter generation failed. Please try again later.",
+      });
+    }
+  });
 });
 
 app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
