@@ -12,6 +12,8 @@ Never invent or infer unsupported candidate facts. Do not fabricate employers, j
 Return only the final cover letter text. Do not include explanations, analysis, markdown fences, or commentary.
 `;
 
+let clientPromise;
+
 const TRANSIENT_GEMINI_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 const MAX_GEMINI_RETRIES = 3;
 const BASE_RETRY_DELAY_MS = 1000;
