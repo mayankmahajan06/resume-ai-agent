@@ -12,6 +12,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { ResumeService }
   from '../../services/resume.service';
 import { MatDialog } from '@angular/material/dialog';
+import { UpgradeModalComponent } from '../../shared/modals/upgrade-modal/upgrade-modal.component';
+import { UserService } from '../../services/user.service';
 import { DeleteConfirmDialogComponent } from '../../shared/delete-confirm-dialog/delete-confirm-dialog.component';
 import { WorkspaceHeaderComponent } from '../../shared/workspace-header/workspace-header.component';
 
@@ -42,7 +44,8 @@ export class MyResumesComponent
   constructor(
     private resumeService: ResumeService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private userService: UserService
   ) { }
 
   /*
@@ -112,7 +115,18 @@ export class MyResumesComponent
     ]);
   }
 
-  goToCoverLetter(): void {
+  async goToCoverLetter(): Promise<void> {
+    await this.userService.loadUserPlan();
+
+    if (!this.userService.isPremiumUser()) {
+      this.dialog.open(UpgradeModalComponent, {
+        width: '520px',
+        maxWidth: '95vw',
+        autoFocus: false
+      });
+      return;
+    }
+
     this.router.navigate([
       '/cover-letter'
     ]);
