@@ -1148,6 +1148,13 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
     } catch (error) {
       console.error("Cover letter generation failed:", error);
 
+      if (error?.code === "GEMINI_TEMPORARILY_UNAVAILABLE") {
+        return res.status(503).send({
+          success: false,
+          message: "AI service is temporarily busy. Please try again in a moment.",
+        });
+      }
+
       return res.status(500).send({
         success: false,
         message: "Cover letter generation failed. Please try again later.",
