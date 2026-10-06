@@ -66,6 +66,8 @@ Requirements:
 - If the job description requests a skill that is not explicitly supported by the resume, do not present it as a candidate strength; focus instead on relevant experience that the resume does support.
 - Do not infer skills from related technologies or general experience.
 - Do not exaggerate responsibility or seniority. Use leadership verbs such as "led", "managed", "directed", "owned", or "architected" only when the resume explicitly supports that level of responsibility. Prefer the level of responsibility stated in the resume.
+- Do not strengthen, inflate, or alter factual claims from the resume. Preserve factual qualifiers such as "minimal", "partial", "assisted", "contributed", "supported", or similar wording when they affect the scope or degree of a claim. Do not replace them with stronger claims such as "zero", "complete", "led", "owned", or "expert" unless the resume explicitly supports the stronger claim.
+- When paraphrasing resume achievements, preserve their original meaning and scope. Do not change numbers, quantities, degrees of impact, responsibility level, or certainty.
 - Do not add contact details such as phone numbers, email addresses, postal addresses, or LinkedIn URLs to the cover letter unless explicitly requested.
 - Do not copy sentences from the job description.
 - Do not mention that AI was used.
