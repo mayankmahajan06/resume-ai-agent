@@ -22,7 +22,10 @@ function buildCoverLetterPdfHTML(content, template = 'classic') {
       font: 'Georgia, "Times New Roman", serif',
       size: '11.5pt',
       line: '1.75',
-      padding: '56px'
+      padding: '56px',
+      accentWidth: '0',
+      accentHeight: '0',
+      accentMarginBottom: '0'
     },
     modern: {
       page: '#ffffff',
@@ -31,7 +34,10 @@ function buildCoverLetterPdfHTML(content, template = 'classic') {
       font: 'Arial, Helvetica, sans-serif',
       size: '11pt',
       line: '1.7',
-      padding: '54px'
+      padding: '54px',
+      accentWidth: '100%',
+      accentHeight: '4px',
+      accentMarginBottom: '30px'
     },
     minimal: {
       page: '#ffffff',
@@ -40,7 +46,10 @@ function buildCoverLetterPdfHTML(content, template = 'classic') {
       font: 'Arial, Helvetica, sans-serif',
       size: '10.8pt',
       line: '1.65',
-      padding: '62px'
+      padding: '62px',
+      accentWidth: '0',
+      accentHeight: '0',
+      accentMarginBottom: '0'
     }
   };
 
@@ -66,14 +75,14 @@ function buildCoverLetterPdfHTML(content, template = 'classic') {
     padding: ${selected.padding};
   }
   .accent {
-    height: 4px;
-    width: 64px;
+    height: ${selected.accentHeight};
+    width: ${selected.accentWidth};
     background: ${selected.accent};
-    margin-bottom: 30px;
+    margin-bottom: ${selected.accentMarginBottom};
   }
   .letter {
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 </style>
 </head>
