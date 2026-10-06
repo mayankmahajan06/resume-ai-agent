@@ -29,7 +29,7 @@
         <button class="secondary-btn cover-letter-btn" (click)="goToCoverLetter()">
           <mat-icon>mail</mat-icon>
           <span>Create Cover Letter</span>
-          <span class="pro-badge">PRO</span>
+          <span class="pro-badge" *ngIf="!checkingPlan && !isPremium">PRO</span>
         </button>
 
         <button class="primary-btn" (click)="createNewResume()">
