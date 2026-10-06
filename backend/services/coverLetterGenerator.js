@@ -62,6 +62,9 @@ Write a recruiter-friendly cover letter, normally around 300-450 words.
 Requirements:
 - Tailor the letter to the job description.
 - Emphasize relevant experience and skills that are explicitly supported by the resume.
+- Do not claim or imply that the candidate has a skill, technology, qualification, or experience merely because it appears in the job description.
+- If the job description requests a skill that is not explicitly supported by the resume, do not present it as a candidate strength; focus instead on relevant experience that the resume does support.
+- Do not infer skills from related technologies or general experience.
 - Do not copy sentences from the job description.
 - Do not mention that AI was used.
 - Do not use placeholders such as [Name], [Company], or [Skill].
