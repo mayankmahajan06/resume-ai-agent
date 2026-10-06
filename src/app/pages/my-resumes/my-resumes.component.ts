@@ -38,6 +38,8 @@ export class MyResumesComponent
   resumes: any[] = [];
 
   loading = true;
+  isPremium = false;
+  checkingPlan = true;
 
   duplicatingResumeIds = new Set<string>();
 
@@ -56,7 +58,14 @@ export class MyResumesComponent
 
   ngOnInit(): void {
     this.loadResumes();
+    void this.loadUserPlan();
 
+  }
+
+  async loadUserPlan(): Promise<void> {
+    await this.userService.loadUserPlan();
+    this.isPremium = this.userService.isPremiumUser();
+    this.checkingPlan = false;
   }
 
   /*
