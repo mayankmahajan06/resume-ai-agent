@@ -12,7 +12,74 @@ Never invent or infer unsupported candidate facts. Do not fabricate employers, j
 Return only the final cover letter text. Do not include explanations, analysis, markdown fences, or commentary.
 `;
 
-let clientPromise;
+const TRANSIENT_GEMINI_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
+const MAX_GEMINI_RETRIES = 3;
+const BASE_RETRY_DELAY_MS = 1000;
+
+class GeminiTemporaryUnavailableError extends Error {
+  constructor() {
+    super("Gemini is temporarily unavailable");
+    this.name = "GeminiTemporaryUnavailableError";
+    this.code = "GEMINI_TEMPORARILY_UNAVAILABLE";
+  }
+}
+
+function getGeminiStatusCode(error) {
+  const status = Number(error?.status ?? error?.code);
+  if (Number.isInteger(status)) {
+    return status;
+  }
+
+  const match = String(error?.message || "").match(/(?:code|status)[^0-9]*(\d{3})/i);
+  return match ? Number(match[1]) : null;
+}
+
+function isTransientGeminiError(error) {
+  return TRANSIENT_GEMINI_STATUS_CODES.has(getGeminiStatusCode(error));
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function generateWithRetry(ai, input) {
+  const request = {
+    model: MODEL_NAME,
+    contents: buildCoverLetterPrompt(input),
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      temperature: 0.7,
+      thinkingConfig: {
+        thinkingLevel: "low",
+      },
+      maxOutputTokens: 1200,
+    },
+  };
+
+  for (let attempt = 0; attempt <= MAX_GEMINI_RETRIES; attempt += 1) {
+    try {
+      return await ai.models.generateContent(request);
+    } catch (error) {
+      if (!isTransientGeminiError(error) || attempt === MAX_GEMINI_RETRIES) {
+        if (isTransientGeminiError(error)) {
+          throw new GeminiTemporaryUnavailableError();
+        }
+
+        throw error;
+      }
+
+      const backoff = BASE_RETRY_DELAY_MS * (2 ** attempt);
+      const jitter = Math.floor(Math.random() * 250);
+      const delay = backoff + jitter;
+
+      console.warn(
+        `Gemini transient error (attempt ${attempt + 1}/${MAX_GEMINI_RETRIES + 1}). Retrying in ${delay}ms.`,
+      );
+
+      await wait(delay);
+    }
+  }
+}
 
 async function getClient() {
   if (!clientPromise) {
@@ -79,18 +146,7 @@ Requirements:
 async function generateCoverLetter(input) {
   const ai = await getClient();
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
-    contents: buildCoverLetterPrompt(input),
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
-      temperature: 0.7,
-      thinkingConfig: {
-        thinkingLevel: "low",
-      },
-      maxOutputTokens: 1200,
-    },
-  });
+  const response = await generateWithRetry(ai, input);
 
   const finishReason = response.candidates?.[0]?.finishReason;
 
