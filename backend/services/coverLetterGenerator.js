@@ -78,9 +78,18 @@ async function generateCoverLetter(input) {
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       temperature: 0.7,
-      maxOutputTokens: 900,
+      thinkingConfig: {
+        thinkingLevel: "low",
+      },
+      maxOutputTokens: 1200,
     },
   });
+
+  const finishReason = response.candidates?.[0]?.finishReason;
+
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error("Gemini stopped before completing the cover letter");
+  }
 
   const content = response.text?.trim();
 
