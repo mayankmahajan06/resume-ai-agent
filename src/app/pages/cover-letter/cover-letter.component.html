@@ -47,17 +47,46 @@
           </div>
         </div>
 
-        <label class="field">
+        <div class="field">
           <span>Resume PDF</span>
-          <input
-            type="file"
-            accept=".pdf,application/pdf"
-            (change)="onFileSelected($event)"
-          />
-          <small *ngIf="selectedFile">
-            {{ selectedFile.name }}
+
+          <label
+            class="file-upload"
+            [class.has-file]="selectedFile"
+          >
+            <input
+              type="file"
+              accept=".pdf,application/pdf"
+              (change)="onFileSelected($event)"
+            />
+
+            <div class="file-upload-icon">
+              <mat-icon>{{ selectedFile ? 'picture_as_pdf' : 'upload_file' }}</mat-icon>
+            </div>
+
+            <div class="file-upload-content">
+              <strong>
+                {{ selectedFile ? selectedFile.name : 'Upload your resume PDF' }}
+              </strong>
+
+              <small *ngIf="!selectedFile">
+                Click to browse or drag your PDF here
+              </small>
+
+              <small *ngIf="selectedFile">
+                {{ (selectedFile.size / 1024 / 1024) | number:'1.1-1' }} MB · PDF selected
+              </small>
+            </div>
+
+            <span class="file-upload-action">
+              {{ selectedFile ? 'Change file' : 'Choose file' }}
+            </span>
+          </label>
+
+          <small class="field-hint">
+            PDF only · Maximum 5 MB
           </small>
-        </label>
+        </div>
 
         <div class="two-column">
           <label class="field">
