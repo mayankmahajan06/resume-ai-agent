@@ -65,6 +65,8 @@ Requirements:
 - Do not claim or imply that the candidate has a skill, technology, qualification, or experience merely because it appears in the job description.
 - If the job description requests a skill that is not explicitly supported by the resume, do not present it as a candidate strength; focus instead on relevant experience that the resume does support.
 - Do not infer skills from related technologies or general experience.
+- Do not exaggerate responsibility or seniority. Use leadership verbs such as "led", "managed", "directed", "owned", or "architected" only when the resume explicitly supports that level of responsibility. Prefer the level of responsibility stated in the resume.
+- Do not add contact details such as phone numbers, email addresses, postal addresses, or LinkedIn URLs to the cover letter unless explicitly requested.
 - Do not copy sentences from the job description.
 - Do not mention that AI was used.
 - Do not use placeholders such as [Name], [Company], or [Skill].
