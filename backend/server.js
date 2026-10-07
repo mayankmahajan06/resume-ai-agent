@@ -578,6 +578,7 @@ app.post("/api/resume/import", requireAuth, importRateLimit, (req, res) => {
        * cannot extract useful text. A bad layout heuristic must never make
        * a valid PDF fail to import.
        */
+      const generationStartedAt = Date.now();
       let extracted;
 
       try {
@@ -1058,6 +1059,7 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
       }
 
       const resumeText = extracted.text || "";
+      console.log("[Cover Letter Timing] PDF extraction:", Date.now() - generationStartedAt, "ms");
 
       if (!resumeText.trim()) {
         return res.status(422).send({
@@ -1112,6 +1114,7 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
         });
       }
 
+      const aiStartedAt = Date.now();
       const content = await generateCoverLetter({
         resumeText,
         jobTitle,
@@ -1119,7 +1122,9 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
         jobDescription,
         tone,
       });
+      console.log("[Cover Letter Timing] Gemini:", Date.now() - aiStartedAt, "ms");
 
+      const quotaStartedAt = Date.now();
       await admin.firestore().runTransaction(async (transaction) => {
         const latestSnapshot = await transaction.get(usageRef);
         const latestData = latestSnapshot.exists ? latestSnapshot.data() || {} : {};
@@ -1140,6 +1145,8 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
           { merge: true },
         );
       });
+      console.log("[Cover Letter Timing] Firestore quota transaction:", Date.now() - quotaStartedAt, "ms");
+      console.log("[Cover Letter Timing] Total:", Date.now() - generationStartedAt, "ms");
 
       return res.status(200).send({
         success: true,
