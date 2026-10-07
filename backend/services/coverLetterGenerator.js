@@ -15,7 +15,7 @@ Return only the final cover letter text. Do not include explanations, analysis, 
 let clientPromise;
 
 const TRANSIENT_GEMINI_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
-const MAX_GEMINI_RETRIES = 3;
+const MAX_GEMINI_RETRIES = 2;
 const BASE_RETRY_DELAY_MS = 1000;
 
 class GeminiTemporaryUnavailableError extends Error {
@@ -50,10 +50,8 @@ async function generateWithRetry(ai, input) {
     contents: buildCoverLetterPrompt(input),
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
-      thinkingConfig: {
-        thinkingLevel: "low",
-      },
-      maxOutputTokens: 1200,
+      maxOutputTokens: 900,
+      responseMimeType: "text/plain",
     },
   };
 
