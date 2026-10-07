@@ -556,7 +556,6 @@ app.get("/resume-data", requireResumeDataAuth, authenticatedRateLimit, async (re
 app.post("/api/resume/import", requireAuth, importRateLimit, (req, res) => {
   resumeUpload.single("resume")(req, res, async (uploadError) => {
     try {
-      const generationStartedAt = Date.now();
       if (uploadError) {
         return res.status(400).send({
           success: false,
@@ -579,7 +578,6 @@ app.post("/api/resume/import", requireAuth, importRateLimit, (req, res) => {
        * cannot extract useful text. A bad layout heuristic must never make
        * a valid PDF fail to import.
        */
-      const generationStartedAt = Date.now();
       let extracted;
 
       try {
@@ -997,6 +995,7 @@ app.post("/verify-payment", requireAuth, authenticatedRateLimit, async (req, res
 app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res) => {
   resumeUpload.single("resume")(req, res, async (uploadError) => {
     try {
+      const generationStartedAt = Date.now();
       if (uploadError) {
         return res.status(400).send({
           success: false,
