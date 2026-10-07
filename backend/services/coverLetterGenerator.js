@@ -1,4 +1,4 @@
-const MODEL_NAME = "gemini-3.8-flash";
+const MODEL_NAME = "gemini-3.7-flash";
 
 const SYSTEM_INSTRUCTION = `
 You are ResumePilot's cover letter generator.
@@ -50,7 +50,6 @@ async function generateWithRetry(ai, input) {
     contents: buildCoverLetterPrompt(input),
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
-      temperature: 0.7,
       thinkingConfig: {
         thinkingLevel: "low",
       },
