@@ -556,6 +556,7 @@ app.get("/resume-data", requireResumeDataAuth, authenticatedRateLimit, async (re
 app.post("/api/resume/import", requireAuth, importRateLimit, (req, res) => {
   resumeUpload.single("resume")(req, res, async (uploadError) => {
     try {
+      const generationStartedAt = Date.now();
       if (uploadError) {
         return res.status(400).send({
           success: false,
