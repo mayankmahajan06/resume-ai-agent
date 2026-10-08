@@ -1122,7 +1122,7 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
         jobDescription,
         tone,
       });
-      console.log("[Cover Letter Timing] Gemini:", Date.now() - aiStartedAt, "ms");
+      console.log("[Cover Letter Timing] AI:", Date.now() - aiStartedAt, "ms");
 
       const quotaStartedAt = Date.now();
       await admin.firestore().runTransaction(async (transaction) => {
