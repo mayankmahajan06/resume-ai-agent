@@ -1,4 +1,6 @@
-const MODEL_NAME = "gemini-3.7-flash";
+const GEMINI_MODEL_NAME = "gemini-3.7-flash";
+const OPENAI_MODEL_NAME = "gpt-5.4-mini";
+const AI_PROVIDER = String(process.env.COVER_LETTER_AI_PROVIDER || "gemini").toLowerCase();
 
 const SYSTEM_INSTRUCTION = `
 You are ResumePilot's cover letter generator.
@@ -17,6 +19,7 @@ let clientPromise;
 const TRANSIENT_GEMINI_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 const MAX_GEMINI_RETRIES = 2;
 const BASE_RETRY_DELAY_MS = 1000;
+const OPENAI_TIMEOUT_MS = 30000;
 
 class GeminiTemporaryUnavailableError extends Error {
   constructor() {
@@ -26,13 +29,21 @@ class GeminiTemporaryUnavailableError extends Error {
   }
 }
 
+class OpenAITemporaryUnavailableError extends Error {
+  constructor() {
+    super("OpenAI is temporarily unavailable");
+    this.name = "OpenAITemporaryUnavailableError";
+    this.code = "OPENAI_TEMPORARILY_UNAVAILABLE";
+  }
+}
+
 function getGeminiStatusCode(error) {
   const status = Number(error?.status ?? error?.code);
   if (Number.isInteger(status)) {
     return status;
   }
 
-  const match = String(error?.message || "").match(/(?:code|status)[^0-9]*(\d{3})/i);
+  const match = String(error?.message || "").match(/(?:code|status)[^0-9]*(\\d{3})/i);
   return match ? Number(match[1]) : null;
 }
 
@@ -44,9 +55,11 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function generateWithRetry(ai, input) {
+async function generateGemini(input) {
+  const ai = await getGeminiClient();
+
   const request = {
-    model: MODEL_NAME,
+    model: GEMINI_MODEL_NAME,
     contents: buildCoverLetterPrompt(input),
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
@@ -80,7 +93,67 @@ async function generateWithRetry(ai, input) {
   }
 }
 
-async function getClient() {
+async function generateOpenAI(input) {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL_NAME,
+        reasoning_effort: "none",
+        max_completion_tokens: 900,
+        messages: [
+          {
+            role: "system",
+            content: SYSTEM_INSTRUCTION,
+          },
+          {
+            role: "user",
+            content: buildCoverLetterPrompt(input),
+          },
+        ],
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      const error = new Error(`OpenAI API request failed with status ${response.status}`);
+      error.status = response.status;
+      error.body = errorBody.slice(0, 500);
+      throw error;
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content?.trim();
+
+    if (!content) {
+      throw new Error("OpenAI returned an empty cover letter");
+    }
+
+    return content;
+  } catch (error) {
+    if (error?.name === "AbortError" || error?.code === "UND_ERR_HEADERS_TIMEOUT") {
+      throw new OpenAITemporaryUnavailableError();
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function getGeminiClient() {
   if (!clientPromise) {
     clientPromise = import("@google/genai").then(({ GoogleGenAI }) => {
       if (!process.env.GEMINI_API_KEY) {
@@ -144,9 +217,20 @@ Requirements:
 }
 
 async function generateCoverLetter(input) {
-  const ai = await getClient();
+  if (AI_PROVIDER === "openai") {
+    const startedAt = Date.now();
+    const content = await generateOpenAI(input);
+    console.log("[Cover Letter AI] OpenAI:", Date.now() - startedAt, "ms");
+    return content;
+  }
 
-  const response = await generateWithRetry(ai, input);
+  if (AI_PROVIDER !== "gemini") {
+    throw new Error(`Unsupported COVER_LETTER_AI_PROVIDER: ${AI_PROVIDER}`);
+  }
+
+  const startedAt = Date.now();
+  const response = await generateGemini(input);
+  console.log("[Cover Letter AI] Gemini:", Date.now() - startedAt, "ms");
 
   const finishReason = response.candidates?.[0]?.finishReason;
 
