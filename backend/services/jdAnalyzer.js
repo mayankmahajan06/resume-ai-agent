@@ -16,7 +16,7 @@ function containsAlias(normalizedText, alias) {
   if (!normalizedAlias) return false;
 
   if (normalizedAlias === 'angular') {
-    const angularPattern = /(^|[^a-z0-9])angular(?!js|\\.js|\\s*1)(?=$|[^a-z0-9])/i;
+    const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1)(?=$|[^a-z0-9])/i;
     return angularPattern.test(normalizedText);
   }
 
