@@ -30,6 +30,7 @@ export class JdAnalysisDialogComponent implements OnInit {
   missingSkills: string[] = [];
   jdSuggestions: string[] = [];
   loading = false;
+  analysisError = '';
   isPremiumUser = false;
 
   constructor(
@@ -59,10 +60,16 @@ export class JdAnalysisDialogComponent implements OnInit {
 
   analyzeJD(): void {
 
-    if (!this.jobDescription.trim()) {
+    if (this.loading) {
       return;
     }
 
+    if (!this.jobDescription.trim()) {
+      this.analysisError = 'Please paste a job description first.';
+      return;
+    }
+
+    this.analysisError = '';
     this.loading = true;
 
     this.pdfService
@@ -97,6 +104,9 @@ export class JdAnalysisDialogComponent implements OnInit {
           );
 
           this.loading = false;
+          this.analysisError =
+            error?.error?.message ||
+            'We could not analyze this job description. Please try again.';
 
         }
 
