@@ -226,6 +226,27 @@ function analyze(resumeText, jobDescription) {
   );
 }
 
+// Explicitly required skills receive double weight; other skills count once.
+{
+  const result = analyze(
+    'Angular',
+    'Required: Angular and TypeScript. Nice to have: React.'
+  );
+  assert.equal(result.jdMatchScore, 40);
+  assert.deepEqual(result.requiredSkills, ['Angular', 'TypeScript']);
+  assert.deepEqual(result.missingRequiredSkills, ['TypeScript']);
+  assert.match(result.scoreMethod, /count double/);
+}
+
+// Without explicit requirement wording, scoring remains equal-weight.
+{
+  const result = analyze('Angular', 'Angular, TypeScript, React');
+  assert.equal(result.jdMatchScore, 33);
+  assert.deepEqual(result.requiredSkills, []);
+  assert.deepEqual(result.missingRequiredSkills, []);
+  assert.match(result.scoreMethod, /Equal-weight/);
+}
+
 // Empty or malformed resume objects should not crash analysis.
 {
   assert.equal(analyzeJD(null, 'Angular').jdMatchScore, 0);
