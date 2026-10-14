@@ -257,7 +257,6 @@ const skillMapping = {
   csharp: { label: "C#", aliases: ["c#", "c sharp"] },
   golang: { label: "Go", aliases: ["golang"] },
   rust: { label: "Rust", aliases: ["rust"] },
-  graphql: { label: "GraphQL", aliases: ["graphql"] },
   websocket: { label: "WebSockets", aliases: ["websocket", "websockets", "web sockets"] },
 
   // Data stores and API technologies
@@ -297,7 +296,6 @@ const skillMapping = {
   prettier: { label: "Prettier", aliases: ["prettier"] },
 
   // Architecture and engineering practices
-  rest: { label: "REST", aliases: ["rest"] },
   oauth: { label: "OAuth", aliases: ["oauth", "oauth 2.0", "oauth2"] },
   jwt: { label: "JWT", aliases: ["jwt", "json web token", "json web tokens"] },
   websocketssecurity: { label: "Web Security", aliases: ["web security", "owasp", "content security policy"] },
