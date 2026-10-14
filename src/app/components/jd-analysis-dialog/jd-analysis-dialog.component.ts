@@ -26,6 +26,9 @@ export class JdAnalysisDialogComponent implements OnInit {
 
   jdMatch = 0;
   recognizedSkillsCount = 0;
+  scoreMethod = '';
+  requiredSkills: string[] = [];
+  missingRequiredSkills: string[] = [];
   hasAnalyzed = false;
 
   matchingSkills: string[] = [];
@@ -88,6 +91,10 @@ export class JdAnalysisDialogComponent implements OnInit {
             response.jdMatchScore;
           this.recognizedSkillsCount =
             Number(response.recognizedSkillsCount || 0);
+          this.scoreMethod = response.scoreMethod ||
+            'Equal-weight overlap of recognized skills.';
+          this.requiredSkills = response.requiredSkills || [];
+          this.missingRequiredSkills = response.missingRequiredSkills || [];
 
           this.matchingSkills =
             response.matchedSkills;
