@@ -27,7 +27,7 @@ function containsAlias(normalizedText, alias) {
   // AngularJS / Angular.js / Angular 1 are not modern Angular.
   // Angular Material is a separate skill and must not imply Angular.
   if (normalizedAlias === 'angular') {
-    const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1|\s+material|\/material)(?=$|[^a-z0-9])/i;
+    const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1(?:\b|\.|\+)|\s+material|\/material)(?=$|[^a-z0-9])/i;
     return angularPattern.test(normalizedText);
   }
 
