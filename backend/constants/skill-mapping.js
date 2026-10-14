@@ -45,12 +45,12 @@ const skillMapping = {
 
   express: {
     label: "Express.js",
-    aliases: ["express", "expressjs"],
+    aliases: ["expressjs", "express.js"],
   },
 
   mongodb: {
     label: "MongoDB",
-    aliases: ["mongodb", "mongo"],
+    aliases: ["mongodb"],
   },
 
   firebase: {
@@ -95,7 +95,7 @@ const skillMapping = {
 
   scss: {
     label: "SCSS",
-    aliases: ["scss", "sass"],
+    aliases: ["scss"],
   },
 
   restapi: {
@@ -201,6 +201,11 @@ const skillMapping = {
     aliases: ["kanban"],
   },
 
+  sass: {
+    label: "Sass",
+    aliases: ["sass"],
+  },
+
   responsivedesign: {
     label: "Responsive Design",
     aliases: ["responsive design", "responsive ui", "responsive web design"],
@@ -219,6 +224,99 @@ const skillMapping = {
       "web performance",
     ],
   },
+
+  // Frontend frameworks and UI libraries
+  nextjs: { label: "Next.js", aliases: ["next.js", "nextjs"] },
+  nuxt: { label: "Nuxt", aliases: ["nuxt", "nuxt.js", "nuxtjs"] },
+  svelte: { label: "Svelte", aliases: ["svelte", "sveltekit"] },
+  jquery: { label: "jQuery", aliases: ["jquery", "jquery ui"] },
+  bootstrap: { label: "Bootstrap", aliases: ["bootstrap"] },
+  tailwindcss: { label: "Tailwind CSS", aliases: ["tailwind css", "tailwindcss"] },
+  materialui: { label: "Material UI", aliases: ["material ui", "material-ui", "mui"] },
+  chakraui: { label: "Chakra UI", aliases: ["chakra ui", "chakra-ui"] },
+  antDesign: { label: "Ant Design", aliases: ["ant design", "antd"] },
+  storybook: { label: "Storybook", aliases: ["storybook"] },
+  webcomponents: { label: "Web Components", aliases: ["web components", "web components api"] },
+  webaccessibility: { label: "Web Accessibility", aliases: ["web accessibility", "wcag", "a11y"] },
+
+  // JavaScript and backend ecosystem
+  npm: { label: "npm", aliases: ["npm"] },
+  yarn: { label: "Yarn", aliases: ["yarn"] },
+  pnpm: { label: "pnpm", aliases: ["pnpm"] },
+  vite: { label: "Vite", aliases: ["vite"] },
+  webpack: { label: "Webpack", aliases: ["webpack"] },
+  babel: { label: "Babel", aliases: ["babel"] },
+  nestjs: { label: "NestJS", aliases: ["nestjs", "nest.js"] },
+  java: { label: "Java", aliases: ["java"] },
+  springboot: { label: "Spring Boot", aliases: ["spring boot", "springboot"] },
+  python: { label: "Python", aliases: ["python", "python3"] },
+  django: { label: "Django", aliases: ["django"] },
+  flask: { label: "Flask", aliases: ["flask"] },
+  php: { label: "PHP", aliases: ["php"] },
+  dotnet: { label: ".NET", aliases: [".net", "dotnet", "asp.net", "asp.net core"] },
+  csharp: { label: "C#", aliases: ["c#", "c sharp"] },
+  golang: { label: "Go", aliases: ["golang"] },
+  rust: { label: "Rust", aliases: ["rust"] },
+  graphql: { label: "GraphQL", aliases: ["graphql"] },
+  websocket: { label: "WebSockets", aliases: ["websocket", "websockets", "web sockets"] },
+
+  // Data stores and API technologies
+  postgresql: { label: "PostgreSQL", aliases: ["postgresql", "postgres"] },
+  mysql: { label: "MySQL", aliases: ["mysql"] },
+  sqlserver: { label: "Microsoft SQL Server", aliases: ["sql server", "microsoft sql server", "mssql"] },
+  dynamodb: { label: "DynamoDB", aliases: ["dynamodb", "dynamo db"] },
+  elasticsearch: { label: "Elasticsearch", aliases: ["elasticsearch", "elastic search"] },
+  rabbitmq: { label: "RabbitMQ", aliases: ["rabbitmq", "rabbit mq"] },
+  kafka: { label: "Apache Kafka", aliases: ["apache kafka", "kafka"] },
+  grpc: { label: "gRPC", aliases: ["grpc"] },
+  openapi: { label: "OpenAPI", aliases: ["openapi", "open api"] },
+  swagger: { label: "Swagger", aliases: ["swagger"] },
+
+  // Cloud, DevOps, and delivery
+  gcp: { label: "Google Cloud Platform", aliases: ["gcp", "google cloud platform", "google cloud"] },
+  azure: { label: "Microsoft Azure", aliases: ["microsoft azure", "azure"] },
+  terraform: { label: "Terraform", aliases: ["terraform"] },
+  ansible: { label: "Ansible", aliases: ["ansible"] },
+  jenkins: { label: "Jenkins", aliases: ["jenkins"] },
+  githubactions: { label: "GitHub Actions", aliases: ["github actions"] },
+  gitlabci: { label: "GitLab CI/CD", aliases: ["gitlab ci", "gitlab ci/cd"] },
+  nginx: { label: "Nginx", aliases: ["nginx"] },
+  linux: { label: "Linux", aliases: ["linux"] },
+  serverless: { label: "Serverless", aliases: ["serverless", "serverless framework"] },
+
+  // Testing and code quality
+  playwright: { label: "Playwright", aliases: ["playwright"] },
+  cypress: { label: "Cypress", aliases: ["cypress"] },
+  vitest: { label: "Vitest", aliases: ["vitest"] },
+  testinglibrary: { label: "Testing Library", aliases: ["testing library", "@testing-library"] },
+  selenium: { label: "Selenium", aliases: ["selenium"] },
+  webdriverio: { label: "WebdriverIO", aliases: ["webdriverio", "webdriver io"] },
+  sonarqube: { label: "SonarQube", aliases: ["sonarqube", "sonar qube"] },
+  veracode: { label: "Veracode", aliases: ["veracode"] },
+  eslint: { label: "ESLint", aliases: ["eslint"] },
+  prettier: { label: "Prettier", aliases: ["prettier"] },
+
+  // Architecture and engineering practices
+  rest: { label: "REST", aliases: ["rest"] },
+  oauth: { label: "OAuth", aliases: ["oauth", "oauth 2.0", "oauth2"] },
+  jwt: { label: "JWT", aliases: ["jwt", "json web token", "json web tokens"] },
+  websocketssecurity: { label: "Web Security", aliases: ["web security", "owasp", "content security policy"] },
+  accessibilitytesting: { label: "Accessibility Testing", aliases: ["accessibility testing", "axe-core"] },
+  designpatterns: { label: "Design Patterns", aliases: ["design patterns", "software design patterns"] },
+  cleanarchitecture: { label: "Clean Architecture", aliases: ["clean architecture"] },
+  systemdesign: { label: "System Design", aliases: ["system design"] },
+  mentoring: { label: "Technical Mentoring", aliases: ["mentoring", "mentor", "mentored"] },
+  codereview: { label: "Code Review", aliases: ["code review", "code reviews", "peer review"] },
+  unitTesting: { label: "Unit Testing", aliases: ["unit testing", "unit tests"] },
+  integrationTesting: { label: "Integration Testing", aliases: ["integration testing", "integration tests"] },
+
+  // AI engineering (kept distinct from OpenAI and ChatGPT)
+  generativeai: { label: "Generative AI", aliases: ["generative ai", "gen ai"] },
+  machinelearning: { label: "Machine Learning", aliases: ["machine learning", "ml"] },
+  embeddings: { label: "Embeddings", aliases: ["embeddings", "embedding models"] },
+  vectorDatabase: { label: "Vector Database", aliases: ["vector database", "vector databases", "vector db"] },
+  huggingface: { label: "Hugging Face", aliases: ["hugging face", "huggingface"] },
+
 };
 
 module.exports = skillMapping;
