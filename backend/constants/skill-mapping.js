@@ -237,7 +237,6 @@ const skillMapping = {
   antDesign: { label: "Ant Design", aliases: ["ant design", "antd"] },
   storybook: { label: "Storybook", aliases: ["storybook"] },
   webcomponents: { label: "Web Components", aliases: ["web components", "web components api"] },
-  webaccessibility: { label: "Web Accessibility", aliases: ["web accessibility", "wcag", "a11y"] },
 
   // JavaScript and backend ecosystem
   npm: { label: "npm", aliases: ["npm"] },
