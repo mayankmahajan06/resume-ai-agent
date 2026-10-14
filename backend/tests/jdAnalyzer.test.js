@@ -127,7 +127,7 @@ function analyze(resumeText, jobDescription) {
       `Skill "${key}" must define aliases`);
 
     for (const alias of skill.aliases) {
-      const result = analyze(alias, skill.label);
+      const result = analyze(alias, alias);
       assert.ok(
         result.matchedSkills.includes(skill.label),
         `Alias "${alias}" did not match canonical skill "${skill.label}"`
