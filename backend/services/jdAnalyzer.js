@@ -83,7 +83,7 @@ const REQUIRED_MARKERS = [
 // overall job title or from a generic "Requirements" heading.
 function isExplicitlyRequired(skill, jobDescription) {
   const segments = String(jobDescription || '')
-    .split(/[\\n;!?]+|(?<=[.!?])\\s+/)
+    .split(/[\n;!?]+|(?<=[.!?])\s+/)
     .map(segment => segment.trim())
     .filter(Boolean);
 
