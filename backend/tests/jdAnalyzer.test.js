@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const analyzeJD = require('../services/jdAnalyzer');
 const skillMapping = require('../constants/skill-mapping');
+const { validateJdAnalysisRequest } = require('../services/jdRequestValidation');
 
 function analyze(resumeText, jobDescription) {
   return analyzeJD(
@@ -167,6 +168,43 @@ function analyze(resumeText, jobDescription) {
   }, 'AWS');
   assert.deepEqual(result.matchedSkills, ['AWS']);
   assert.equal(result.jdMatchScore, 100);
+}
+
+// Request validation returns predictable client errors before analysis.
+{
+  assert.deepEqual(validateJdAnalysisRequest({}), {
+    valid: false,
+    status: 400,
+    message: 'Please provide a job description to analyze.'
+  });
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: {},
+      jobDescription: '   '
+    }).status,
+    400
+  );
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: {},
+      jobDescription: 'x'.repeat(50001)
+    }).status,
+    413
+  );
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: [],
+      jobDescription: 'Angular'
+    }).status,
+    400
+  );
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: {},
+      jobDescription: 'Angular'
+    }).valid,
+    true
+  );
 }
 
 // Empty or malformed resume objects should not crash analysis.
