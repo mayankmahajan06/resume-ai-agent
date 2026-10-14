@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { PdfService } from '../../services/pdf.service';
 import { UserService }
   from '../../services/user.service';
+import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-jd-analysis-dialog',
@@ -37,6 +38,7 @@ export class JdAnalysisDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<JdAnalysisDialogComponent>,
     private pdfService: PdfService,
     private userService: UserService,
+    private paymentService: PaymentService,
     @Inject(MAT_DIALOG_DATA)
     public data: any
   ) { }
@@ -112,6 +114,10 @@ export class JdAnalysisDialogComponent implements OnInit {
 
       });
 
+  }
+
+  startUpgrade(planType: 'pro' | 'pro_plus'): void {
+    this.paymentService.startPremiumUpgrade(planType, 'jd_analysis_dialog');
   }
 
   getScoreClass(): string {
