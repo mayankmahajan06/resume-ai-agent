@@ -40,7 +40,7 @@ const skillMapping = {
 
   nodejs: {
     label: "Node.js",
-    aliases: ["nodejs", "node.js", "node"],
+    aliases: ["nodejs", "node.js"],
   },
 
   express: {
@@ -110,7 +110,7 @@ const skillMapping = {
 
   git: {
     label: "Git",
-    aliases: ["git", "github", "gitlab"],
+    aliases: ["git"],
   },
 
   llm: {
@@ -120,7 +120,7 @@ const skillMapping = {
 
   openai: {
     label: "OpenAI",
-    aliases: ["openai", "chatgpt", "gpt", "gpt4"],
+    aliases: ["openai"],
   },
 
   promptengineering: {
@@ -178,7 +178,22 @@ const skillMapping = {
 
   agile: {
     label: "Agile",
-    aliases: ["agile", "scrum", "kanban"],
+    aliases: ["agile"],
+  },
+
+  chatgpt: {
+    label: "ChatGPT",
+    aliases: ["chatgpt"],
+  },
+
+  scrum: {
+    label: "Scrum",
+    aliases: ["scrum"],
+  },
+
+  kanban: {
+    label: "Kanban",
+    aliases: ["kanban"],
   },
 
   responsivedesign: {
