@@ -143,7 +143,7 @@ function analyze(resumeText, jobDescription) {
     'Java, TypeScript, Express.js, MongoDB'
   );
   assert.deepEqual(result.matchedSkills, ['TypeScript']);
-  assert.deepEqual(result.missingSkills, ['Java', 'Express.js', 'MongoDB']);
+  assert.deepEqual(result.missingSkills, ['Express.js', 'MongoDB', 'Java']);
   assert.equal(result.jdMatchScore, 25);
 }
 
