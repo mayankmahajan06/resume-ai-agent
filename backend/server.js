@@ -1172,6 +1172,8 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
 
 app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async (req, res) => {
   let browser;
+  const pdfStartedAt = Date.now();
+  let stageStartedAt = pdfStartedAt;
 
   try {
     const content = String(req.body?.content || "").trim();
@@ -1195,6 +1197,8 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
+    console.log("[Cover Letter PDF Timing] Browser launch:", Date.now() - stageStartedAt, "ms");
+    stageStartedAt = Date.now();
 
     const page = await browser.newPage();
     const html = buildCoverLetterPdfHTML(content, template);
@@ -1203,6 +1207,8 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
       waitUntil: "domcontentloaded",
       timeout: 10000,
     });
+    console.log("[Cover Letter PDF Timing] HTML setup:", Date.now() - stageStartedAt, "ms");
+    stageStartedAt = Date.now();
 
     const pdf = await page.pdf({
       format: "A4",
@@ -1210,11 +1216,16 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
       preferCSSPageSize: true,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
+    console.log("[Cover Letter PDF Timing] PDF render:", Date.now() - stageStartedAt, "ms");
+    stageStartedAt = Date.now();
 
     await browser.close();
+    console.log("[Cover Letter PDF Timing] Browser close:", Date.now() - stageStartedAt, "ms");
+    console.log("[Cover Letter PDF Timing] Total:", Date.now() - pdfStartedAt, "ms");
 
     return res.status(200).send(pdf);
   } catch (error) {
+    console.error("[Cover Letter PDF Timing] Failed after:", Date.now() - pdfStartedAt, "ms");
     console.error("Cover letter PDF generation failed:", error);
 
     if (browser) {
