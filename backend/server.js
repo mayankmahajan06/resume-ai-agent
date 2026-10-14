@@ -1265,8 +1265,11 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
   }
 });
 
-app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
-  try {
+app.post(
+  "/analyze-jd",
+  requireActivePremium,
+  aiRateLimit,
+  (req, res, next) => {
     const { resumeData, jobDescription } = req.body || {};
 
     if (typeof jobDescription !== "string" || !jobDescription.trim()) {
@@ -1290,16 +1293,22 @@ app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req,
       });
     }
 
-    const analysis = analyzeJD(resumeData, jobDescription);
-    return res.status(200).send(analysis);
-  } catch (error) {
-    console.error("JD Analysis Failed:", error);
-    return res.status(500).send({
-      success: false,
-      message: "JD analysis failed. Please try again later.",
-    });
+    next();
+  },
+  requireAiQuota,
+  (req, res) => {
+    try {
+      const analysis = analyzeJD(req.body.resumeData, req.body.jobDescription);
+      return res.status(200).send(analysis);
+    } catch (error) {
+      console.error("JD Analysis Failed:", error);
+      return res.status(500).send({
+        success: false,
+        message: "JD analysis failed. Please try again later.",
+      });
+    }
   }
-});
+);
 
 const PORT = process.env.PORT || 3000;
 
