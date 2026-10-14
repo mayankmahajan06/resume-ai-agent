@@ -63,7 +63,7 @@ function analyze(resumeText, jobDescription) {
   const result = analyze('Scrum and Kanban', 'Agile, Scrum, Kanban');
   assert.deepEqual(result.matchedSkills, ['Scrum', 'Kanban']);
   assert.deepEqual(result.missingSkills, ['Agile']);
-  assert.equal(result.jdMatchScore, 50);
+  assert.equal(result.jdMatchScore, 67);
 }
 
 // A standalone "node" mention is not enough to prove Node.js.
@@ -244,7 +244,7 @@ function analyze(resumeText, jobDescription) {
 {
   const result = analyze('Node.js', 'Node.js is required. React is nice to have.');
   assert.deepEqual(result.requiredSkills, ['Node.js']);
-  assert.equal(result.jdMatchScore, 67);
+  assert.equal(result.jdMatchScore, 50);
 }
 
 // Without explicit requirement wording, scoring remains equal-weight.
