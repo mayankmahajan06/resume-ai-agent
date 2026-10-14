@@ -72,6 +72,41 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 0);
 }
 
+// Angular spellings and version labels must not cross-match AngularJS.
+{
+  const cases = [
+    ['AngularJS', 'Angular', false],
+    ['Angular 1', 'Angular', false],
+    ['Angular.js', 'Angular', false],
+    ['Angular 2+', 'Angular', true],
+    ['Angular 2+', 'AngularJS', false]
+  ];
+
+  for (const [resumeText, jdText, shouldMatch] of cases) {
+    const result = analyze(resumeText, jdText);
+    assert.equal(
+      result.matchedSkills.includes('Angular'),
+      shouldMatch,
+      `Unexpected Angular match for resume "${resumeText}" and JD "${jdText}"`
+    );
+  }
+}
+
+// Abbreviations are recognized only as complete terms.
+{
+  assert.deepEqual(analyze('TS', 'TypeScript').matchedSkills, ['TypeScript']);
+  assert.deepEqual(analyze('JS', 'JavaScript').matchedSkills, ['JavaScript']);
+  assert.deepEqual(analyze('status and projects', 'TypeScript, JavaScript').matchedSkills, []);
+}
+
+// React/Vue aliases remain supported.
+{
+  const result = analyze('ReactJS, VueJS, ECMAScript', 'React, Vue, JavaScript');
+  assert.deepEqual(result.matchedSkills, ['React', 'Vue', 'JavaScript']);
+  assert.deepEqual(result.missingSkills, []);
+  assert.equal(result.jdMatchScore, 100);
+}
+
 // Empty or malformed resume objects should not crash analysis.
 {
   assert.equal(analyzeJD(null, 'Angular').jdMatchScore, 0);
