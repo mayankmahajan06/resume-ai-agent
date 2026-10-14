@@ -352,7 +352,6 @@ const skillMapping = {
   json: { label: "JSON", aliases: ["json", "javascript object notation"] },
   xml: { label: "XML", aliases: ["xml", "extensible markup language"] },
   yaml: { label: "YAML", aliases: ["yaml", "yml"] },
-  oauth2: { label: "OAuth 2.0", aliases: ["oauth 2.0", "oauth2"] },
   eventdriven: { label: "Event-Driven Architecture", aliases: ["event-driven architecture", "event driven architecture"] },
 
 };
