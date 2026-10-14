@@ -67,20 +67,36 @@ function analyzeJD(resumeData, jobDescription) {
   const projects = Array.isArray(safeResume.projects)
     ? safeResume.projects
     : [];
+  const education = Array.isArray(safeResume.education)
+    ? safeResume.education
+    : [];
+  const certifications = Array.isArray(safeResume.certifications)
+    ? safeResume.certifications
+    : [];
+
+  const textValue = value =>
+    typeof value === 'string' || typeof value === 'number'
+      ? String(value)
+      : '';
 
   const resumeText = `
-    ${safeResume.skills || ''}
-    ${safeResume.summary || ''}
+    ${textValue(safeResume.skills)}
+    ${textValue(safeResume.summary)}
     ${experiences.map(exp => `
-      ${exp?.role || ''}
-      ${exp?.company || ''}
-      ${exp?.responsibilities || ''}
+      ${textValue(exp?.role)}
+      ${textValue(exp?.company)}
+      ${textValue(exp?.responsibilities)}
     `).join(' ')}
     ${projects.map(project => `
-      ${project?.projectName || ''}
-      ${project?.techStack || ''}
-      ${project?.description || ''}
+      ${textValue(project?.projectName)}
+      ${textValue(project?.techStack)}
+      ${textValue(project?.description)}
     `).join(' ')}
+    ${education.map(item => `
+      ${textValue(item?.degree)}
+      ${textValue(item?.fieldOfStudy)}
+    `).join(' ')}
+    ${certifications.map(item => textValue(item?.certificationName)).join(' ')}
   `;
 
   const jdSkills = uniqueSkills(extractSkills(jobDescription));
