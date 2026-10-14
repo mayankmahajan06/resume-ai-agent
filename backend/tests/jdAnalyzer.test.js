@@ -100,6 +100,14 @@ function analyze(resumeText, jobDescription) {
   assert.deepEqual(analyze('status and projects', 'TypeScript, JavaScript').matchedSkills, []);
 }
 
+// ".js" suffixes in library names must not count as the standalone JS alias.
+{
+  const result = analyze('Node.js, React.js, TypeScript', 'JavaScript, TypeScript');
+  assert.deepEqual(result.matchedSkills, ['TypeScript']);
+  assert.deepEqual(result.missingSkills, ['JavaScript']);
+  assert.equal(result.jdMatchScore, 50);
+}
+
 // React/Vue aliases remain supported.
 {
   const result = analyze('ReactJS, VueJS, ECMAScript', 'React, Vue, JavaScript');
