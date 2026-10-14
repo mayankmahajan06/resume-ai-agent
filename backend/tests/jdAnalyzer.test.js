@@ -128,6 +128,25 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 50);
 }
 
+// The top-level mapping must not silently overwrite duplicate JavaScript object keys.
+{
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const mappingSource = fs.readFileSync(
+    path.join(__dirname, '../constants/skill-mapping.js'),
+    'utf8'
+  );
+  const keys = Array.from(
+    mappingSource.matchAll(/^  ([A-Za-z_$][\\w$]*):\\s*\\{/gm),
+    match => match[1]
+  );
+  assert.equal(
+    new Set(keys).size,
+    keys.length,
+    'Skill mapping contains duplicate top-level keys'
+  );
+}
+
 // Every configured alias should recognize its own canonical skill label.
 {
   for (const [key, skill] of Object.entries(skillMapping)) {
