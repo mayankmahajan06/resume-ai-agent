@@ -1265,7 +1265,7 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
   }
 });
 
-app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
+app.post("/analyze-jd", requireActivePremium, aiRateLimit, (req, res) => {
   try {
     const { resumeData, jobDescription } = req.body || {};
 
