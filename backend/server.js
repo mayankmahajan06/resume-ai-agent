@@ -1200,7 +1200,8 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
     const html = buildCoverLetterPdfHTML(content, template);
 
     await page.setContent(html, {
-      waitUntil: "networkidle0",
+      waitUntil: "domcontentloaded",
+      timeout: 10000,
     });
 
     const pdf = await page.pdf({
