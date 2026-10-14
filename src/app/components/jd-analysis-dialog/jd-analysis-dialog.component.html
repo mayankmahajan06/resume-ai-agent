@@ -15,6 +15,7 @@
 
     <textarea
       rows="10"
+      maxlength="50000"
       [(ngModel)]="jobDescription"
       placeholder="Paste the full job description from LinkedIn, Naukri, or company portal here..."
     >
@@ -64,8 +65,12 @@
       </div>
     </div>
 
-    <div class="empty-state" *ngIf="hasAnalyzed && !matchingSkills.length">
-      No matching skills found for this role.
+    <div class="empty-state" *ngIf="hasAnalyzed && recognizedSkillsCount === 0">
+      We could not identify any supported skills in this job description. Try pasting more of the role's responsibilities and requirements.
+    </div>
+
+    <div class="empty-state" *ngIf="hasAnalyzed && recognizedSkillsCount > 0 && !matchingSkills.length">
+      No recognized job-description skills were detected in your resume. This does not necessarily mean you lack those skills.
     </div>
 
     <!-- FREE USER UPGRADE -->
