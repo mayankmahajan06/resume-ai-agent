@@ -166,11 +166,6 @@ const skillMapping = {
     aliases: ["angular material", "@angular/material"],
   },
 
-  materialui: {
-    label: "Material UI",
-    aliases: ["material ui", "material-ui", "mui"],
-  },
-
   azuredevops: {
     label: "Azure DevOps",
     aliases: ["azure devops", "azuredevops"],
