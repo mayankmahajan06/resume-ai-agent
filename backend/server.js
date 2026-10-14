@@ -24,6 +24,34 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 const INTERNAL_RENDER_TOKEN = process.env.INTERNAL_RENDER_TOKEN || crypto.randomBytes(32).toString('hex');
 
+let coverLetterPdfBrowser = null;
+let coverLetterPdfBrowserPromise = null;
+
+async function getCoverLetterPdfBrowser() {
+  if (coverLetterPdfBrowser?.connected) {
+    return coverLetterPdfBrowser;
+  }
+
+  if (!coverLetterPdfBrowserPromise) {
+    coverLetterPdfBrowserPromise = puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    }).then((browser) => {
+      coverLetterPdfBrowser = browser;
+      browser.on("disconnected", () => {
+        if (coverLetterPdfBrowser === browser) {
+          coverLetterPdfBrowser = null;
+        }
+      });
+      return browser;
+    }).finally(() => {
+      coverLetterPdfBrowserPromise = null;
+    });
+  }
+
+  return coverLetterPdfBrowserPromise;
+}
+
 const app = express();
 const resumeUpload = multer({
   storage: multer.memoryStorage(),
@@ -1171,7 +1199,7 @@ app.post("/generate-cover-letter", requireActivePremium, aiRateLimit, (req, res)
 });
 
 app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async (req, res) => {
-  let browser;
+  let page;
   const pdfStartedAt = Date.now();
   let stageStartedAt = pdfStartedAt;
 
@@ -1193,14 +1221,11 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
       });
     }
 
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    console.log("[Cover Letter PDF Timing] Browser launch:", Date.now() - stageStartedAt, "ms");
+    const browser = await getCoverLetterPdfBrowser();
+    console.log("[Cover Letter PDF Timing] Browser acquisition:", Date.now() - stageStartedAt, "ms");
     stageStartedAt = Date.now();
 
-    const page = await browser.newPage();
+    page = await browser.newPage();
     const html = buildCoverLetterPdfHTML(content, template);
 
     await page.setContent(html, {
@@ -1219,8 +1244,9 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
     console.log("[Cover Letter PDF Timing] PDF render:", Date.now() - stageStartedAt, "ms");
     stageStartedAt = Date.now();
 
-    await browser.close();
-    console.log("[Cover Letter PDF Timing] Browser close:", Date.now() - stageStartedAt, "ms");
+    await page.close();
+    page = null;
+    console.log("[Cover Letter PDF Timing] Page close:", Date.now() - stageStartedAt, "ms");
     console.log("[Cover Letter PDF Timing] Total:", Date.now() - pdfStartedAt, "ms");
 
     return res.status(200).send(pdf);
@@ -1228,8 +1254,8 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
     console.error("[Cover Letter PDF Timing] Failed after:", Date.now() - pdfStartedAt, "ms");
     console.error("Cover letter PDF generation failed:", error);
 
-    if (browser) {
-      await browser.close();
+    if (page) {
+      await page.close().catch(() => {});
     }
 
     return res.status(500).send({
