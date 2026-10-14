@@ -107,6 +107,17 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 100);
 }
 
+// Angular Material and Material UI are different component libraries.
+{
+  const result = analyze(
+    'Material UI, MUI',
+    'Angular Material, Material UI'
+  );
+  assert.deepEqual(result.matchedSkills, ['Material UI']);
+  assert.deepEqual(result.missingSkills, ['Angular Material']);
+  assert.equal(result.jdMatchScore, 50);
+}
+
 // Empty or malformed resume objects should not crash analysis.
 {
   assert.equal(analyzeJD(null, 'Angular').jdMatchScore, 0);
