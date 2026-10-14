@@ -1267,12 +1267,37 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
 
 app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
   try {
-    const { resumeData, jobDescription } = req.body;
+    const { resumeData, jobDescription } = req.body || {};
+
+    if (typeof jobDescription !== "string" || !jobDescription.trim()) {
+      return res.status(400).send({
+        success: false,
+        message: "Please provide a job description to analyze.",
+      });
+    }
+
+    if (jobDescription.length > 50000) {
+      return res.status(413).send({
+        success: false,
+        message: "The job description is too long. Please shorten it and try again.",
+      });
+    }
+
+    if (!resumeData || typeof resumeData !== "object" || Array.isArray(resumeData)) {
+      return res.status(400).send({
+        success: false,
+        message: "Valid resume data is required for analysis.",
+      });
+    }
+
     const analysis = analyzeJD(resumeData, jobDescription);
-    res.send(analysis);
+    return res.status(200).send(analysis);
   } catch (error) {
     console.error("JD Analysis Failed:", error);
-    res.status(500).send({ success: false, message: "JD analysis failed" });
+    return res.status(500).send({
+      success: false,
+      message: "JD analysis failed. Please try again later.",
+    });
   }
 });
 
