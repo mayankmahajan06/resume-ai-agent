@@ -126,6 +126,7 @@ function analyzeJD(resumeData, jobDescription) {
 
   return {
     jdMatchScore: score,
+    recognizedSkillsCount: jdSkills.length,
     matchedSkills: matchedSkills.map(skill => skill.label),
     missingSkills: missingSkills.map(skill => skill.label)
   };
