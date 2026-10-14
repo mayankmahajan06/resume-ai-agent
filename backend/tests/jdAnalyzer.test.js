@@ -39,11 +39,37 @@ function analyze(resumeText, jobDescription) {
     'Node.js',
     'CI/CD',
     'HTML',
-    'CSS',
-    'Git'
+    'CSS'
   ]);
-  assert.deepEqual(result.missingSkills, []);
-  assert.equal(result.jdMatchScore, 100);
+  assert.deepEqual(result.missingSkills, ['Git']);
+  assert.equal(result.jdMatchScore, 80);
+}
+
+// Related platforms and AI products must not imply a different skill.
+{
+  const result = analyze(
+    'GitHub, GitLab, ChatGPT, GPT-4',
+    'Git, OpenAI, ChatGPT'
+  );
+  assert.deepEqual(result.matchedSkills, ['ChatGPT']);
+  assert.deepEqual(result.missingSkills, ['Git', 'OpenAI']);
+  assert.equal(result.jdMatchScore, 33);
+}
+
+// Methodology names are distinct from the broader Agile label.
+{
+  const result = analyze('Scrum and Kanban', 'Agile, Scrum, Kanban');
+  assert.deepEqual(result.matchedSkills, ['Scrum', 'Kanban']);
+  assert.deepEqual(result.missingSkills, ['Agile']);
+  assert.equal(result.jdMatchScore, 67);
+}
+
+// A standalone "node" mention is not enough to prove Node.js.
+{
+  const result = analyze('Node-based workflow', 'Node.js');
+  assert.deepEqual(result.matchedSkills, []);
+  assert.deepEqual(result.missingSkills, ['Node.js']);
+  assert.equal(result.jdMatchScore, 0);
 }
 
 // Empty or malformed resume objects should not crash analysis.
