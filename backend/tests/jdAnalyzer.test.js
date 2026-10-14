@@ -1,5 +1,7 @@
 const assert = require('node:assert/strict');
 const analyzeJD = require('../services/jdAnalyzer');
+const skillMapping = require('../constants/skill-mapping');
+const { validateJdAnalysisRequest } = require('../services/jdRequestValidation');
 
 function analyze(resumeText, jobDescription) {
   return analyzeJD(
@@ -25,7 +27,7 @@ function analyze(resumeText, jobDescription) {
 {
   const result = analyze('projects and design', 'JavaScript, TypeScript, Git');
   assert.deepEqual(result.matchedSkills, []);
-  assert.deepEqual(result.missingSkills, ['JavaScript', 'TypeScript', 'Git']);
+  assert.deepEqual(result.missingSkills, ['TypeScript', 'JavaScript', 'Git']);
   assert.equal(result.jdMatchScore, 0);
 }
 
@@ -39,11 +41,219 @@ function analyze(resumeText, jobDescription) {
     'Node.js',
     'CI/CD',
     'HTML',
-    'CSS',
-    'Git'
+    'CSS'
   ]);
+  assert.deepEqual(result.missingSkills, ['Git']);
+  assert.equal(result.jdMatchScore, 80);
+}
+
+// Related platforms and AI products must not imply a different skill.
+{
+  const result = analyze(
+    'GitHub, GitLab, ChatGPT, GPT-4',
+    'Git, OpenAI, ChatGPT'
+  );
+  assert.deepEqual(result.matchedSkills, ['ChatGPT']);
+  assert.deepEqual(result.missingSkills, ['Git', 'OpenAI']);
+  assert.equal(result.jdMatchScore, 33);
+}
+
+// Methodology names are distinct from the broader Agile label.
+{
+  const result = analyze('Scrum and Kanban', 'Agile, Scrum, Kanban');
+  assert.deepEqual(result.matchedSkills, ['Scrum', 'Kanban']);
+  assert.deepEqual(result.missingSkills, ['Agile']);
+  assert.equal(result.jdMatchScore, 67);
+}
+
+// A standalone "node" mention is not enough to prove Node.js.
+{
+  const result = analyze('Node-based workflow', 'Node.js');
+  assert.deepEqual(result.matchedSkills, []);
+  assert.deepEqual(result.missingSkills, ['Node.js']);
+  assert.equal(result.jdMatchScore, 0);
+}
+
+// Angular spellings and version labels must not cross-match AngularJS.
+{
+  const cases = [
+    ['AngularJS', 'Angular', false],
+    ['Angular 1', 'Angular', false],
+    ['Angular.js', 'Angular', false],
+    ['Angular 2+', 'Angular', true],
+    ['Angular 11', 'Angular', true],
+    ['Angular 1.8', 'Angular', false],
+    ['Angular 2+', 'AngularJS', false]
+  ];
+
+  for (const [resumeText, jdText, shouldMatch] of cases) {
+    const result = analyze(resumeText, jdText);
+    assert.equal(
+      result.matchedSkills.includes('Angular'),
+      shouldMatch,
+      `Unexpected Angular match for resume "${resumeText}" and JD "${jdText}"`
+    );
+  }
+}
+
+// Abbreviations are recognized only as complete terms.
+{
+  assert.deepEqual(analyze('TS', 'TypeScript').matchedSkills, ['TypeScript']);
+  assert.deepEqual(analyze('JS', 'JavaScript').matchedSkills, ['JavaScript']);
+  assert.deepEqual(analyze('status and projects', 'TypeScript, JavaScript').matchedSkills, []);
+}
+
+// ".js" suffixes in library names must not count as the standalone JS alias.
+{
+  const result = analyze('Node.js, React.js, TypeScript', 'JavaScript, TypeScript');
+  assert.deepEqual(result.matchedSkills, ['TypeScript']);
+  assert.deepEqual(result.missingSkills, ['JavaScript']);
+  assert.equal(result.jdMatchScore, 50);
+}
+
+// React/Vue aliases remain supported.
+{
+  const result = analyze('ReactJS, VueJS, ECMAScript', 'React, Vue, JavaScript');
+  assert.deepEqual(result.matchedSkills, ['React', 'Vue', 'JavaScript']);
   assert.deepEqual(result.missingSkills, []);
   assert.equal(result.jdMatchScore, 100);
+}
+
+// Angular Material and Material UI are different component libraries.
+{
+  const result = analyze(
+    'Material UI, MUI',
+    'Angular Material, Material UI'
+  );
+  assert.deepEqual(result.matchedSkills, ['Material UI']);
+  assert.deepEqual(result.missingSkills, ['Angular Material']);
+  assert.equal(result.jdMatchScore, 50);
+}
+
+// The top-level mapping must not silently overwrite duplicate JavaScript object keys.
+{
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const mappingSource = fs.readFileSync(
+    path.join(__dirname, '../constants/skill-mapping.js'),
+    'utf8'
+  );
+  const keys = Array.from(
+    mappingSource.matchAll(/^  ([A-Za-z_$][\w$]*):\s*\{/gm),
+    match => match[1]
+  );
+  assert.equal(
+    new Set(keys).size,
+    keys.length,
+    'Skill mapping contains duplicate top-level keys'
+  );
+}
+
+// Every configured alias should recognize its own canonical skill label.
+{
+  for (const [key, skill] of Object.entries(skillMapping)) {
+    assert.ok(skill.label, `Skill "${key}" must have a label`);
+    assert.ok(Array.isArray(skill.aliases) && skill.aliases.length > 0,
+      `Skill "${key}" must define aliases`);
+
+    for (const alias of skill.aliases) {
+      const result = analyze(alias, alias);
+      assert.ok(
+        result.matchedSkills.includes(skill.label),
+        `Alias "${alias}" did not match canonical skill "${skill.label}"`
+      );
+    }
+  }
+}
+
+// Common technology names must not be detected inside longer unrelated words.
+{
+  const result = analyze(
+    'JavaScript, TypeScript, express delivery, mongo-themed project',
+    'Java, TypeScript, Express.js, MongoDB'
+  );
+  assert.deepEqual(result.matchedSkills, ['TypeScript']);
+  assert.deepEqual(result.missingSkills, ['Express.js', 'MongoDB', 'Java']);
+  assert.equal(result.jdMatchScore, 25);
+}
+
+// Education and certifications can provide evidence when the data is structured.
+{
+  const result = analyzeJD({
+    skills: '',
+    summary: '',
+    experiences: [],
+    projects: [],
+    education: [{ degree: 'BSc Computer Science', college: 'University' }],
+    certifications: [{ certificationName: 'AWS Certified Developer' }]
+  }, 'AWS');
+  assert.deepEqual(result.matchedSkills, ['AWS']);
+  assert.equal(result.jdMatchScore, 100);
+}
+
+// Request validation returns predictable client errors before analysis.
+{
+  assert.deepEqual(validateJdAnalysisRequest({}), {
+    valid: false,
+    status: 400,
+    message: 'Please provide a job description to analyze.'
+  });
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: {},
+      jobDescription: '   '
+    }).status,
+    400
+  );
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: {},
+      jobDescription: 'x'.repeat(50001)
+    }).status,
+    413
+  );
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: [],
+      jobDescription: 'Angular'
+    }).status,
+    400
+  );
+  assert.equal(
+    validateJdAnalysisRequest({
+      resumeData: {},
+      jobDescription: 'Angular'
+    }).valid,
+    true
+  );
+}
+
+// Explicitly required skills receive double weight; other skills count once.
+{
+  const result = analyze(
+    'Angular',
+    'Required: Angular and TypeScript. Nice to have: React.'
+  );
+  assert.equal(result.jdMatchScore, 33);
+  assert.deepEqual(result.requiredSkills, ['Angular', 'TypeScript']);
+  assert.deepEqual(result.missingRequiredSkills, ['TypeScript']);
+  assert.match(result.scoreMethod, /Equal-weight/);
+}
+
+// Periods inside technology names must not break required-skill detection.
+{
+  const result = analyze('Node.js', 'Node.js is required. React is nice to have.');
+  assert.deepEqual(result.requiredSkills, ['Node.js']);
+  assert.equal(result.jdMatchScore, 50);
+}
+
+// Without explicit requirement wording, scoring remains equal-weight.
+{
+  const result = analyze('Angular', 'Angular, TypeScript, React');
+  assert.equal(result.jdMatchScore, 33);
+  assert.deepEqual(result.requiredSkills, []);
+  assert.deepEqual(result.missingRequiredSkills, []);
+  assert.match(result.scoreMethod, /Equal-weight/);
 }
 
 // Empty or malformed resume objects should not crash analysis.

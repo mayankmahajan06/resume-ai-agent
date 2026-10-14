@@ -100,6 +100,14 @@
   margin-bottom: 8px;
 }
 
+.score-method {
+  max-width: 620px;
+  margin: 8px auto 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
 .result-card strong {
   font-size: 32px;
   font-weight: 700;
@@ -177,6 +185,16 @@
   color: #4f46e5;
 }
 
+.error-state {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 /* ========================================
    ANALYZE BUTTON
 ======================================== */
@@ -194,8 +212,14 @@
   transition: 0.2s ease;
 }
 
-.analyze-btn:hover {
+.analyze-btn:hover:not(:disabled) {
   transform: translateY(-1px);
+}
+
+.analyze-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .pricing-cards {

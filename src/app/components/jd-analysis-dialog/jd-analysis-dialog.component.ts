@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { PdfService } from '../../services/pdf.service';
 import { UserService }
   from '../../services/user.service';
+import { PaymentService } from '../../services/payment.service';
 
 @Component({
   selector: 'app-jd-analysis-dialog',
@@ -24,18 +25,24 @@ export class JdAnalysisDialogComponent implements OnInit {
   jobDescription = '';
 
   jdMatch = 0;
+  recognizedSkillsCount = 0;
+  scoreMethod = '';
+  requiredSkills: string[] = [];
+  missingRequiredSkills: string[] = [];
   hasAnalyzed = false;
 
   matchingSkills: string[] = [];
   missingSkills: string[] = [];
   jdSuggestions: string[] = [];
   loading = false;
+  analysisError = '';
   isPremiumUser = false;
 
   constructor(
     private dialogRef: MatDialogRef<JdAnalysisDialogComponent>,
     private pdfService: PdfService,
     private userService: UserService,
+    private paymentService: PaymentService,
     @Inject(MAT_DIALOG_DATA)
     public data: any
   ) { }
@@ -59,10 +66,16 @@ export class JdAnalysisDialogComponent implements OnInit {
 
   analyzeJD(): void {
 
-    if (!this.jobDescription.trim()) {
+    if (this.loading) {
       return;
     }
 
+    if (!this.jobDescription.trim()) {
+      this.analysisError = 'Please paste a job description first.';
+      return;
+    }
+
+    this.analysisError = '';
     this.loading = true;
 
     this.pdfService
@@ -76,6 +89,12 @@ export class JdAnalysisDialogComponent implements OnInit {
 
           this.jdMatch =
             response.jdMatchScore;
+          this.recognizedSkillsCount =
+            Number(response.recognizedSkillsCount || 0);
+          this.scoreMethod = response.scoreMethod ||
+            'Equal-weight overlap of recognized skills.';
+          this.requiredSkills = response.requiredSkills || [];
+          this.missingRequiredSkills = response.missingRequiredSkills || [];
 
           this.matchingSkills =
             response.matchedSkills;
@@ -97,11 +116,18 @@ export class JdAnalysisDialogComponent implements OnInit {
           );
 
           this.loading = false;
+          this.analysisError =
+            error?.error?.message ||
+            'We could not analyze this job description. Please try again.';
 
         }
 
       });
 
+  }
+
+  startUpgrade(planType: 'pro' | 'pro_plus'): void {
+    this.paymentService.startPremiumUpgrade(planType, 'jd_analysis_dialog');
   }
 
   getScoreClass(): string {

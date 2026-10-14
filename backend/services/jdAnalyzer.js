@@ -15,8 +15,19 @@ function containsAlias(normalizedText, alias) {
   const normalizedAlias = normalizeText(alias);
   if (!normalizedAlias) return false;
 
+  // Short aliases must not match inside words or technology suffixes.
+  if (normalizedAlias === 'js' || normalizedAlias === 'ts') {
+    const shortAliasPattern = new RegExp(
+      `(^|[^a-z0-9.])${normalizedAlias}(?=$|[^a-z0-9])`,
+      'i'
+    );
+    return shortAliasPattern.test(normalizedText);
+  }
+
+  // AngularJS / Angular.js / Angular 1 are not modern Angular.
+  // Angular Material is a separate skill and must not imply Angular.
   if (normalizedAlias === 'angular') {
-    const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1)(?=$|[^a-z0-9])/i;
+    const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1(?:\b|\.|\+)|\s+material|\/material)(?=$|[^a-z0-9])/i;
     return angularPattern.test(normalizedText);
   }
 
@@ -56,8 +67,36 @@ function uniqueSkills(skills = []) {
   return Array.from(map.values());
 }
 
+const REQUIRED_MARKERS = [
+  /\bmust[- ]have\b/i,
+  /\bmust have\b/i,
+  /\brequired\b/i,
+  /\bmandatory\b/i,
+  /\bessential\b/i,
+  /\bminimum qualifications?\b/i,
+  /\bneed to have\b/i,
+  /\byou must\b/i,
+];
+
+// Only mark a skill as required when explicit requirement wording appears in
+// the same line/sentence as that skill. We do not infer priority from the
+// overall job title or from a generic "Requirements" heading.
+function isExplicitlyRequired(skill, jobDescription) {
+  const segments = String(jobDescription || '')
+    .split(/[\n;!?]+|(?<=[.!?])\s+/)
+    .map(segment => segment.trim())
+    .filter(Boolean);
+
+  return segments.some(segment =>
+    REQUIRED_MARKERS.some(marker => marker.test(segment)) &&
+    (skillMapping[skill.key]?.aliases || []).some(alias =>
+      containsAlias(normalizeText(segment), alias)
+    )
+  );
+}
+
 function analyzeJD(resumeData, jobDescription) {
-  const safeResume = resumeData && typeof resumeData === 'object'
+  const safeResume = resumeData && typeof resumeData === 'object' && !Array.isArray(resumeData)
     ? resumeData
     : {};
 
@@ -67,41 +106,67 @@ function analyzeJD(resumeData, jobDescription) {
   const projects = Array.isArray(safeResume.projects)
     ? safeResume.projects
     : [];
+  const education = Array.isArray(safeResume.education)
+    ? safeResume.education
+    : [];
+  const certifications = Array.isArray(safeResume.certifications)
+    ? safeResume.certifications
+    : [];
+
+  const textValue = value =>
+    typeof value === 'string' || typeof value === 'number'
+      ? String(value)
+      : '';
 
   const resumeText = `
-    ${safeResume.skills || ''}
-    ${safeResume.summary || ''}
+    ${textValue(safeResume.skills)}
+    ${textValue(safeResume.summary)}
     ${experiences.map(exp => `
-      ${exp?.role || ''}
-      ${exp?.company || ''}
-      ${exp?.responsibilities || ''}
+      ${textValue(exp?.role)}
+      ${textValue(exp?.company)}
+      ${textValue(exp?.responsibilities)}
     `).join(' ')}
     ${projects.map(project => `
-      ${project?.projectName || ''}
-      ${project?.techStack || ''}
-      ${project?.description || ''}
+      ${textValue(project?.projectName)}
+      ${textValue(project?.techStack)}
+      ${textValue(project?.description)}
     `).join(' ')}
+    ${education.map(item => `
+      ${textValue(item?.degree)}
+      ${textValue(item?.fieldOfStudy)}
+    `).join(' ')}
+    ${certifications.map(item => textValue(item?.certificationName)).join(' ')}
   `;
 
   const jdSkills = uniqueSkills(extractSkills(jobDescription));
   const resumeSkills = uniqueSkills(extractSkills(resumeText));
   const resumeSkillKeys = new Set(resumeSkills.map(skill => skill.key));
 
-  const matchedSkills = jdSkills.filter(skill =>
-    resumeSkillKeys.has(skill.key)
-  );
-  const missingSkills = jdSkills.filter(skill =>
-    !resumeSkillKeys.has(skill.key)
-  );
+  const analyzedSkills = jdSkills.map(skill => ({
+    ...skill,
+    matched: resumeSkillKeys.has(skill.key),
+    required: isExplicitlyRequired(skill, jobDescription),
+  }));
 
+  const matchedSkills = analyzedSkills.filter(skill => skill.matched);
+  const missingSkills = analyzedSkills.filter(skill => !skill.matched);
+  const requiredSkills = analyzedSkills.filter(skill => skill.required);
+  const missingRequiredSkills = requiredSkills.filter(skill => !skill.matched);
+
+  // Keep the score transparent and stable: each recognized JD skill has
+  // equal weight. Explicit requirement labels are reported separately.
   const score = jdSkills.length
     ? Math.round((matchedSkills.length / jdSkills.length) * 100)
     : 0;
 
   return {
     jdMatchScore: score,
+    scoreMethod: 'Equal-weight overlap of recognized skills; required-skill labels are informational and do not change the score.',
+    recognizedSkillsCount: jdSkills.length,
+    requiredSkills: requiredSkills.map(skill => skill.label),
+    missingRequiredSkills: missingRequiredSkills.map(skill => skill.label),
     matchedSkills: matchedSkills.map(skill => skill.label),
-    missingSkills: missingSkills.map(skill => skill.label)
+    missingSkills: missingSkills.map(skill => skill.label),
   };
 }
 

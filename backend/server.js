@@ -10,6 +10,7 @@ const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const { extractResumeTextFromPdf } = require("./services/pdfLayoutExtractor");
 const analyzeJD = require("./services/jdAnalyzer");
+const { validateJdAnalysisRequest } = require("./services/jdRequestValidation");
 const { parseResumeText } = require("./services/resumeImporter");
 const { generateCoverLetter } = require("./services/coverLetterGenerator");
 const { buildCoverLetterPdfHTML } = require("./services/coverLetterPdf");
@@ -1265,16 +1266,35 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
   }
 });
 
-app.post("/analyze-jd", requireActivePremium, aiRateLimit, requireAiQuota, (req, res) => {
-  try {
-    const { resumeData, jobDescription } = req.body;
-    const analysis = analyzeJD(resumeData, jobDescription);
-    res.send(analysis);
-  } catch (error) {
-    console.error("JD Analysis Failed:", error);
-    res.status(500).send({ success: false, message: "JD analysis failed" });
+app.post(
+  "/analyze-jd",
+  requireActivePremium,
+  aiRateLimit,
+  (req, res, next) => {
+    const validation = validateJdAnalysisRequest(req.body);
+    if (!validation.valid) {
+      return res.status(validation.status).send({
+        success: false,
+        message: validation.message,
+      });
+    }
+
+    next();
+  },
+  requireAiQuota,
+  (req, res) => {
+    try {
+      const analysis = analyzeJD(req.body.resumeData, req.body.jobDescription);
+      return res.status(200).send(analysis);
+    } catch (error) {
+      console.error("JD Analysis Failed:", error);
+      return res.status(500).send({
+        success: false,
+        message: "JD analysis failed. Please try again later.",
+      });
+    }
   }
-});
+);
 
 const PORT = process.env.PORT || 3000;
 
