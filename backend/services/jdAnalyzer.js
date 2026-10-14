@@ -153,26 +153,15 @@ function analyzeJD(resumeData, jobDescription) {
   const requiredSkills = analyzedSkills.filter(skill => skill.required);
   const missingRequiredSkills = requiredSkills.filter(skill => !skill.matched);
 
-  // Explicitly required skills carry 2 points; other recognized skills carry
-  // 1. If the JD contains no explicit required markers, this naturally falls
-  // back to the original equal-weight skill-overlap score.
-  const totalWeight = analyzedSkills.reduce(
-    (total, skill) => total + (skill.required ? 2 : 1),
-    0
-  );
-  const matchedWeight = matchedSkills.reduce(
-    (total, skill) => total + (skill.required ? 2 : 1),
-    0
-  );
-  const score = totalWeight
-    ? Math.round((matchedWeight / totalWeight) * 100)
+  // Keep the score transparent and stable: each recognized JD skill has
+  // equal weight. Explicit requirement labels are reported separately.
+  const score = jdSkills.length
+    ? Math.round((matchedSkills.length / jdSkills.length) * 100)
     : 0;
 
   return {
     jdMatchScore: score,
-    scoreMethod: requiredSkills.length
-      ? 'Explicitly required skills count double; other recognized skills count once.'
-      : 'Equal-weight overlap of recognized skills; no explicit required-skill wording was detected.',
+    scoreMethod: 'Equal-weight overlap of recognized skills; required-skill labels are informational and do not change the score.',
     recognizedSkillsCount: jdSkills.length,
     requiredSkills: requiredSkills.map(skill => skill.label),
     missingRequiredSkills: missingRequiredSkills.map(skill => skill.label),
