@@ -137,7 +137,7 @@ function analyze(resumeText, jobDescription) {
     'utf8'
   );
   const keys = Array.from(
-    mappingSource.matchAll(/^  ([A-Za-z_$][\\w$]*):\\s*\\{/gm),
+    mappingSource.matchAll(/^  ([A-Za-z_$][\w$]*):\s*\{/gm),
     match => match[1]
   );
   assert.equal(
