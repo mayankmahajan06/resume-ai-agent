@@ -25,6 +25,7 @@ export class JdAnalysisDialogComponent implements OnInit {
   jobDescription = '';
 
   jdMatch = 0;
+  recognizedSkillsCount = 0;
   hasAnalyzed = false;
 
   matchingSkills: string[] = [];
@@ -85,6 +86,8 @@ export class JdAnalysisDialogComponent implements OnInit {
 
           this.jdMatch =
             response.jdMatchScore;
+          this.recognizedSkillsCount =
+            Number(response.recognizedSkillsCount || 0);
 
           this.matchingSkills =
             response.matchedSkills;
