@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const analyzeJD = require('../services/jdAnalyzer');
+const skillMapping = require('../constants/skill-mapping');
 
 function analyze(resumeText, jobDescription) {
   return analyzeJD(
@@ -116,6 +117,48 @@ function analyze(resumeText, jobDescription) {
   assert.deepEqual(result.matchedSkills, ['Material UI']);
   assert.deepEqual(result.missingSkills, ['Angular Material']);
   assert.equal(result.jdMatchScore, 50);
+}
+
+// Every configured alias should recognize its own canonical skill label.
+{
+  for (const [key, skill] of Object.entries(skillMapping)) {
+    assert.ok(skill.label, `Skill "${key}" must have a label`);
+    assert.ok(Array.isArray(skill.aliases) && skill.aliases.length > 0,
+      `Skill "${key}" must define aliases`);
+
+    for (const alias of skill.aliases) {
+      const result = analyze(alias, skill.label);
+      assert.ok(
+        result.matchedSkills.includes(skill.label),
+        `Alias "${alias}" did not match canonical skill "${skill.label}"`
+      );
+    }
+  }
+}
+
+// Common technology names must not be detected inside longer unrelated words.
+{
+  const result = analyze(
+    'JavaScript, TypeScript, express delivery, mongo-themed project',
+    'Java, TypeScript, Express.js, MongoDB'
+  );
+  assert.deepEqual(result.matchedSkills, ['TypeScript']);
+  assert.deepEqual(result.missingSkills, ['Java', 'Express.js', 'MongoDB']);
+  assert.equal(result.jdMatchScore, 25);
+}
+
+// Education and certifications can provide evidence when the data is structured.
+{
+  const result = analyzeJD({
+    skills: '',
+    summary: '',
+    experiences: [],
+    projects: [],
+    education: [{ degree: 'BSc Computer Science', college: 'University' }],
+    certifications: [{ certificationName: 'AWS Certified Developer' }]
+  }, 'AWS');
+  assert.deepEqual(result.matchedSkills, ['AWS']);
+  assert.equal(result.jdMatchScore, 100);
 }
 
 // Empty or malformed resume objects should not crash analysis.
