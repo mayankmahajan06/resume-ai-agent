@@ -186,6 +186,11 @@ const skillMapping = {
     aliases: ["chatgpt"],
   },
 
+  gptmodels: {
+    label: "GPT Models",
+    aliases: ["gpt", "gpt-4", "gpt4", "generative pre-trained transformer"],
+  },
+
   scrum: {
     label: "Scrum",
     aliases: ["scrum"],
