@@ -15,6 +15,16 @@ function containsAlias(normalizedText, alias) {
   const normalizedAlias = normalizeText(alias);
   if (!normalizedAlias) return false;
 
+  // Do not treat the ".js" suffix in names like Node.js or React.js as
+  // a standalone JavaScript abbreviation. Apply the same conservative rule to TS.
+  if (normalizedAlias === 'js' || normalizedAlias === 'ts') {
+    const shortAliasPattern = new RegExp(
+      `(^|[^a-z0-9.])${normalizedAlias}(?=$|[^a-z0-9])`,
+      'i'
+    );
+    return shortAliasPattern.test(normalizedText);
+  }
+
   if (normalizedAlias === 'angular') {
     const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1)(?=$|[^a-z0-9])/i;
     return angularPattern.test(normalizedText);
