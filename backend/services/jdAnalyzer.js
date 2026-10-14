@@ -1,201 +1,103 @@
 const skillMapping =
   require('../constants/skill-mapping');
 
-/*
-========================================
-NORMALIZE TEXT
-========================================
-*/
-
 function normalizeText(text = '') {
-
-  return text
+  return String(text)
     .toLowerCase()
-    .replace(/[^\w\s/#.+-]/g, ' ');
-
+    .replace(/[^\w\s/#.+-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-/*
-========================================
-EXTRACT SKILLS
-========================================
-*/
+// Match aliases as complete terms rather than arbitrary substrings.
+// Punctuation within aliases (e.g. Node.js and CI/CD) remains significant.
+function containsAlias(normalizedText, alias) {
+  const normalizedAlias = normalizeText(alias);
+  if (!normalizedAlias) return false;
+
+  const escapedAlias = normalizedAlias.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&'
+  );
+
+  const pattern = new RegExp(
+    `(^|[^a-z0-9])${escapedAlias}(?=$|[^a-z0-9])`,
+    'i'
+  );
+
+  return pattern.test(normalizedText);
+}
 
 function extractSkills(text = '') {
-
-  const normalizedText =
-    normalizeText(text);
-
+  const normalizedText = normalizeText(text);
   const detectedSkills = [];
 
-  Object.entries(skillMapping)
-    .forEach(([key, skillData]) => {
+  Object.entries(skillMapping).forEach(([key, skillData]) => {
+    const aliases = Array.isArray(skillData.aliases)
+      ? skillData.aliases
+      : [];
 
-      const matched =
-        skillData.aliases.some(alias =>
-          normalizedText.includes(
-            alias.toLowerCase()
-          )
-        );
-
-      if (matched) {
-
-        detectedSkills.push({
-          key,
-          label: skillData.label
-        });
-
-      }
-
-    });
-
-  return detectedSkills;
-
-}
-
-/*
-========================================
-REMOVE DUPLICATES
-========================================
-*/
-
-function uniqueSkills(skills = []) {
-
-  const map = new Map();
-
-  skills.forEach(skill => {
-
-    map.set(skill.key, skill);
-
+    if (aliases.some(alias => containsAlias(normalizedText, alias))) {
+      detectedSkills.push({ key, label: skillData.label });
+    }
   });
 
-  return Array.from(map.values());
-
+  return detectedSkills;
 }
 
-/*
-========================================
-ANALYZE JD
-========================================
-*/
+function uniqueSkills(skills = []) {
+  const map = new Map();
+  skills.forEach(skill => map.set(skill.key, skill));
+  return Array.from(map.values());
+}
 
-function analyzeJD(
-  resumeData,
-  jobDescription
-) {
+function analyzeJD(resumeData, jobDescription) {
+  const safeResume = resumeData && typeof resumeData === 'object'
+    ? resumeData
+    : {};
+
+  const experiences = Array.isArray(safeResume.experiences)
+    ? safeResume.experiences
+    : [];
+  const projects = Array.isArray(safeResume.projects)
+    ? safeResume.projects
+    : [];
 
   const resumeText = `
-
-    ${resumeData.skills || ''}
-
-    ${resumeData.summary || ''}
-
-    ${resumeData.experiences
-      ?.map(exp =>
-        `
-        ${exp.role || ''}
-        ${exp.company || ''}
-        ${exp.responsibilities || ''}
-        `
-      )
-      .join(' ') || ''}
-
-    ${resumeData.projects
-      ?.map(project =>
-        `
-        ${project.projectName || ''}
-        ${project.techStack || ''}
-        ${project.description || ''}
-        `
-      )
-      .join(' ') || ''}
-
+    ${safeResume.skills || ''}
+    ${safeResume.summary || ''}
+    ${experiences.map(exp => `
+      ${exp?.role || ''}
+      ${exp?.company || ''}
+      ${exp?.responsibilities || ''}
+    `).join(' ')}
+    ${projects.map(project => `
+      ${project?.projectName || ''}
+      ${project?.techStack || ''}
+      ${project?.description || ''}
+    `).join(' ')}
   `;
 
-  /*
-  ========================================
-  EXTRACT SKILLS
-  ========================================
-  */
+  const jdSkills = uniqueSkills(extractSkills(jobDescription));
+  const resumeSkills = uniqueSkills(extractSkills(resumeText));
+  const resumeSkillKeys = new Set(resumeSkills.map(skill => skill.key));
 
-  const jdSkills =
-    uniqueSkills(
-      extractSkills(jobDescription)
-    );
+  const matchedSkills = jdSkills.filter(skill =>
+    resumeSkillKeys.has(skill.key)
+  );
+  const missingSkills = jdSkills.filter(skill =>
+    !resumeSkillKeys.has(skill.key)
+  );
 
-  const resumeSkills =
-    uniqueSkills(
-      extractSkills(resumeText)
-    );
-
-  /*
-  ========================================
-  MATCHING
-  ========================================
-  */
-
-  const matchedSkills =
-    jdSkills.filter(jdSkill =>
-
-      resumeSkills.some(
-        resumeSkill =>
-          resumeSkill.key === jdSkill.key
-      )
-
-    );
-
-  const missingSkills =
-    jdSkills.filter(jdSkill =>
-
-      !resumeSkills.some(
-        resumeSkill =>
-          resumeSkill.key === jdSkill.key
-      )
-
-    );
-
-  /*
-  ========================================
-  SCORE
-  ========================================
-  */
-
-  let score = 0;
-
-  if (jdSkills.length > 0) {
-
-    score = Math.round(
-      (
-        matchedSkills.length /
-        jdSkills.length
-      ) * 100
-    );
-
-  }
-
-
-  /*
-  ========================================
-  RESPONSE
-  ========================================
-  */
+  const score = jdSkills.length
+    ? Math.round((matchedSkills.length / jdSkills.length) * 100)
+    : 0;
 
   return {
-
     jdMatchScore: score,
-
-    matchedSkills:
-      matchedSkills.map(
-        skill => skill.label
-      ),
-
-    missingSkills:
-      missingSkills.map(
-        skill => skill.label
-      )
-
+    matchedSkills: matchedSkills.map(skill => skill.label),
+    missingSkills: missingSkills.map(skill => skill.label)
   };
-
 }
 
 module.exports = analyzeJD;
