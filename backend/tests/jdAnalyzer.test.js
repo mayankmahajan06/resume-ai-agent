@@ -81,6 +81,8 @@ function analyze(resumeText, jobDescription) {
     ['Angular 1', 'Angular', false],
     ['Angular.js', 'Angular', false],
     ['Angular 2+', 'Angular', true],
+    ['Angular 11', 'Angular', true],
+    ['Angular 1.8', 'Angular', false],
     ['Angular 2+', 'AngularJS', false]
   ];
 
