@@ -238,6 +238,13 @@ function analyze(resumeText, jobDescription) {
   assert.match(result.scoreMethod, /count double/);
 }
 
+// Periods inside technology names must not break required-skill detection.
+{
+  const result = analyze('Node.js', 'Node.js is required. React is nice to have.');
+  assert.deepEqual(result.requiredSkills, ['Node.js']);
+  assert.equal(result.jdMatchScore, 67);
+}
+
 // Without explicit requirement wording, scoring remains equal-weight.
 {
   const result = analyze('Angular', 'Angular, TypeScript, React');
