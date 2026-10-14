@@ -63,7 +63,7 @@ function analyze(resumeText, jobDescription) {
   const result = analyze('Scrum and Kanban', 'Agile, Scrum, Kanban');
   assert.deepEqual(result.matchedSkills, ['Scrum', 'Kanban']);
   assert.deepEqual(result.missingSkills, ['Agile']);
-  assert.equal(result.jdMatchScore, 67);
+  assert.equal(result.jdMatchScore, 50);
 }
 
 // A standalone "node" mention is not enough to prove Node.js.
@@ -234,10 +234,10 @@ function analyze(resumeText, jobDescription) {
     'Angular',
     'Required: Angular and TypeScript. Nice to have: React.'
   );
-  assert.equal(result.jdMatchScore, 40);
+  assert.equal(result.jdMatchScore, 33);
   assert.deepEqual(result.requiredSkills, ['Angular', 'TypeScript']);
   assert.deepEqual(result.missingRequiredSkills, ['TypeScript']);
-  assert.match(result.scoreMethod, /count double/);
+  assert.match(result.scoreMethod, /Equal-weight/);
 }
 
 // Periods inside technology names must not break required-skill detection.
