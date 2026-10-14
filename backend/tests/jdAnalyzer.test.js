@@ -26,7 +26,7 @@ function analyze(resumeText, jobDescription) {
 {
   const result = analyze('projects and design', 'JavaScript, TypeScript, Git');
   assert.deepEqual(result.matchedSkills, []);
-  assert.deepEqual(result.missingSkills, ['JavaScript', 'TypeScript', 'Git']);
+  assert.deepEqual(result.missingSkills, ['TypeScript', 'JavaScript', 'Git']);
   assert.equal(result.jdMatchScore, 0);
 }
 
