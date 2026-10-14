@@ -309,6 +309,52 @@ const skillMapping = {
   vectorDatabase: { label: "Vector Database", aliases: ["vector database", "vector databases", "vector db"] },
   huggingface: { label: "Hugging Face", aliases: ["hugging face", "huggingface"] },
 
+  // Additional frontend and state-management skills
+  redux: { label: "Redux", aliases: ["redux", "redux toolkit"] },
+  zustand: { label: "Zustand", aliases: ["zustand"] },
+  mobx: { label: "MobX", aliases: ["mobx"] },
+  reactquery: { label: "TanStack Query", aliases: ["tanstack query", "react query"] },
+  angularsignals: { label: "Angular Signals", aliases: ["angular signals", "signal-based state"] },
+  rxjsoperators: { label: "RxJS Operators", aliases: ["rxjs operators"] },
+  pwa: { label: "Progressive Web Apps", aliases: ["progressive web app", "progressive web apps", "pwa"] },
+  ssr: { label: "Server-Side Rendering", aliases: ["server-side rendering", "server side rendering", "ssr"] },
+  seo: { label: "SEO", aliases: ["seo", "search engine optimization"] },
+  webaccessibility: { label: "Web Accessibility", aliases: ["web accessibility"] },
+
+  // API design, identity, and application security
+  rest: { label: "REST", aliases: ["restful services", "rest architecture"] },
+  grpcweb: { label: "gRPC-Web", aliases: ["grpc-web", "grpc web"] },
+  oidc: { label: "OpenID Connect", aliases: ["openid connect", "oidc"] },
+  saml: { label: "SAML", aliases: ["saml", "security assertion markup language"] },
+  cors: { label: "CORS", aliases: ["cors", "cross-origin resource sharing"] },
+  csrf: { label: "CSRF Protection", aliases: ["csrf", "cross-site request forgery"] },
+  xss: { label: "Cross-Site Scripting (XSS)", aliases: ["xss", "cross-site scripting"] },
+  securecoding: { label: "Secure Coding", aliases: ["secure coding", "secure software development"] },
+
+  // Observability and monitoring
+  datadog: { label: "Datadog", aliases: ["datadog"] },
+  splunk: { label: "Splunk", aliases: ["splunk"] },
+  prometheus: { label: "Prometheus", aliases: ["prometheus"] },
+  grafana: { label: "Grafana", aliases: ["grafana"] },
+  opentelemetry: { label: "OpenTelemetry", aliases: ["opentelemetry", "open telemetry"] },
+
+  // Delivery, collaboration, and engineering tools
+  github: { label: "GitHub", aliases: ["github"] },
+  gitlab: { label: "GitLab", aliases: ["gitlab"] },
+  bitbucket: { label: "Bitbucket", aliases: ["bitbucket"] },
+  jira: { label: "Jira", aliases: ["jira"] },
+  confluence: { label: "Confluence", aliases: ["confluence"] },
+  figma: { label: "Figma", aliases: ["figma"] },
+  agileplanning: { label: "Agile Planning", aliases: ["agile planning", "sprint planning"] },
+  technicaldocumentation: { label: "Technical Documentation", aliases: ["technical documentation", "developer documentation"] },
+
+  // Data formats and integration
+  json: { label: "JSON", aliases: ["json", "javascript object notation"] },
+  xml: { label: "XML", aliases: ["xml", "extensible markup language"] },
+  yaml: { label: "YAML", aliases: ["yaml", "yml"] },
+  oauth2: { label: "OAuth 2.0", aliases: ["oauth 2.0", "oauth2"] },
+  eventdriven: { label: "Event-Driven Architecture", aliases: ["event-driven architecture", "event driven architecture"] },
+
 };
 
 module.exports = skillMapping;
