@@ -4,8 +4,8 @@ const skillMapping =
 function normalizeText(text = '') {
   return String(text)
     .toLowerCase()
-    .replace(/[^\\w\\s/#.+-]/g, ' ')
-    .replace(/\\s+/g, ' ')
+    .replace(/[^\w\s/#.+-]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -27,12 +27,12 @@ function containsAlias(normalizedText, alias) {
   // AngularJS / Angular.js / Angular 1 are not modern Angular.
   // Angular Material is a separate skill and must not imply Angular.
   if (normalizedAlias === 'angular') {
-    const angularPattern = /(^|[^a-z0-9])angular(?!js|\\.js|\\s*1|\\s+material|\\/material)(?=$|[^a-z0-9])/i;
+    const angularPattern = /(^|[^a-z0-9])angular(?!js|\.js|\s*1|\s+material|\/material)(?=$|[^a-z0-9])/i;
     return angularPattern.test(normalizedText);
   }
 
   const escapedAlias = normalizedAlias.replace(
-    /[.*+?^${}()|[\\]\\\\]/g,
+    /[.*+?^${}()|[\]\\]/g,
     '\\$&'
   );
 
@@ -68,14 +68,14 @@ function uniqueSkills(skills = []) {
 }
 
 const REQUIRED_MARKERS = [
-  /\\bmust[- ]have\\b/i,
-  /\\bmust have\\b/i,
-  /\\brequired\\b/i,
-  /\\bmandatory\\b/i,
-  /\\bessential\\b/i,
-  /\\bminimum qualifications?\\b/i,
-  /\\bneed to have\\b/i,
-  /\\byou must\\b/i,
+  /\bmust[- ]have\b/i,
+  /\bmust have\b/i,
+  /\brequired\b/i,
+  /\bmandatory\b/i,
+  /\bessential\b/i,
+  /\bminimum qualifications?\b/i,
+  /\bneed to have\b/i,
+  /\byou must\b/i,
 ];
 
 // Only mark a skill as required when explicit requirement wording appears in
