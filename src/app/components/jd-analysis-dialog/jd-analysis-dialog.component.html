@@ -5,8 +5,8 @@
     <h2>Check Resume Match for This Job</h2>
 
     <p>
-      Paste the job description and get an estimated recruiter match score for
-      your resume.
+      Paste the job description to see which recognized skills appear in your resume.
+      This is a skills-overlap estimate, not a prediction of recruiter decisions.
     </p>
   </div>
 
@@ -20,11 +20,19 @@
     >
     </textarea>
 
-    <button type="button" class="analyze-btn" (click)="analyzeJD()">
-      Analyze Resume Match
+    <button
+      type="button"
+      class="analyze-btn"
+      [disabled]="loading"
+      (click)="analyzeJD()"
+    >
+      {{ loading ? 'Analyzing...' : 'Analyze Resume Match' }}
     </button>
 
-    <div class="loading-state" *ngIf="loading">Analyzing Resume Match...</div>
+    <div class="loading-state" *ngIf="loading">Analyzing resume skills...</div>
+    <div class="error-state" role="alert" *ngIf="analysisError">
+      {{ analysisError }}
+    </div>
 
     <div class="analysis-result" *ngIf="hasAnalyzed">
       <div class="result-card">
@@ -46,7 +54,7 @@
         class="skills-analysis missing"
         *ngIf="isPremiumUser && missingSkills.length"
       >
-        <h4>Missing Skills</h4>
+        <h4>Skills Not Detected in Your Resume</h4>
 
         <div class="skill-tags">
           <span class="missing" *ngFor="let skill of missingSkills">
