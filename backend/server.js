@@ -10,6 +10,7 @@ const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const { extractResumeTextFromPdf } = require("./services/pdfLayoutExtractor");
 const analyzeJD = require("./services/jdAnalyzer");
+const { validateJdAnalysisRequest } = require("./services/jdRequestValidation");
 const { parseResumeText } = require("./services/resumeImporter");
 const { generateCoverLetter } = require("./services/coverLetterGenerator");
 const { buildCoverLetterPdfHTML } = require("./services/coverLetterPdf");
@@ -1270,26 +1271,11 @@ app.post(
   requireActivePremium,
   aiRateLimit,
   (req, res, next) => {
-    const { resumeData, jobDescription } = req.body || {};
-
-    if (typeof jobDescription !== "string" || !jobDescription.trim()) {
-      return res.status(400).send({
+    const validation = validateJdAnalysisRequest(req.body);
+    if (!validation.valid) {
+      return res.status(validation.status).send({
         success: false,
-        message: "Please provide a job description to analyze.",
-      });
-    }
-
-    if (jobDescription.length > 50000) {
-      return res.status(413).send({
-        success: false,
-        message: "The job description is too long. Please shorten it and try again.",
-      });
-    }
-
-    if (!resumeData || typeof resumeData !== "object" || Array.isArray(resumeData)) {
-      return res.status(400).send({
-        success: false,
-        message: "Valid resume data is required for analysis.",
+        message: validation.message,
       });
     }
 
