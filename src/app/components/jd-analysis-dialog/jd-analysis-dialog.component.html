@@ -39,6 +39,21 @@
       <div class="result-card">
         <span>Resume Match Score</span>
         <strong [ngClass]="getScoreClass()">{{ jdMatch }}%</strong>
+        <p class="score-method">{{ scoreMethod }}</p>
+      </div>
+
+      <div class="skills-analysis" *ngIf="requiredSkills.length">
+        <h4>Explicitly Required Skills</h4>
+        <div class="skill-tags">
+          <span class="matched" *ngFor="let skill of requiredSkills">{{ skill }}</span>
+        </div>
+      </div>
+
+      <div class="skills-analysis missing" *ngIf="isPremiumUser && missingRequiredSkills.length">
+        <h4>Required Skills Not Detected</h4>
+        <div class="skill-tags">
+          <span class="missing" *ngFor="let skill of missingRequiredSkills">{{ skill }}</span>
+        </div>
       </div>
 
       <div class="skills-analysis" *ngIf="matchingSkills.length">
