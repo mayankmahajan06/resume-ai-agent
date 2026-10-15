@@ -95,6 +95,31 @@ function isExplicitlyRequired(skill, jobDescription) {
   );
 }
 
+
+const COMMON_NON_SKILL_TERMS = new Set((
+  'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service api apis unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus'
+).split(/\s+/));
+
+function detectUnmappedTerms(jobDescription) {
+  const candidates = [];
+  const tokenPattern = /[A-Za-z][A-Za-z0-9+#./-]{1,}/g;
+  let match;
+  while ((match = tokenPattern.exec(String(jobDescription || ''))) !== null) {
+    const token = match[0].replace(/[.,;:!?]+$/, '');
+    const lower = token.toLowerCase();
+    if (COMMON_NON_SKILL_TERMS.has(lower)) continue;
+    const isMapped = Object.values(skillMapping).some(skill =>
+      (skill.aliases || []).some(alias => containsAlias(normalizeText(token), alias))
+    );
+    if (isMapped) continue;
+    const looksTechnical = /^[A-Z][A-Z0-9+#./-]{1,}$/.test(token) ||
+      /[+#./0-9-]/.test(token) ||
+      /^(Hibernate|Mockito|Maven|JUnit|JPA|JDBC|Gradle|Lombok|Tomcat)$/i.test(token);
+    if (looksTechnical) candidates.push(token);
+  }
+  return [...new Set(candidates)].slice(0, 30);
+}
+
 function analyzeJD(resumeData, jobDescription) {
   const safeResume = resumeData && typeof resumeData === 'object' && !Array.isArray(resumeData)
     ? resumeData
@@ -152,21 +177,26 @@ function analyzeJD(resumeData, jobDescription) {
   const missingSkills = analyzedSkills.filter(skill => !skill.matched);
   const requiredSkills = analyzedSkills.filter(skill => skill.required);
   const missingRequiredSkills = requiredSkills.filter(skill => !skill.matched);
+  const unrecognizedJdTerms = detectUnmappedTerms(jobDescription);
 
-  // Keep the score transparent and stable: each recognized JD skill has
-  // equal weight. Explicit requirement labels are reported separately.
+  // Preserve the general overlap score and make explicit requirement coverage visible.
   const score = jdSkills.length
     ? Math.round((matchedSkills.length / jdSkills.length) * 100)
     : 0;
+  const requiredSkillMatchScore = requiredSkills.length
+    ? Math.round(((requiredSkills.length - missingRequiredSkills.length) / requiredSkills.length) * 100)
+    : null;
 
   return {
     jdMatchScore: score,
-    scoreMethod: 'Equal-weight overlap of recognized skills; required-skill labels are informational and do not change the score.',
+    scoreMethod: 'Recognized-skill overlap: matched recognized JD skills divided by all recognized JD skills. Required-skill coverage is reported separately.',
     recognizedSkillsCount: jdSkills.length,
+    requiredSkillMatchScore,
     requiredSkills: requiredSkills.map(skill => skill.label),
     missingRequiredSkills: missingRequiredSkills.map(skill => skill.label),
     matchedSkills: matchedSkills.map(skill => skill.label),
     missingSkills: missingSkills.map(skill => skill.label),
+    unrecognizedJdTerms,
   };
 }
 
