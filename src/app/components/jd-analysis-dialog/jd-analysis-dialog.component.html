@@ -42,6 +42,24 @@
         <p class="score-method">{{ scoreMethod }}</p>
       </div>
 
+      <div class="result-card" *ngIf="requiredSkillMatchScore !== null">
+        <span>Required Skills Coverage</span>
+        <strong>{{ requiredSkillMatchScore }}%</strong>
+        <p class="score-method">
+          Percentage of explicitly required, recognized skills detected in your resume. This is separate from the overall match score.
+        </p>
+      </div>
+
+      <div class="skills-analysis" *ngIf="isPremiumUser && unrecognizedJdTerms.length">
+        <h4>JD Terms to Review</h4>
+        <p class="score-method">
+          These technical-looking terms may need to be added to the skill dictionary. They are not included in the match score yet.
+        </p>
+        <div class="skill-tags">
+          <span *ngFor="let term of unrecognizedJdTerms">{{ term }}</span>
+        </div>
+      </div>
+
       <div class="skills-analysis" *ngIf="requiredSkills.length">
         <h4>Explicitly Required Skills</h4>
         <div class="skill-tags">
