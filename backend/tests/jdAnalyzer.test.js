@@ -304,7 +304,7 @@ function analyze(resumeText, jobDescription) {
 
 // Skills listed under a dedicated Required Skills section count as required.
 {
-  const result = analyze('Angular, JavaScript', 'Required Skills:\\n- AngularJS 1.x\\n- JavaScript\\nPreferred Skills:\\n- React');
+  const result = analyze('Angular, JavaScript', 'Required Skills:\n- AngularJS 1.x\n- JavaScript\nPreferred Skills:\n- React');
   assert.deepEqual(result.requiredSkills, ['AngularJS', 'JavaScript']);
   assert.deepEqual(result.missingRequiredSkills, ['AngularJS']);
   assert.equal(result.requiredSkillMatchScore, 50);
@@ -312,7 +312,7 @@ function analyze(resumeText, jobDescription) {
 
 // Generic Requirements headings do not automatically elevate every listed skill.
 {
-  const result = analyze('Angular', 'Requirements:\\n- Angular\\n- React');
+  const result = analyze('Angular', 'Requirements:\n- Angular\n- React');
   assert.deepEqual(result.requiredSkills, []);
 }
 
