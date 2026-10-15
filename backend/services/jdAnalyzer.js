@@ -96,50 +96,33 @@ function isExplicitlyRequired(skill, jobDescription) {
 }
 
 
-const COMMON_NON_SKILL_TERMS = new Set((
-  'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus'
-).split(/\\s+/));
+const COMMON_NON_SKILL_TERMS = new Set(
+  'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus'.split(' ')
+);
+
+const MAPPED_ALIAS_TOKENS = new Set(
+  Object.values(skillMapping)
+    .flatMap(skill => skill.aliases || [])
+    .flatMap(alias => normalizeText(alias).split(' '))
+);
 
 function detectUnmappedTerms(jobDescription) {
-  const text = String(jobDescription || '');
-  const coveredRanges = [];
-
-  // Mark every phrase that matches any configured alias. Tokens inside a mapped
-  // phrase (for example "Spring" inside "Spring Boot") are not reported.
-  for (const skill of Object.values(skillMapping)) {
-    for (const alias of skill.aliases || []) {
-      const normalizedAlias = normalizeText(alias);
-      if (!normalizedAlias) continue;
-      const escaped = normalizedAlias.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
-      const pattern = new RegExp('(^|[^a-z0-9])(' + escaped + ')(?=$|[^a-z0-9])', 'ig');
-      let match;
-      while ((match = pattern.exec(text)) !== null) {
-        const offset = match.index + match[1].length;
-        coveredRanges.push([offset, offset + match[2].length]);
-      }
-    }
-  }
-
   const candidates = [];
-  const tokenPattern = /[A-Za-z][A-Za-z0-9+#./-]{1,}/g;
-  let match;
-  while ((match = tokenPattern.exec(text)) !== null) {
-    const token = match[0].replace(/[.,;:!?]+$/, '');
-    const lower = token.toLowerCase();
-    const tokenStart = match.index;
-    const tokenEnd = tokenStart + token.length;
+  const tokens = String(jobDescription || '').match(/[A-Za-z][A-Za-z0-9+#./-]{1,}/g) || [];
 
-    if (COMMON_NON_SKILL_TERMS.has(lower)) continue;
-    if (coveredRanges.some(([start, end]) => tokenStart < end && tokenEnd > start)) continue;
+  for (const token of tokens) {
+    const cleanToken = token.replace(/[.,;:!?]+$/, '');
+    const lower = cleanToken.toLowerCase();
 
-    // This is intentionally conservative: surface capitalized acronyms,
-    // product-like names and version/punctuation-heavy tokens for review.
+    if (COMMON_NON_SKILL_TERMS.has(lower) || MAPPED_ALIAS_TOKENS.has(lower)) continue;
+
+    // Conservative review aid: only report acronym/product-like tokens.
     const looksTechnical =
-      /^[A-Z][A-Z0-9+#./-]{1,}$/.test(token) ||
-      /[+#./0-9-]/.test(token) ||
-      /^(Hibernate|Mockito|Maven|JUnit|JPA|JDBC|Gradle|Lombok|Tomcat)$/i.test(token);
+      /^[A-Z][A-Z0-9+#./-]{1,}$/.test(cleanToken) ||
+      /[+#./0-9-]/.test(cleanToken) ||
+      /^(Hibernate|Mockito|Maven|JUnit|JPA|JDBC|Gradle|Lombok|Tomcat)$/i.test(cleanToken);
 
-    if (looksTechnical) candidates.push(token);
+    if (looksTechnical) candidates.push(cleanToken);
   }
 
   return [...new Set(candidates)].slice(0, 30);
