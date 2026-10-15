@@ -82,17 +82,37 @@ const REQUIRED_MARKERS = [
 // the same line/sentence as that skill. We do not infer priority from the
 // overall job title or from a generic "Requirements" heading.
 function isExplicitlyRequired(skill, jobDescription) {
-  const segments = String(jobDescription || '')
-    .split(/[\n;!?]+|(?<=[.!?])\s+/)
+  const text = String(jobDescription || '');
+  const segments = text
+    .split(/[\\n;!?]+|(?<=[.!?])\\s+/)
     .map(segment => segment.trim())
     .filter(Boolean);
+  const aliases = skillMapping[skill.key]?.aliases || [];
 
-  return segments.some(segment =>
+  const explicitlyMarked = segments.some(segment =>
     REQUIRED_MARKERS.some(marker => marker.test(segment)) &&
-    (skillMapping[skill.key]?.aliases || []).some(alias =>
-      containsAlias(normalizeText(segment), alias)
-    )
+    aliases.some(alias => containsAlias(normalizeText(segment), alias))
   );
+  if (explicitlyMarked) return true;
+
+  // A skill listed under an explicit "Required Skills" section counts as required.
+  // Generic "Requirements" headings are intentionally not treated as required.
+  const lines = text.split(/\\r?\\n/);
+  let inRequiredSkillsSection = false;
+  for (const line of lines) {
+    const heading = line.trim().replace(/^#+\\s*/, '').replace(/[:*]+$/, '').trim();
+    if (/^required skills$/i.test(heading)) {
+      inRequiredSkillsSection = true;
+      continue;
+    }
+    if (/^(preferred skills|nice to have|bonus skills|what you will do|responsibilities|qualifications|experience|education)$/i.test(heading)) {
+      inRequiredSkillsSection = false;
+    }
+    if (inRequiredSkillsSection && aliases.some(alias => containsAlias(normalizeText(line), alias))) {
+      return true;
+    }
+  }
+  return false;
 }
 
 
