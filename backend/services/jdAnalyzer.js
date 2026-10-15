@@ -84,7 +84,7 @@ const REQUIRED_MARKERS = [
 function isExplicitlyRequired(skill, jobDescription) {
   const text = String(jobDescription || '');
   const segments = text
-    .split(/[\\n;!?]+|(?<=[.!?])\\s+/)
+    .split(/[\n;!?]+|(?<=[.!?])\s+/)
     .map(segment => segment.trim())
     .filter(Boolean);
   const aliases = skillMapping[skill.key]?.aliases || [];
@@ -97,10 +97,10 @@ function isExplicitlyRequired(skill, jobDescription) {
 
   // A skill listed under an explicit "Required Skills" section counts as required.
   // Generic "Requirements" headings are intentionally not treated as required.
-  const lines = text.split(/\\r?\\n/);
+  const lines = text.split(/\r?\n/);
   let inRequiredSkillsSection = false;
   for (const line of lines) {
-    const heading = line.trim().replace(/^#+\\s*/, '').replace(/[:*]+$/, '').trim();
+    const heading = line.trim().replace(/^#+\s*/, '').replace(/[:*]+$/, '').trim();
     if (/^required skills$/i.test(heading)) {
       inRequiredSkillsSection = true;
       continue;
@@ -114,7 +114,6 @@ function isExplicitlyRequired(skill, jobDescription) {
   }
   return false;
 }
-
 
 const COMMON_NON_SKILL_TERMS = new Set(
   'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus'.split(' ')
