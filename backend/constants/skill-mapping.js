@@ -15,7 +15,7 @@ const skillMapping = {
 
   vue: {
     label: "Vue",
-    aliases: ["vue", "vuejs"],
+    aliases: ["vue", "vuejs", "vue.js"],
   },
 
   typescript: {
