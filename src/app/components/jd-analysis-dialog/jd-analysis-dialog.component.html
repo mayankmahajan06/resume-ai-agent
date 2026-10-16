@@ -49,12 +49,6 @@
         </p>
       </div>
 
-      <div class="skills-analysis" *ngIf="isPremiumUser && unrecognizedJdTerms.length">
-        <h4>JD Terms to Review</h4>
-        <div class="skill-tags">
-          <span *ngFor="let term of unrecognizedJdTerms">{{ term }}</span>
-        </div>
-      </div>
 
       <div class="skills-analysis" *ngIf="requiredSkills.length">
         <h4>Explicitly Required Skills</h4>
