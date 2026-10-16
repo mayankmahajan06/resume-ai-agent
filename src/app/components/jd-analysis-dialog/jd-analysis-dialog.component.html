@@ -51,9 +51,6 @@
 
       <div class="skills-analysis" *ngIf="isPremiumUser && unrecognizedJdTerms.length">
         <h4>JD Terms to Review</h4>
-        <p class="score-method">
-          These technical-looking terms may need to be added to the skill dictionary. They are not included in the match score yet.
-        </p>
         <div class="skill-tags">
           <span *ngFor="let term of unrecognizedJdTerms">{{ term }}</span>
         </div>
