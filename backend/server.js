@@ -373,6 +373,80 @@ async function requireAuth(req, res, next) {
   }
 }
 
+
+/*
+AUTHORITATIVE SUBSCRIPTION STATUS
+
+The client must not write subscription authority fields directly because
+Firestore rules intentionally reserve those writes for the Admin SDK.
+*/
+app.get("/subscription-status", requireAuth, authenticatedRateLimit, async (req, res) => {
+  try {
+    const userRef = admin.firestore().collection("users").doc(req.user.uid);
+    const snapshot = await userRef.get();
+
+    if (!snapshot.exists) {
+      return res.status(200).send({
+        success: true,
+        userPlan: "free",
+        paymentStatus: "inactive",
+        planExpiryDate: null,
+      });
+    }
+
+    const userData = snapshot.data() || {};
+    const userPlan = userData.userPlan;
+    const paymentStatus = userData.paymentStatus;
+    const isPremiumPlan = ["pro", "pro_plus"].includes(userPlan);
+    const expiryDate = parseExistingExpiryDate(userData.planExpiryDate);
+    const isActive = paymentStatus === "active";
+    const isExpired = !expiryDate || expiryDate.getTime() <= Date.now();
+
+    if (isPremiumPlan && isActive && isExpired) {
+      await userRef.set(
+        {
+          userPlan: "free",
+          paymentStatus: "inactive",
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
+
+      return res.status(200).send({
+        success: true,
+        userPlan: "free",
+        paymentStatus: "inactive",
+        planExpiryDate: userData.planExpiryDate ?? null,
+        expired: true,
+      });
+    }
+
+    if (!isPremiumPlan || !isActive) {
+      return res.status(200).send({
+        success: true,
+        userPlan: "free",
+        paymentStatus: "inactive",
+        planExpiryDate: userData.planExpiryDate ?? null,
+        expired: false,
+      });
+    }
+
+    return res.status(200).send({
+      success: true,
+      userPlan,
+      paymentStatus,
+      planExpiryDate: userData.planExpiryDate ?? null,
+      expired: false,
+    });
+  } catch (error) {
+    console.error("Subscription status refresh failed:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Failed to refresh subscription status",
+    });
+  }
+});
+
 /*
 PREMIUM ACCESS MIDDLEWARE
 
