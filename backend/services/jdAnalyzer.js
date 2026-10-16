@@ -119,10 +119,12 @@ const COMMON_NON_SKILL_TERMS = new Set(
   'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus hands-on real-time problem-solving customer-focused fast-paced cross-functional'.split(' ')
 );
 
+const MAPPED_ALIASES = Object.values(skillMapping)
+  .flatMap(skill => skill.aliases || [])
+  .map(alias => normalizeText(alias));
+
 const MAPPED_ALIAS_TOKENS = new Set(
-  Object.values(skillMapping)
-    .flatMap(skill => skill.aliases || [])
-    .flatMap(alias => normalizeText(alias).split(' '))
+  MAPPED_ALIASES.flatMap(alias => alias.split(' '))
 );
 
 function detectUnmappedTerms(jobDescription) {
@@ -133,7 +135,11 @@ function detectUnmappedTerms(jobDescription) {
     const cleanToken = token.replace(/[.,;:!?]+$/, '');
     const lower = cleanToken.toLowerCase();
 
-    if (COMMON_NON_SKILL_TERMS.has(lower) || MAPPED_ALIAS_TOKENS.has(lower)) continue;
+    if (
+      COMMON_NON_SKILL_TERMS.has(lower) ||
+      MAPPED_ALIAS_TOKENS.has(lower) ||
+      MAPPED_ALIASES.includes(normalizeText(cleanToken))
+    ) continue;
 
     // Conservative review aid: only report acronym/product-like tokens.
     const looksTechnical =
