@@ -82,17 +82,69 @@ const REQUIRED_MARKERS = [
 // the same line/sentence as that skill. We do not infer priority from the
 // overall job title or from a generic "Requirements" heading.
 function isExplicitlyRequired(skill, jobDescription) {
-  const segments = String(jobDescription || '')
+  const text = String(jobDescription || '');
+  const segments = text
     .split(/[\n;!?]+|(?<=[.!?])\s+/)
     .map(segment => segment.trim())
     .filter(Boolean);
+  const aliases = skillMapping[skill.key]?.aliases || [];
 
-  return segments.some(segment =>
+  const explicitlyMarked = segments.some(segment =>
     REQUIRED_MARKERS.some(marker => marker.test(segment)) &&
-    (skillMapping[skill.key]?.aliases || []).some(alias =>
-      containsAlias(normalizeText(segment), alias)
-    )
+    aliases.some(alias => containsAlias(normalizeText(segment), alias))
   );
+  if (explicitlyMarked) return true;
+
+  // A skill listed under an explicit "Required Skills" section counts as required.
+  // Generic "Requirements" headings are intentionally not treated as required.
+  const lines = text.split(/\r?\n/);
+  let inRequiredSkillsSection = false;
+  for (const line of lines) {
+    const heading = line.trim().replace(/^#+\s*/, '').replace(/[:*]+$/, '').trim();
+    if (/^required skills$/i.test(heading)) {
+      inRequiredSkillsSection = true;
+      continue;
+    }
+    if (/^(preferred skills|nice to have|bonus skills|what you will do|responsibilities|qualifications|experience|education)$/i.test(heading)) {
+      inRequiredSkillsSection = false;
+    }
+    if (inRequiredSkillsSection && aliases.some(alias => containsAlias(normalizeText(line), alias))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const COMMON_NON_SKILL_TERMS = new Set(
+  'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus'.split(' ')
+);
+
+const MAPPED_ALIAS_TOKENS = new Set(
+  Object.values(skillMapping)
+    .flatMap(skill => skill.aliases || [])
+    .flatMap(alias => normalizeText(alias).split(' '))
+);
+
+function detectUnmappedTerms(jobDescription) {
+  const candidates = [];
+  const tokens = String(jobDescription || '').match(/[A-Za-z][A-Za-z0-9+#./-]{1,}/g) || [];
+
+  for (const token of tokens) {
+    const cleanToken = token.replace(/[.,;:!?]+$/, '');
+    const lower = cleanToken.toLowerCase();
+
+    if (COMMON_NON_SKILL_TERMS.has(lower) || MAPPED_ALIAS_TOKENS.has(lower)) continue;
+
+    // Conservative review aid: only report acronym/product-like tokens.
+    const looksTechnical =
+      /^[A-Z][A-Z0-9+#./-]{1,}$/.test(cleanToken) ||
+      /[+#./0-9-]/.test(cleanToken) ||
+      /^(Hibernate|Mockito|Maven|JUnit|JPA|JDBC|Gradle|Lombok|Tomcat)$/i.test(cleanToken);
+
+    if (looksTechnical) candidates.push(cleanToken);
+  }
+
+  return [...new Set(candidates)].slice(0, 30);
 }
 
 function analyzeJD(resumeData, jobDescription) {
@@ -152,21 +204,26 @@ function analyzeJD(resumeData, jobDescription) {
   const missingSkills = analyzedSkills.filter(skill => !skill.matched);
   const requiredSkills = analyzedSkills.filter(skill => skill.required);
   const missingRequiredSkills = requiredSkills.filter(skill => !skill.matched);
+  const unrecognizedJdTerms = detectUnmappedTerms(jobDescription);
 
-  // Keep the score transparent and stable: each recognized JD skill has
-  // equal weight. Explicit requirement labels are reported separately.
+  // Preserve the general overlap score and make explicit requirement coverage visible.
   const score = jdSkills.length
     ? Math.round((matchedSkills.length / jdSkills.length) * 100)
     : 0;
+  const requiredSkillMatchScore = requiredSkills.length
+    ? Math.round(((requiredSkills.length - missingRequiredSkills.length) / requiredSkills.length) * 100)
+    : null;
 
   return {
     jdMatchScore: score,
-    scoreMethod: 'Equal-weight overlap of recognized skills; required-skill labels are informational and do not change the score.',
+    scoreMethod: 'Recognized-skill overlap: matched recognized JD skills divided by all recognized JD skills. Required-skill coverage is reported separately.',
     recognizedSkillsCount: jdSkills.length,
+    requiredSkillMatchScore,
     requiredSkills: requiredSkills.map(skill => skill.label),
     missingRequiredSkills: missingRequiredSkills.map(skill => skill.label),
     matchedSkills: matchedSkills.map(skill => skill.label),
     missingSkills: missingSkills.map(skill => skill.label),
+    unrecognizedJdTerms,
   };
 }
 

@@ -237,7 +237,7 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 33);
   assert.deepEqual(result.requiredSkills, ['Angular', 'TypeScript']);
   assert.deepEqual(result.missingRequiredSkills, ['TypeScript']);
-  assert.match(result.scoreMethod, /Equal-weight/);
+  assert.match(result.scoreMethod, /Recognized-skill overlap/);
 }
 
 // Periods inside technology names must not break required-skill detection.
@@ -253,7 +253,7 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 33);
   assert.deepEqual(result.requiredSkills, []);
   assert.deepEqual(result.missingRequiredSkills, []);
-  assert.match(result.scoreMethod, /Equal-weight/);
+  assert.match(result.scoreMethod, /Recognized-skill overlap/);
 }
 
 // Empty or malformed resume objects should not crash analysis.
@@ -268,6 +268,52 @@ function analyze(resumeText, jobDescription) {
   assert.deepEqual(result.matchedSkills, ['Angular', 'TypeScript']);
   assert.equal(result.jdMatchScore, 100);
   assert.equal(analyze('Angular', 'People-focused leadership').jdMatchScore, 0);
+}
+
+
+
+// Java backend technologies must be recognized and reported missing when absent.
+{
+  const result = analyze(
+    'Angular, TypeScript, REST APIs, Git',
+    'Required: Java, Spring Boot, Hibernate, JPA, Maven, JUnit, Mockito, SQL, PostgreSQL and Apache Kafka.'
+  );
+  for (const skill of ['Java', 'Spring Boot', 'Hibernate', 'JPA', 'Maven', 'JUnit', 'Mockito', 'SQL', 'PostgreSQL', 'Apache Kafka']) {
+    assert.ok(result.missingSkills.includes(skill), `Expected ${skill} to be mapped and reported missing`);
+  }
+  assert.equal(result.requiredSkillMatchScore, 0);
+}
+
+// Explicit must-have coverage is exposed separately from overall overlap.
+{
+  const result = analyze(
+    'Angular, JavaScript, HTML, CSS, REST APIs, Unit Testing',
+    'AngularJS is required. JavaScript, HTML, CSS, REST APIs and Unit Testing are required.'
+  );
+  assert.ok(result.requiredSkills.includes('AngularJS'));
+  assert.ok(result.missingRequiredSkills.includes('AngularJS'));
+  assert.ok(result.requiredSkillMatchScore < 100);
+}
+
+// Unrecognized technical tokens are surfaced separately for review.
+{
+  const result = analyze('Angular, TypeScript', 'Required: Angular, TypeScript, FooQZ and Hibernate.');
+  assert.ok(Array.isArray(result.unrecognizedJdTerms));
+}
+
+
+// Skills listed under a dedicated Required Skills section count as required.
+{
+  const result = analyze('Angular, JavaScript', 'Required Skills:\n- AngularJS 1.x\n- JavaScript\nPreferred Skills:\n- React');
+  assert.deepEqual(result.requiredSkills, ['AngularJS', 'JavaScript']);
+  assert.deepEqual(result.missingRequiredSkills, ['AngularJS']);
+  assert.equal(result.requiredSkillMatchScore, 50);
+}
+
+// Generic Requirements headings do not automatically elevate every listed skill.
+{
+  const result = analyze('Angular', 'Requirements:\n- Angular\n- React');
+  assert.deepEqual(result.requiredSkills, []);
 }
 
 console.log('JD analyzer tests passed.');

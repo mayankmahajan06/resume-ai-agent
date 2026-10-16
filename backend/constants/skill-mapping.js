@@ -359,6 +359,25 @@ const skillMapping = {
   yaml: { label: "YAML", aliases: ["yaml", "yml"] },
   eventdriven: { label: "Event-Driven Architecture", aliases: ["event-driven architecture", "event driven architecture"] },
 
+
+  // Java ecosystem and common backend requirements
+  hibernate: { label: "Hibernate", aliases: ["hibernate", "hibernate orm"] },
+  jpa: { label: "JPA", aliases: ["jpa", "java persistence api", "jakarta persistence"] },
+  maven: { label: "Maven", aliases: ["maven", "apache maven", "mvn"] },
+  junit: { label: "JUnit", aliases: ["junit", "junit 4", "junit 5"] },
+  mockito: { label: "Mockito", aliases: ["mockito"] },
+  springmvc: { label: "Spring MVC", aliases: ["spring mvc", "spring-mvc"] },
+  springsecurity: { label: "Spring Security", aliases: ["spring security"] },
+  microservices: { label: "Microservices", aliases: ["microservices", "micro services", "microservice architecture"] },
+  sql: { label: "SQL", aliases: ["sql", "structured query language"] },
+  gradle: { label: "Gradle", aliases: ["gradle"] },
+  lombok: { label: "Lombok", aliases: ["lombok"] },
+  jdbc: { label: "JDBC", aliases: ["jdbc", "java database connectivity"] },
+  servlet: { label: "Java Servlets", aliases: ["java servlet", "java servlets", "servlet api"] },
+  jsp: { label: "JSP", aliases: ["jsp", "java server pages"] },
+  j2ee: { label: "Jakarta EE / J2EE", aliases: ["j2ee", "jakarta ee", "java ee", "jakarta enterprise edition"] },
+  tomcat: { label: "Apache Tomcat", aliases: ["apache tomcat", "tomcat"] },
+
 };
 
 module.exports = skillMapping;
