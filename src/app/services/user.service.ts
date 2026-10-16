@@ -143,9 +143,8 @@ export class UserService {
       }
 
       const expiryDate = this.parseExpiryDate(data['planExpiryDate']);
-      const isExpired = !expiryDate || expiryDate.getTime() <= Date.now();
 
-      if (isExpired) {
+      if (!expiryDate || expiryDate.getTime() <= Date.now()) {
         // Preserve payment/order identifiers and history; only deactivate access.
         await setDoc(
           userRef,
