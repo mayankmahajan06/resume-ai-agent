@@ -295,10 +295,17 @@ function analyze(resumeText, jobDescription) {
   assert.ok(result.requiredSkillMatchScore < 100);
 }
 
-// Unrecognized technical tokens are surfaced separately for review.
+// Unrecognized technical tokens are surfaced separately, while common descriptive phrases are filtered.
 {
-  const result = analyze('Angular, TypeScript', 'Required: Angular, TypeScript, FooQZ and Hibernate.');
+  const result = analyze(
+    'Angular, TypeScript',
+    'Required: Angular, TypeScript, FooQZ and Hibernate. Hands-on experience with real-time systems, problem-solving, customer-focused teams and fast-paced cross-functional work.'
+  );
   assert.ok(Array.isArray(result.unrecognizedJdTerms));
+  assert.ok(result.unrecognizedJdTerms.includes('FooQZ'));
+  for (const term of ['hands-on', 'real-time', 'problem-solving', 'customer-focused', 'fast-paced', 'cross-functional']) {
+    assert.ok(!result.unrecognizedJdTerms.some(item => item.toLowerCase() === term), `Unexpected descriptive term: ${term}`);
+  }
 }
 
 
