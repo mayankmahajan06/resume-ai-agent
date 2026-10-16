@@ -172,6 +172,11 @@ export class UserService {
     }
   }
 
+  resetUserPlan(): void {
+    this.clearExpiryTimer();
+    this.setUserPlan('free');
+  }
+
   isPremiumUser(): boolean {
     return this.userPlan === 'pro' || this.userPlan === 'pro_plus';
   }
