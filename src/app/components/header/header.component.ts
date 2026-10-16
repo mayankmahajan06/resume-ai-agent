@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnDestroy,
   ViewChild
 } from '@angular/core';
 import { Router } from '@angular/router';
@@ -9,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 
@@ -19,7 +21,7 @@ import { UserService } from '../../services/user.service';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnDestroy {
   @ViewChild('profileMenuWrapper')
   profileMenuWrapper!: ElementRef;
 
@@ -32,12 +34,20 @@ export class HeaderComponent {
   userInitial = '';
   userPlan: 'free' | 'pro' | 'pro_plus' = 'free';
 
+  private authSubscription?: Subscription;
+  private userPlanSubscription?: Subscription;
+
   constructor(
     private router: Router,
     private authService: AuthService,
     private userService: UserService
   ) {
-    this.authService
+    // Keep the header in sync when the plan expires without a page reload.
+    this.userPlanSubscription = this.userService.userPlan$.subscribe((plan) => {
+      this.userPlan = plan;
+    });
+
+    this.authSubscription = this.authService
       .getCurrentUser()
       .subscribe(async (user) => {
         this.isLoggedIn = !!user;
@@ -47,7 +57,7 @@ export class HeaderComponent {
           this.userName = '';
           this.userEmail = '';
           this.userInitial = '';
-          this.userPlan = 'free';
+          this.userService.resetUserPlan();
           return;
         }
 
@@ -60,9 +70,12 @@ export class HeaderComponent {
           this.userName.charAt(0).toUpperCase();
 
         await this.userService.loadUserPlan();
-        this.userPlan =
-          this.userService.userPlan;
       });
+  }
+
+  ngOnDestroy(): void {
+    this.authSubscription?.unsubscribe();
+    this.userPlanSubscription?.unsubscribe();
   }
 
   @HostListener('window:scroll', [])
