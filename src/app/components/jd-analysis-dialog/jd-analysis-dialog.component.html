@@ -39,7 +39,6 @@
       <div class="result-card">
         <span>Resume Match Score</span>
         <strong [ngClass]="getScoreClass()">{{ jdMatch }}%</strong>
-        <p class="score-method">{{ scoreMethod }}</p>
       </div>
 
       <div class="result-card" *ngIf="requiredSkillMatchScore !== null">
