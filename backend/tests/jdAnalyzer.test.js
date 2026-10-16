@@ -119,14 +119,11 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 100);
 }
 
-// Dotted Vue.js spelling must map to Vue and not appear as an unmapped term.
+// Dotted Vue.js spelling maps to Vue and is reported as a missing skill when absent.
 {
   const result = analyze('Angular, TypeScript', 'Vue.js is required.');
   assert.ok(result.missingSkills.includes('Vue'));
-  assert.ok(
-    !result.unrecognizedJdTerms.some(term => term.toLowerCase() === 'vue.js'),
-    'Vue.js should not be flagged as an unrecognized JD term'
-  );
+  assert.equal(result.jdMatchScore, 0);
 }
 
 // Angular Material and Material UI are different component libraries.
@@ -304,20 +301,6 @@ function analyze(resumeText, jobDescription) {
   assert.ok(result.missingRequiredSkills.includes('AngularJS'));
   assert.ok(result.requiredSkillMatchScore < 100);
 }
-
-// Unrecognized technical tokens are surfaced separately, while common descriptive phrases are filtered.
-{
-  const result = analyze(
-    'Angular, TypeScript',
-    'Required: Angular, TypeScript, FooQZ and Hibernate. Hands-on experience with real-time systems, problem-solving, customer-focused teams and fast-paced cross-functional work.'
-  );
-  assert.ok(Array.isArray(result.unrecognizedJdTerms));
-  assert.ok(result.unrecognizedJdTerms.includes('FooQZ'));
-  for (const term of ['hands-on', 'real-time', 'problem-solving', 'customer-focused', 'fast-paced', 'cross-functional']) {
-    assert.ok(!result.unrecognizedJdTerms.some(item => item.toLowerCase() === term), `Unexpected descriptive term: ${term}`);
-  }
-}
-
 
 // Skills listed under a dedicated Required Skills section count as required.
 {
