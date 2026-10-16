@@ -119,6 +119,16 @@ function analyze(resumeText, jobDescription) {
   assert.equal(result.jdMatchScore, 100);
 }
 
+// Dotted Vue.js spelling must map to Vue and not appear as an unmapped term.
+{
+  const result = analyze('Angular, TypeScript', 'Vue.js is required.');
+  assert.ok(result.missingSkills.includes('Vue'));
+  assert.ok(
+    !result.unrecognizedJdTerms.some(term => term.toLowerCase() === 'vue.js'),
+    'Vue.js should not be flagged as an unrecognized JD term'
+  );
+}
+
 // Angular Material and Material UI are different component libraries.
 {
   const result = analyze(
