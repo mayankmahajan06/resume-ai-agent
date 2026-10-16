@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import {
-  Firestore,
-  doc,
-  getDoc,
-  setDoc
-} from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type UserPlan = 'free' | 'pro' | 'pro_plus';
 
@@ -126,41 +121,46 @@ export class UserService {
         return;
       }
 
-      const userRef = doc(this.firestore, `users/${user.uid}`);
-      const snapshot = await getDoc(userRef);
+      const token = await user.getIdToken();
+      const response = await fetch(
+        `${environment.apiBaseUrl}/subscription-status`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
-      if (!snapshot.exists()) {
-        return;
+      if (!response.ok) {
+        throw new Error(`Subscription status request failed: ${response.status}`);
       }
 
-      const data = snapshot.data() as Record<string, unknown>;
-      const plan = data['userPlan'];
-      const isPremiumPlan = plan === 'pro' || plan === 'pro_plus';
-      const isActive = data['paymentStatus'] === 'active';
+      const result = await response.json() as {
+        success?: boolean;
+        userPlan?: unknown;
+        paymentStatus?: unknown;
+        planExpiryDate?: unknown;
+      };
 
-      if (!isPremiumPlan || !isActive) {
-        return;
-      }
-
-      const expiryDate = this.parseExpiryDate(data['planExpiryDate']);
-
-      if (!expiryDate || expiryDate.getTime() <= Date.now()) {
-        // Preserve payment/order identifiers and history; only deactivate access.
-        await setDoc(
-          userRef,
-          {
-            userPlan: 'free',
-            paymentStatus: 'inactive',
-            updatedAt: new Date().toISOString()
-          },
-          { merge: true }
-        );
-
+      if (
+        result.success !== true ||
+        result.paymentStatus !== 'active' ||
+        (result.userPlan !== 'pro' && result.userPlan !== 'pro_plus')
+      ) {
         this.setUserPlan('free');
         return;
       }
 
-      this.setUserPlan(plan as UserPlan);
+      const expiryDate = this.parseExpiryDate(result.planExpiryDate);
+
+      // Never enable premium locally without a valid future expiry date.
+      if (!expiryDate || expiryDate.getTime() <= Date.now()) {
+        this.setUserPlan('free');
+        return;
+      }
+
+      this.setUserPlan(result.userPlan as UserPlan);
       this.scheduleExpiryCheck(expiryDate);
     } catch (error) {
       // Fail closed: premium access must not remain enabled if refresh fails.
