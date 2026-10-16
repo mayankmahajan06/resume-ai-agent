@@ -115,43 +115,6 @@ function isExplicitlyRequired(skill, jobDescription) {
   return false;
 }
 
-const COMMON_NON_SKILL_TERMS = new Set(
-  'the and for with from that this are you your our their job role team work years year experience experienced required preferred responsibilities responsibility skills skill ability strong excellent good knowledge familiarity understanding develop maintain build building using including candidate developer development applications application support design implement integrate write test testing debugging performance production collaborate frontend backend modern legacy scalable services service unit integration automated system data database cloud tools platform software engineering engineer architecture related based business computer science bachelor degree or to of in on a an as at by is be it we have has had can able not etc agile nice must should will plus hands-on real-time problem-solving customer-focused fast-paced cross-functional'.split(' ')
-);
-
-const MAPPED_ALIASES = Object.values(skillMapping)
-  .flatMap(skill => skill.aliases || [])
-  .map(alias => normalizeText(alias));
-
-const MAPPED_ALIAS_TOKENS = new Set(
-  MAPPED_ALIASES.flatMap(alias => alias.split(' '))
-);
-
-function detectUnmappedTerms(jobDescription) {
-  const candidates = [];
-  const tokens = String(jobDescription || '').match(/[A-Za-z][A-Za-z0-9+#./-]{1,}/g) || [];
-
-  for (const token of tokens) {
-    const cleanToken = token.replace(/[.,;:!?]+$/, '');
-    const lower = cleanToken.toLowerCase();
-
-    if (
-      COMMON_NON_SKILL_TERMS.has(lower) ||
-      MAPPED_ALIAS_TOKENS.has(lower) ||
-      MAPPED_ALIASES.includes(normalizeText(cleanToken))
-    ) continue;
-
-    // Conservative review aid: only report acronym/product-like tokens.
-    const looksTechnical =
-      /^[A-Z][A-Z0-9+#./-]{1,}$/.test(cleanToken) ||
-      /[+#./0-9-]/.test(cleanToken) ||
-      /^(Hibernate|Mockito|Maven|JUnit|JPA|JDBC|Gradle|Lombok|Tomcat)$/i.test(cleanToken);
-
-    if (looksTechnical) candidates.push(cleanToken);
-  }
-
-  return [...new Set(candidates)].slice(0, 30);
-}
 
 function analyzeJD(resumeData, jobDescription) {
   const safeResume = resumeData && typeof resumeData === 'object' && !Array.isArray(resumeData)
@@ -210,7 +173,6 @@ function analyzeJD(resumeData, jobDescription) {
   const missingSkills = analyzedSkills.filter(skill => !skill.matched);
   const requiredSkills = analyzedSkills.filter(skill => skill.required);
   const missingRequiredSkills = requiredSkills.filter(skill => !skill.matched);
-  const unrecognizedJdTerms = detectUnmappedTerms(jobDescription);
 
   // Preserve the general overlap score and make explicit requirement coverage visible.
   const score = jdSkills.length
@@ -229,7 +191,6 @@ function analyzeJD(resumeData, jobDescription) {
     missingRequiredSkills: missingRequiredSkills.map(skill => skill.label),
     matchedSkills: matchedSkills.map(skill => skill.label),
     missingSkills: missingSkills.map(skill => skill.label),
-    unrecognizedJdTerms,
   };
 }
 
