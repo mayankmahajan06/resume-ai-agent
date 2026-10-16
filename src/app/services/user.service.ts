@@ -21,7 +21,6 @@ export class UserService {
   private refreshInProgress = false;
 
   constructor(
-    private firestore: Firestore,
     private auth: Auth
   ) {
     // A sleeping tab can miss the exact expiry moment. Recheck whenever
