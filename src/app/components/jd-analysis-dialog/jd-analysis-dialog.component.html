@@ -38,7 +38,7 @@
     <div class="analysis-result" *ngIf="hasAnalyzed">
       <div class="result-card">
         <span>JD Skills Match</span>
-        <strong [ngClass]="getScoreClass()">{{ jdMatch }}%</strong>
+        <strong [ngClass]="getScoreClass()">{{ recognizedSkillsCount > 0 ? jdMatch + '%' : 'N/A' }}</strong>
       </div>
 
       <div class="result-card" *ngIf="requiredSkillMatchScore !== null">
@@ -86,10 +86,6 @@
         *ngIf="isPremiumUser && missingSkills.length"
       >
         <h4>Other JD Skills Not Detected</h4>
-        <p class="score-method">
-          These recognized job-description skills were not found in the resume text. This does not necessarily mean you lack them; add them only if they reflect your actual experience.
-        </p>
-
         <div class="skill-tags">
           <span class="missing" *ngFor="let skill of missingSkills">
             {{ skill }}
