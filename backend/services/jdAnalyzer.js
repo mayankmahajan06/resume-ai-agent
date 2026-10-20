@@ -79,6 +79,9 @@ const REQUIRED_MARKERS = [
   /\bessential\b/i,
   /\bminimum qualifications?\b/i,
   /\bneed to have\b/i,
+  /\bshould have\b/i,
+  /\bshould possess\b/i,
+  /\bhands[- ]on experience with\b/i,
   /\byou must\b/i,
 ];
 
