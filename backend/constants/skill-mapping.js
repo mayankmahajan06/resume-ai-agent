@@ -25,7 +25,7 @@ const skillMapping = {
 
   javascript: {
     label: "JavaScript",
-    aliases: ["javascript", "js", "ecmascript"],
+    aliases: ["javascript", "java script", "js", "ecmascript"],
   },
 
   rxjs: {
