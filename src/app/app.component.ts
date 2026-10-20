@@ -34,8 +34,8 @@ export class AppComponent implements OnInit, OnDestroy {
           )
         )
         .subscribe((event) => {
-          this.analytics.track('page_view', {
-            page_path: event.urlAfterRedirects,
+          this.analytics.track('app_route_view', {
+            page_path: event.urlAfterRedirects.split('?')[0],
             page_title: document.title
           });
         });
