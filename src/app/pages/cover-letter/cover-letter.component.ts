@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { CoverLetterService } from '../../services/cover-letter.service';
 import { UserService } from '../../services/user.service';
+import { AnalyticsService } from '../../services/analytics.service';
 import { WorkspaceHeaderComponent } from '../../shared/workspace-header/workspace-header.component';
 
 @Component({
@@ -21,7 +22,6 @@ import { WorkspaceHeaderComponent } from '../../shared/workspace-header/workspac
   styleUrl: './cover-letter.component.scss'
 })
 export class CoverLetterComponent {
-
   selectedFile: File | null = null;
   jobTitle = '';
   companyName = '';
@@ -41,7 +41,8 @@ export class CoverLetterComponent {
   constructor(
     private coverLetterService: CoverLetterService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private analytics: AnalyticsService
   ) {
     this.loadPlan();
   }
@@ -55,7 +56,6 @@ export class CoverLetterComponent {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
-
     this.errorMessage = '';
 
     if (!file) {
@@ -116,16 +116,21 @@ export class CoverLetterComponent {
         if (!response.success || !response.content) {
           this.errorMessage =
             response.message || 'Cover letter generation failed.';
+          this.analytics.track('cover_letter_generation_failed');
           return;
         }
 
         this.generatedContent = response.content;
+        this.analytics.track('cover_letter_generated', {
+          tone: this.tone.toLowerCase()
+        });
       },
       error: error => {
         this.loading = false;
         this.errorMessage =
           error?.error?.message ||
           'Cover letter generation failed. Please try again.';
+        this.analytics.track('cover_letter_generation_failed');
       }
     });
   }
@@ -149,12 +154,16 @@ export class CoverLetterComponent {
           anchor.click();
           URL.revokeObjectURL(url);
           this.downloading = false;
+          this.analytics.track('cover_letter_pdf_downloaded', {
+            template: this.selectedTemplate
+          });
         },
         error: error => {
           this.downloading = false;
           this.errorMessage =
             error?.error?.message ||
             'Cover letter PDF download failed. Please try again.';
+          this.analytics.track('cover_letter_pdf_download_failed');
         }
       });
   }
