@@ -103,7 +103,7 @@ const NON_REQUIRED_MARKERS = [
 function isExplicitlyRequired(skill, jobDescription) {
   const text = String(jobDescription || '');
   const segments = text
-    .split(/[\n;,!?]+|(?<=[.!?])\s+|\b(?:but|whereas|while)\b/i)
+    .split(/[\n;!?]+|(?<=[.!?])\s+|\b(?:but|whereas|while)\b/i)
     .map(segment => segment.trim())
     .filter(Boolean);
   const aliases = skillMapping[skill.key]?.aliases || [];
