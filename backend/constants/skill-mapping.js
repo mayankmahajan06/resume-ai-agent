@@ -100,7 +100,7 @@ const skillMapping = {
 
   restapi: {
     label: "REST APIs",
-    aliases: ["rest", "rest api", "rest apis", "restful api", "restful services", "rest architecture"],
+    aliases: ["rest", "rest api", "rest apis", "restful api", "restful apis", "restful services", "rest architecture"],
   },
 
   graphql: {
