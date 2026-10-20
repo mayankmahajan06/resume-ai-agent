@@ -1343,7 +1343,7 @@ app.post("/generate-cover-letter-pdf", requireActivePremium, pdfRateLimit, async
 app.post(
   "/analyze-jd",
   requireActivePremium,
-  aiRateLimit,
+  authenticatedRateLimit,
   (req, res, next) => {
     const validation = validateJdAnalysisRequest(req.body);
     if (!validation.valid) {
@@ -1355,7 +1355,6 @@ app.post(
 
     next();
   },
-  requireAiQuota,
   (req, res) => {
     try {
       const analysis = analyzeJD(req.body.resumeData, req.body.jobDescription);
