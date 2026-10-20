@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { AuthService } from '../../../services/auth.service';
+import { AnalyticsService } from '../../../services/analytics.service';
 import { MatIconModule } from '@angular/material/icon';
 import { ResumeService } from '../../../services/resume.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -18,7 +20,6 @@ import { ResumeService } from '../../../services/resume.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-
   email = '';
   password = '';
 
@@ -28,7 +29,8 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private resumeService: ResumeService
+    private resumeService: ResumeService,
+    private analytics: AnalyticsService
   ) {}
 
   login(): void {
@@ -41,19 +43,14 @@ export class LoginComponent {
 
     this.isLoading = true;
 
-    
-
     this.authService
       .login(this.email, this.password)
       .then(() => {
-        
-
+        this.analytics.track('login', { method: 'email' });
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
-        
-
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       })
       .finally(() => {
@@ -62,23 +59,19 @@ export class LoginComponent {
   }
 
   googleLogin(): void {
-    
-
     this.authService
       .googleLogin()
       .then((credential) => {
         if (this.authService.isNewAuthUser(credential)) {
-          
+          this.analytics.track('sign_up', { method: 'google' });
         } else {
-          
+          this.analytics.track('login', { method: 'google' });
         }
 
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
-        
-
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       });
   }
@@ -95,19 +88,14 @@ export class LoginComponent {
     switch (code) {
       case 'auth/user-not-found':
         return 'No account found with this email.';
-
       case 'auth/wrong-password':
         return 'Incorrect password. Please try again.';
-
       case 'auth/invalid-email':
         return 'Please enter a valid email address.';
-
       case 'auth/invalid-credential':
         return 'Invalid email or password.';
-
       case 'auth/network-request-failed':
         return 'Network error. Please try again.';
-
       default:
         return 'Something went wrong. Please try again.';
     }
