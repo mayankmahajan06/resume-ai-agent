@@ -100,7 +100,7 @@ const skillMapping = {
 
   restapi: {
     label: "REST APIs",
-    aliases: ["rest api", "rest apis", "restful api"],
+    aliases: ["rest", "rest api", "rest apis", "restful api", "restful services", "rest architecture"],
   },
 
   graphql: {
@@ -327,7 +327,6 @@ const skillMapping = {
   webaccessibility: { label: "Web Accessibility", aliases: ["web accessibility"] },
 
   // API design, identity, and application security
-  rest: { label: "REST", aliases: ["restful services", "rest architecture"] },
   grpcweb: { label: "gRPC-Web", aliases: ["grpc-web", "grpc web"] },
   oidc: { label: "OpenID Connect", aliases: ["openid connect", "oidc"] },
   saml: { label: "SAML", aliases: ["saml", "security assertion markup language"] },
