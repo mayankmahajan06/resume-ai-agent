@@ -25,6 +25,7 @@ import {
 import { ResumeData } from '../../services/resume.service';
 import { PdfService } from '../../services/pdf.service';
 import { PaymentService } from '../../services/payment.service';
+import { AnalyticsService } from '../../services/analytics.service';
 import { ResumeImportService } from '../../services/resume-import.service';
 import { MatDialog } from '@angular/material/dialog';
 import { JdAnalysisDialogComponent } from '../jd-analysis-dialog/jd-analysis-dialog.component';
@@ -130,7 +131,8 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
     private resumeImportService: ResumeImportService,
     private auth: Auth,
     private firestore: Firestore,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private analytics: AnalyticsService
   ) { }
 
   ngOnInit(): void {
@@ -272,6 +274,7 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
           }
 
           this.applyImportedResumeData(response.resumeData);
+          this.analytics.track('resume_imported', { file_type: 'pdf' });
 
           
 
@@ -621,6 +624,7 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
         this.pdfService.generatePdf().subscribe({
           next: (response: Blob) => {
             this._triggerDownload(response, latestData.fullName || 'resume');
+            this.analytics.track('resume_pdf_downloaded', { plan: 'free', template: latestData.selectedTemplate || 'modern' });
             
             this.isDownloading = false;
             this.downloadSuccessMessage = 'Free PDF downloaded successfully';
@@ -679,6 +683,7 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
         this.pdfService.generatePremiumPdf().subscribe({
           next: (response: Blob) => {
             this._triggerDownload(response, latestData.fullName || 'premium-resume');
+            this.analytics.track('resume_pdf_downloaded', { plan: this.userPlan, template: latestData.selectedTemplate || 'modern' });
             
             this.isPremiumDownloading = false;
             this.downloadSuccessMessage = 'Premium PDF downloaded successfully';
@@ -809,6 +814,8 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.analytics.track('jd_analysis_opened');
+
     const dialogRef = this.dialog.open(JdAnalysisDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
@@ -823,6 +830,9 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.resumeService.updateResumeData({ jdMatch: result.jdMatch });
+        this.analytics.track('jd_analysis_completed', {
+          match_score: typeof result.jdMatch === 'number' ? result.jdMatch : 0
+        });
       }
     });
   }
@@ -978,7 +988,7 @@ export class ResumeFormComponent implements OnInit, OnDestroy {
     feature = 'premium_feature',
     source = 'resume_form'
   ): void {
-    
+    this.analytics.track('upgrade_modal_opened', { feature, source });
 
     this.dialog.open(
       UpgradeModalComponent,
