@@ -49,6 +49,13 @@
         </p>
       </div>
 
+      <div
+        class="empty-state"
+        *ngIf="recognizedSkillsCount > 0 && requiredSkillMatchScore === null"
+      >
+        No explicit requirements identified in this job description, so required-skills coverage cannot be calculated.
+      </div>
+
 
       <div class="skills-analysis" *ngIf="requiredSkills.length">
         <h4>Explicitly Required Skills</h4>
@@ -78,7 +85,10 @@
         class="skills-analysis missing"
         *ngIf="isPremiumUser && missingSkills.length"
       >
-        <h4>Skills Not Detected in Your Resume</h4>
+        <h4>Other JD Skills Not Detected</h4>
+        <p class="score-method">
+          These recognized job-description skills were not found in the resume text. This does not necessarily mean you lack them; add them only if they reflect your actual experience.
+        </p>
 
         <div class="skill-tags">
           <span class="missing" *ngFor="let skill of missingSkills">
