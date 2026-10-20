@@ -122,7 +122,7 @@ function analyze(resumeText, jobDescription) {
 // Dotted Vue.js spelling maps to Vue and is reported as a missing skill when absent.
 {
   const result = analyze('Angular, TypeScript', 'Vue.js is required.');
-  assert.ok(result.missingSkills.includes('Vue'));
+  assert.ok(result.missingRequiredSkills.includes('Vue'));
   assert.equal(result.jdMatchScore, 0);
 }
 
@@ -286,7 +286,7 @@ function analyze(resumeText, jobDescription) {
     'Required: Java, Spring Boot, Hibernate, JPA, Maven, JUnit, Mockito, SQL, PostgreSQL and Apache Kafka.'
   );
   for (const skill of ['Java', 'Spring Boot', 'Hibernate', 'JPA', 'Maven', 'JUnit', 'Mockito', 'SQL', 'PostgreSQL', 'Apache Kafka']) {
-    assert.ok(result.missingSkills.includes(skill), `Expected ${skill} to be mapped and reported missing`);
+    assert.ok(result.missingRequiredSkills.includes(skill), `Expected ${skill} to be mapped and reported as a missing required skill`);
   }
   assert.equal(result.requiredSkillMatchScore, 0);
 }
