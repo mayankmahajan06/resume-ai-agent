@@ -15,6 +15,11 @@ function containsAlias(normalizedText, alias) {
   const normalizedAlias = normalizeText(alias);
   if (!normalizedAlias) return false;
 
+  // "Java Script" is a common spacing variation of JavaScript, not Java.
+  if (normalizedAlias === 'java') {
+    return /(^|[^a-z0-9])java(?!\s+script)(?=$|[^a-z0-9])/i.test(normalizedText);
+  }
+
   // Short aliases must not match inside words or technology suffixes.
   if (normalizedAlias === 'js' || normalizedAlias === 'ts') {
     const shortAliasPattern = new RegExp(
@@ -69,13 +74,27 @@ function uniqueSkills(skills = []) {
 
 const REQUIRED_MARKERS = [
   /\bmust[- ]have\b/i,
-  /\bmust have\b/i,
   /\brequired\b/i,
   /\bmandatory\b/i,
   /\bessential\b/i,
   /\bminimum qualifications?\b/i,
   /\bneed to have\b/i,
   /\byou must\b/i,
+];
+
+const NON_REQUIRED_MARKERS = [
+  /\bnot required\b/i,
+  /\bnot mandatory\b/i,
+  /\bnot necessary\b/i,
+  /\bnot essential\b/i,
+  /\bpreferred\b/i,
+  /\bpreferable\b/i,
+  /\bnice[- ]to[- ]have\b/i,
+  /\bbonus\b/i,
+  /\bdesirable\b/i,
+  /\boptional\b/i,
+  /\bwithout\b.{0,60}\bexperience\b/i,
+  /\bexperience\b.{0,60}\bnot needed\b/i,
 ];
 
 // Only mark a skill as required when explicit requirement wording appears in
@@ -89,10 +108,23 @@ function isExplicitlyRequired(skill, jobDescription) {
     .filter(Boolean);
   const aliases = skillMapping[skill.key]?.aliases || [];
 
-  const explicitlyMarked = segments.some(segment =>
-    REQUIRED_MARKERS.some(marker => marker.test(segment)) &&
-    aliases.some(alias => containsAlias(normalizeText(segment), alias))
-  );
+  const explicitlyMarked = segments.some(segment => {
+    const normalizedSegment = normalizeText(segment);
+    const mentionsSkill = aliases.some(alias =>
+      containsAlias(normalizedSegment, alias)
+    );
+
+    if (!mentionsSkill) return false;
+
+    // Negative, preferred, optional, bonus, and desirable wording must not
+    // elevate a skill to mandatory merely because it shares a sentence with
+    // requirement wording for another skill.
+    if (NON_REQUIRED_MARKERS.some(marker => marker.test(segment))) {
+      return false;
+    }
+
+    return REQUIRED_MARKERS.some(marker => marker.test(segment));
+  });
   if (explicitlyMarked) return true;
 
   // A skill listed under an explicit "Required Skills" section counts as required.
@@ -170,7 +202,9 @@ function analyzeJD(resumeData, jobDescription) {
   }));
 
   const matchedSkills = analyzedSkills.filter(skill => skill.matched);
-  const missingSkills = analyzedSkills.filter(skill => !skill.matched);
+  // Required misses have their own section in the UI. Keep this list limited
+  // to non-required misses so the same skill is not shown twice.
+  const missingSkills = analyzedSkills.filter(skill => !skill.matched && !skill.required);
   const requiredSkills = analyzedSkills.filter(skill => skill.required);
   const missingRequiredSkills = requiredSkills.filter(skill => !skill.matched);
 
