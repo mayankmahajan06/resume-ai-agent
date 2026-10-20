@@ -316,4 +316,34 @@ function analyze(resumeText, jobDescription) {
   assert.deepEqual(result.requiredSkills, []);
 }
 
+
+// REST and REST APIs must resolve to one canonical skill in either direction.
+{
+  const result = analyze(
+    'REST APIs in the professional summary',
+    'Required: REST.'
+  );
+  assert.deepEqual(result.matchedSkills, ['REST APIs']);
+  assert.deepEqual(result.missingSkills, []);
+  assert.deepEqual(result.requiredSkills, ['REST APIs']);
+  assert.equal(result.requiredSkillMatchScore, 100);
+}
+
+{
+  const result = analyze(
+    'RESTful services and REST architecture',
+    'REST APIs'
+  );
+  assert.deepEqual(result.matchedSkills, ['REST APIs']);
+  assert.deepEqual(result.missingSkills, []);
+}
+
+// No explicitly required skills should not imply full required coverage.
+{
+  const result = analyze('Angular', 'Angular, TypeScript, React');
+  assert.equal(result.requiredSkillMatchScore, null);
+  assert.deepEqual(result.requiredSkills, []);
+  assert.deepEqual(result.missingRequiredSkills, []);
+}
+
 console.log('JD analyzer tests passed.');
