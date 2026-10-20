@@ -346,4 +346,56 @@ function analyze(resumeText, jobDescription) {
   assert.deepEqual(result.missingRequiredSkills, []);
 }
 
+
+/*
+Regression tests for requirement wording and display classification.
+Negative/preferred mentions must not become mandatory requirements.
+*/
+{
+  const result = analyze(
+    'Angular, TypeScript, HTML, CSS, JavaScript, Git, Agile',
+    'Angular and TypeScript are required. React is preferred but not mandatory. Familiarity with Docker is a bonus. HTML, CSS, JavaScript, Git, and Agile are desirable.'
+  );
+  assert.deepEqual(result.requiredSkills, ['Angular', 'TypeScript']);
+  assert.equal(result.requiredSkillMatchScore, 100);
+  assert.ok(!result.requiredSkills.includes('React'));
+  assert.ok(!result.requiredSkills.includes('Docker'));
+  assert.ok(!result.requiredSkills.includes('Agile'));
+  assert.deepEqual(result.missingSkills, ['React', 'Docker']);
+}
+
+{
+  const result = analyze(
+    'Angular, TypeScript, HTML, CSS, Git, Agile',
+    'Angular and TypeScript are required. React is not required for this position, and candidates without Docker experience are welcome. Kubernetes experience is not necessary. Familiarity with Git, HTML, and CSS is preferred. The team works in an Agile environment.'
+  );
+  assert.deepEqual(result.requiredSkills, ['Angular', 'TypeScript']);
+  assert.equal(result.requiredSkillMatchScore, 100);
+  assert.deepEqual(result.missingRequiredSkills, []);
+  assert.deepEqual(result.missingSkills, ['React', 'Docker', 'Kubernetes']);
+}
+
+// "Java Script" is a JavaScript spelling variant and must not imply Java.
+{
+  const result = analyze('Java Script', 'JavaScript and Java');
+  assert.deepEqual(result.matchedSkills, ['JavaScript']);
+  assert.deepEqual(result.missingSkills, ['Java']);
+  assert.equal(result.jdMatchScore, 50);
+}
+
+// Required misses appear in the required-missing section, not again in other misses.
+{
+  const result = analyze('Angular', 'Angular and React are required. Docker is a bonus.');
+  assert.deepEqual(result.requiredSkills, ['Angular', 'React']);
+  assert.deepEqual(result.missingRequiredSkills, ['React']);
+  assert.deepEqual(result.missingSkills, ['Docker']);
+}
+
+// A JD without supported skills remains distinguishable from a zero-overlap JD.
+{
+  const result = analyze('Angular', 'People-focused leadership and collaboration.');
+  assert.equal(result.recognizedSkillsCount, 0);
+  assert.equal(result.jdMatchScore, 0); // API remains numeric; UI displays N/A for this state.
+}
+
 console.log('JD analyzer tests passed.');
