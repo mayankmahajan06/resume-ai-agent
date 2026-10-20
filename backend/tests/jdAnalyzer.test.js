@@ -399,3 +399,41 @@ Negative/preferred mentions must not become mandatory requirements.
 }
 
 console.log('JD analyzer tests passed.');
+
+
+// RESTful APIs (plural) must resolve to the canonical REST APIs skill.
+{
+  const result = analyze(
+    'RESTful APIs in the professional summary',
+    'Experience with RESTful APIs is required.'
+  );
+  assert.deepEqual(result.matchedSkills, ['REST APIs']);
+  assert.deepEqual(result.missingSkills, []);
+  assert.deepEqual(result.requiredSkills, ['REST APIs']);
+  assert.equal(result.requiredSkillMatchScore, 100);
+}
+
+// "Should have hands-on experience with" marks the listed skills as required.
+{
+  const result = analyze(
+    'Angular, TypeScript',
+    'The candidate should have hands-on experience with React, Vue.js, Next.js, GraphQL, and Cypress.'
+  );
+  assert.deepEqual(result.requiredSkills, ['React', 'Vue', 'Next.js', 'GraphQL', 'Cypress']);
+  assert.deepEqual(result.missingRequiredSkills, ['React', 'Vue', 'Next.js', 'GraphQL', 'Cypress']);
+  assert.equal(result.requiredSkillMatchScore, 0);
+}
+
+// Repeating skills in a JD must not alter the score or duplicate skill results.
+{
+  const resume = 'Angular, TypeScript, JavaScript';
+  const unique = analyze(resume, 'Angular, TypeScript, JavaScript, React');
+  const repeated = analyze(
+    resume,
+    'Angular Angular Angular, TypeScript TypeScript, JavaScript JavaScript JavaScript, React React'
+  );
+  assert.equal(repeated.jdMatchScore, unique.jdMatchScore);
+  assert.deepEqual(repeated.matchedSkills, unique.matchedSkills);
+  assert.deepEqual(repeated.missingSkills, unique.missingSkills);
+  assert.equal(repeated.recognizedSkillsCount, unique.recognizedSkillsCount);
+}
