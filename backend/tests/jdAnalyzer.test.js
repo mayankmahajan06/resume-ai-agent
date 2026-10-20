@@ -420,7 +420,7 @@ console.log('JD analyzer tests passed.');
     'The candidate should have hands-on experience with React, Vue.js, Next.js, GraphQL, and Cypress.'
   );
   assert.deepEqual(result.requiredSkills, ['React', 'Vue', 'GraphQL', 'Next.js', 'Cypress']);
-  assert.deepEqual(result.missingRequiredSkills, ['React', 'Vue', 'Next.js', 'GraphQL', 'Cypress']);
+  assert.deepEqual(result.missingRequiredSkills, ['React', 'Vue', 'GraphQL', 'Next.js', 'Cypress']);
   assert.equal(result.requiredSkillMatchScore, 0);
 }
 
