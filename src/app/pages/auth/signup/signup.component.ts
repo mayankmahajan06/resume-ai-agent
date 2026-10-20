@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { AuthService } from '../../../services/auth.service';
+import { AnalyticsService } from '../../../services/analytics.service';
 import { MatIconModule } from '@angular/material/icon';
 import { ResumeService } from '../../../services/resume.service';
+
 @Component({
   selector: 'app-signup',
   standalone: true,
@@ -18,7 +20,6 @@ import { ResumeService } from '../../../services/resume.service';
   styleUrls: ['./signup.component.scss']
 })
 export class SignupComponent {
-
   fullName = '';
   email = '';
   password = '';
@@ -30,8 +31,9 @@ export class SignupComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private resumeService: ResumeService
-  ) { }
+    private resumeService: ResumeService,
+    private analytics: AnalyticsService
+  ) {}
 
   signup(): void {
     this.errorMessage = '';
@@ -53,22 +55,14 @@ export class SignupComponent {
 
     this.isLoading = true;
 
-    
-
     this.authService
-      .signup(
-        this.email,
-        this.password,
-        this.fullName
-      )
+      .signup(this.email, this.password, this.fullName)
       .then(() => {
-        
+        this.analytics.track('sign_up', { method: 'email' });
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
-        
-
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       })
       .finally(() => {
@@ -77,23 +71,19 @@ export class SignupComponent {
   }
 
   googleSignup(): void {
-    
-
     this.authService
       .googleLogin()
       .then((credential) => {
         if (this.authService.isNewAuthUser(credential)) {
-          
+          this.analytics.track('sign_up', { method: 'google' });
         } else {
-          
+          this.analytics.track('login', { method: 'google' });
         }
 
         this.resumeService.createNewResume();
         this.router.navigate(['/resume-builder']);
       })
       .catch((error) => {
-        
-
         this.errorMessage = this.getFirebaseErrorMessage(error.code);
       });
   }
@@ -106,16 +96,12 @@ export class SignupComponent {
     switch (code) {
       case 'auth/email-already-in-use':
         return 'This email is already registered.';
-
       case 'auth/invalid-email':
         return 'Please enter a valid email address.';
-
       case 'auth/weak-password':
         return 'Password should be at least 6 characters.';
-
       case 'auth/network-request-failed':
         return 'Network error. Please try again.';
-
       default:
         return 'Something went wrong. Please try again.';
     }
